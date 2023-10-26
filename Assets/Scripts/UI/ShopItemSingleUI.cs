@@ -22,11 +22,6 @@ public class ShopItemSingleUI : MonoBehaviour
         shopItemButton = GetComponent<Button>();
     }
 
-    private void Start()
-    {
-        PlayerController.Instance.OnCoinsValueChange += PlayerController_OnCoinsValueChange;
-    }
-
     private void PlayerController_OnCoinsValueChange(object sender, EventArgs e)
     {
         if (currentShopItem != null)
@@ -45,6 +40,8 @@ public class ShopItemSingleUI : MonoBehaviour
         soldItemName.text = currentShopItem.itemName;
 
         shopItemButton.onClick.AddListener(OnClick);
+
+        PlayerController.Instance.OnCoinsValueChange += PlayerController_OnCoinsValueChange;
 
         TryChangeItemVisual();
     }
@@ -88,5 +85,10 @@ public class ShopItemSingleUI : MonoBehaviour
     private bool IsEnoughCoinsToBuy()
     {
         return PlayerController.Instance.IsEnoughCoins(currentShopItem.coinsCost);
+    }
+
+    private void OnDestroy()
+    {
+        PlayerController.Instance.OnCoinsValueChange -= PlayerController_OnCoinsValueChange;
     }
 }

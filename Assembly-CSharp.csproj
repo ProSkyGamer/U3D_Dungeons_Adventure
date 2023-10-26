@@ -53,8 +53,11 @@
      <Compile Include="Assets\Scripts\Interactions\Items To Interact\Merchant.cs" />
      <Compile Include="Assets\Mini First Person Controller\Scripts\Components\Jump.cs" />
      <Compile Include="Assets\Scripts\Enemies\EnemyAttackController.cs" />
+     <Compile Include="Assets\Scripts\Inventory\WeaponInventoryObject.cs" />
      <Compile Include="Assets\Scripts\Input\GameInputActions.cs" />
      <Compile Include="Assets\Scripts\ScriptableObjects\ShopItemSO\ShopItemSO.cs" />
+     <Compile Include="Assets\Scripts\Inventory\InventoryObject.cs" />
+     <Compile Include="Assets\Scripts\Inventory\PlayerInventory.cs" />
      <Compile Include="Assets\Scripts\Player\PlayerHealth.cs" />
      <Compile Include="Assets\Scripts\Input\GameInput.cs" />
      <Compile Include="Assets\Scripts\Player\PlayerEffects.cs" />
@@ -62,6 +65,7 @@
      <Compile Include="Assets\Scripts\UI\TempUI.cs" />
      <Compile Include="Assets\Scripts\Player\CameraController.cs" />
      <Compile Include="Assets\Scripts\Player\PlayerController.cs" />
+     <Compile Include="Assets\Scripts\Inventory\IInventoryParent.cs" />
      <Compile Include="Assets\Scripts\Enemies\EnemyMovement.cs" />
      <Compile Include="Assets\Mini First Person Controller\Scripts\Components\Crouch.cs" />
      <Compile Include="Assets\Scripts\Enemies\EnemyStatsUI.cs" />
@@ -69,6 +73,7 @@
      <Compile Include="Assets\Scripts\Interactions\Items To Interact\InteractableItem.cs" />
      <Compile Include="Assets\Scripts\Dungeon\DungeonRoom.cs" />
      <Compile Include="Assets\Scripts\Interactions\Items To Interact\LootChest.cs" />
+     <Compile Include="Assets\Scripts\Inventory\InventorySlotSingleUI.cs" />
      <Compile Include="Assets\Scripts\Dungeon\ProcedureDungeonGeneration.cs" />
      <Compile Include="Assets\Scripts\Player\StaminaController.cs" />
      <Compile Include="Assets\Scripts\Enemies\EnemyHealth.cs" />
@@ -183,6 +188,7 @@
      <Folder Include="Library\PackageCache\com.unity.modules.physics@1.0.0" />
      <Folder Include="Library\PackageCache\com.unity.textmeshpro@3.0.6\Scripts" />
      <Folder Include="Library\PackageCache\com.unity.visualscripting@1.8.0\Runtime" />
+     <Folder Include="Assets\Scripts\Inventory" />
      <Folder Include="Library\PackageCache\com.unity.modules.vr@1.0.0" />
      <Folder Include="Assets\Mini First Person Controller\Scripts\Components" />
      <Folder Include="Library\PackageCache\com.unity.modules.physics2d@1.0.0" />
@@ -251,6 +257,7 @@
      <Folder Include="Assets\Scripts\Enemies\EnemyTypes" />
      <None Include="Library\PackageCache\com.unity.ai.navigation@1.1.4\package.json" />
      <Folder Include="Assets\Prefabs\UI" />
+     <Folder Include="Assets\Scripts\Inventory\InventoryItems" />
      <Folder Include="Library\PackageCache\com.unity.ide.vscode@1.2.5" />
      <Folder Include="Library\PackageCache\com.unity.modules.vehicles@1.0.0" />
      <None Include="Library\PackageCache\com.unity.modules.xr@1.0.0\package.json" />

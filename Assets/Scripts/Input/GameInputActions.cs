@@ -134,6 +134,15 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""CurrentMousePosition"",
+                    ""type"": ""Value"",
+                    ""id"": ""3732c4e1-cbb1-4995-99a7-01b2abc77a31"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -312,6 +321,17 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
                     ""action"": ""UpgradesStartDraging"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""78341644-eac6-4d34-8762-e4feed70bf4d"",
+                    ""path"": ""<Mouse>/position"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""CurrentMousePosition"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -332,6 +352,7 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
         m_Player_DropCurrentWeapon = m_Player.FindAction("DropCurrentWeapon", throwIfNotFound: true);
         m_Player_OpenCharacterInfo = m_Player.FindAction("OpenCharacterInfo", throwIfNotFound: true);
         m_Player_UpgradesStartDraging = m_Player.FindAction("UpgradesStartDraging", throwIfNotFound: true);
+        m_Player_CurrentMousePosition = m_Player.FindAction("CurrentMousePosition", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -405,6 +426,7 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_DropCurrentWeapon;
     private readonly InputAction m_Player_OpenCharacterInfo;
     private readonly InputAction m_Player_UpgradesStartDraging;
+    private readonly InputAction m_Player_CurrentMousePosition;
     public struct PlayerActions
     {
         private @GameInputActions m_Wrapper;
@@ -421,6 +443,7 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
         public InputAction @DropCurrentWeapon => m_Wrapper.m_Player_DropCurrentWeapon;
         public InputAction @OpenCharacterInfo => m_Wrapper.m_Player_OpenCharacterInfo;
         public InputAction @UpgradesStartDraging => m_Wrapper.m_Player_UpgradesStartDraging;
+        public InputAction @CurrentMousePosition => m_Wrapper.m_Player_CurrentMousePosition;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -466,6 +489,9 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
             @UpgradesStartDraging.started += instance.OnUpgradesStartDraging;
             @UpgradesStartDraging.performed += instance.OnUpgradesStartDraging;
             @UpgradesStartDraging.canceled += instance.OnUpgradesStartDraging;
+            @CurrentMousePosition.started += instance.OnCurrentMousePosition;
+            @CurrentMousePosition.performed += instance.OnCurrentMousePosition;
+            @CurrentMousePosition.canceled += instance.OnCurrentMousePosition;
         }
 
         private void UnregisterCallbacks(IPlayerActions instance)
@@ -506,6 +532,9 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
             @UpgradesStartDraging.started -= instance.OnUpgradesStartDraging;
             @UpgradesStartDraging.performed -= instance.OnUpgradesStartDraging;
             @UpgradesStartDraging.canceled -= instance.OnUpgradesStartDraging;
+            @CurrentMousePosition.started -= instance.OnCurrentMousePosition;
+            @CurrentMousePosition.performed -= instance.OnCurrentMousePosition;
+            @CurrentMousePosition.canceled -= instance.OnCurrentMousePosition;
         }
 
         public void RemoveCallbacks(IPlayerActions instance)
@@ -537,5 +566,6 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
         void OnDropCurrentWeapon(InputAction.CallbackContext context);
         void OnOpenCharacterInfo(InputAction.CallbackContext context);
         void OnUpgradesStartDraging(InputAction.CallbackContext context);
+        void OnCurrentMousePosition(InputAction.CallbackContext context);
     }
 }

@@ -57,10 +57,11 @@ public class DungeonRoomSettings : MonoBehaviour
 
     private void TryUnlockLootChest()
     {
-        if (enemiesToDefeatForUnlockingChest.Count == 0)
-            if (!isChestSpawnedAfterDefeatingAllEnemies)
-                lootChest.UnlockChest();
-            else
-                Instantiate(roomLootChest, transform.position, Quaternion.identity, transform);
+        if (enemiesToDefeatForUnlockingChest.Count != 0) return;
+
+        if (!isChestSpawnedAfterDefeatingAllEnemies)
+            lootChest.UnlockChest();
+        else
+            Instantiate(roomLootChest, transform.position, Quaternion.identity, transform);
     }
 }

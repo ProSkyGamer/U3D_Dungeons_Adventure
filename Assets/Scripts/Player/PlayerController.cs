@@ -6,6 +6,7 @@ using UnityEngine;
 [RequireComponent(typeof(PlayerHealth))]
 [RequireComponent(typeof(StaminaController))]
 [RequireComponent(typeof(PlayerEffects))]
+[RequireComponent(typeof(PlayerInventory))]
 public class PlayerController : MonoBehaviour
 {
     public static PlayerController Instance { get; private set; }
@@ -50,6 +51,7 @@ public class PlayerController : MonoBehaviour
     private PlayerHealth playerHealth;
     private StaminaController staminaController;
     private PlayerEffects playerEffects;
+    private PlayerInventory playerInventory;
 
     private bool isFirstUpdate = true;
 
@@ -65,6 +67,7 @@ public class PlayerController : MonoBehaviour
         playerHealth = GetComponent<PlayerHealth>();
         staminaController = GetComponent<StaminaController>();
         playerEffects = GetComponent<PlayerEffects>();
+        playerInventory = GetComponent<PlayerInventory>();
 
         timerForConstantSprint = timeForConstantSprint;
         waitingForStaminaRegenerationTimer = waitingForStaminaRegenerationTime;
@@ -417,6 +420,11 @@ public class PlayerController : MonoBehaviour
     public PlayerEffects GetPlayerEffects()
     {
         return playerEffects;
+    }
+
+    public PlayerInventory GetPlayerInventory()
+    {
+        return playerInventory;
     }
 
     #endregion

@@ -8,7 +8,7 @@ public class LootChest : InteractableItem
     [SerializeField] private int experienceForChest = 10;
 
     [SerializeField] [Range(0f, 1f)] private float weaponDropChance = 1f;
-    [SerializeField] private List<WeaponSO> availableWeaponToDrop = new();
+    [SerializeField] private List<WeaponInventoryObject> availableWeaponToDrop = new();
 
     private bool isLootChestLocked;
 
@@ -24,7 +24,7 @@ public class LootChest : InteractableItem
 
     public override void OnInteract(PlayerController player)
     {
-        WeaponSO weaponToDrop = null;
+        WeaponInventoryObject weaponToDrop = null;
 
         base.OnInteract(player);
 
@@ -40,7 +40,11 @@ public class LootChest : InteractableItem
             var weaponToDropIndex = Random.Range(0, availableWeaponToDrop.Count);
             weaponToDrop = availableWeaponToDrop[weaponToDropIndex];
 
-            player.PickUpWeapon(weaponToDrop);
+            var weaponToDropNewObject = ScriptableObject.CreateInstance<WeaponInventoryObject>();
+            weaponToDropNewObject.SetInventoryObject(weaponToDrop);
+
+            if (PlayerController.Instance.GetPlayerInventory().IsHasAnyAvailableSlot())
+                weaponToDropNewObject.SetInventoryParent(PlayerController.Instance.GetPlayerInventory());
         }
 
         Debug.Log($"Added {coinsInChest} coins, {experienceForChest} experience,  {weaponToDrop.name} weapon");

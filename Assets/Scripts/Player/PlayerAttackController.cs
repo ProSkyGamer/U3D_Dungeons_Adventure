@@ -177,7 +177,7 @@ public class PlayerAttackController : MonoBehaviour
 
         foreach (var enemy in enemiesToAttack) enemy.ReceiveDamage(normalAttackDamage, transform);
 
-        Debug.Log($"I'm attacking with damage:{normalAttackDamage} by N.A.");
+        //Debug.Log($"I'm attacking with damage:{normalAttackDamage} by N.A.");
         comboAttackResetTimer = comboAttackResetTime;
     }
 
@@ -201,7 +201,7 @@ public class PlayerAttackController : MonoBehaviour
 
         foreach (var enemy in enemiesToAttack) enemy.ReceiveDamage(chargeAttackDamage, transform);
 
-        Debug.Log($"I'm attacking with damage:{chargeAttackDamage} by C.A.");
+        //Debug.Log($"I'm attacking with damage:{chargeAttackDamage} by C.A.");
     }
 
     private int CalculateDamage(int attack, float attackScale, float damageBonus, float critCrate, float critDamage)
@@ -225,7 +225,7 @@ public class PlayerAttackController : MonoBehaviour
             if (hit.transform.gameObject.TryGetComponent(out EnemyController enemyController))
                 enemiesToAttack.Add(hit.transform.gameObject.GetComponent<EnemyController>());
 
-        Debug.Log($"Enemies to attack {enemiesToAttack.Count} {raycastHits.Length}");
+        //Debug.Log($"Enemies to attack {enemiesToAttack.Count} {raycastHits.Length}");
 
         return enemiesToAttack;
     }

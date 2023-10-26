@@ -15,6 +15,7 @@ public class EnemyHealth : MonoBehaviour
     private int currentShieldDurability;
 
     public event EventHandler<OnEnemyHealthChangeEventArgs> OnEnemyHealthChange;
+    public event EventHandler OnEnemyDie;
 
     public class OnEnemyHealthChangeEventArgs : EventArgs
     {
@@ -70,7 +71,8 @@ public class EnemyHealth : MonoBehaviour
             currentHealth = currentHealth, maxHealth = maxHealth, lostHealth = takenDamage, obtainedHealth = 0
         });
 
-        if (currentHealth <= 0) Destroy(gameObject);
+        if (currentHealth <= 0)
+            OnEnemyDie?.Invoke(this, EventArgs.Empty);
     }
 
     public void RegenerateHealth(int healthToRegenerate)

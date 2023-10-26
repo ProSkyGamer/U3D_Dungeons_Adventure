@@ -100,6 +100,7 @@ GameObject:
   - component: {fileID: 9127793870788687417}
   - component: {fileID: 6435627681822023902}
   - component: {fileID: 7995302803797805552}
+  - component: {fileID: 5830442008227960675}
   m_Layer: 6
   m_Name: Player
   m_TagString: Untagged
@@ -185,6 +186,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1bb84e17aa579fe4f873ca6b21236e76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  experienceForFirstLevel: 100
+  experienceIncreaseForNextLevel: 0.2
   walkSpeed: 1
   runSpeed: 3
   sprintSpeed: 5
@@ -272,3 +275,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e9eefebed11eb754a9397ab563d17552, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &5830442008227960675
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7672009534980938123}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc7307fa1fbebbf41a1de5d7a8b5c0c3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerMaxSlots: 10

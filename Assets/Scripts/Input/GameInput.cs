@@ -139,6 +139,13 @@ public class GameInput : MonoBehaviour
         return mousePosition;
     }
 
+    public Vector2 GetCurrentMousePosition()
+    {
+        var currentMousePosition = gameInputActions.Player.CurrentMousePosition.ReadValue<Vector2>();
+
+        return currentMousePosition;
+    }
+
     public float GetMouseScroll()
     {
         var mouseScroll = -gameInputActions.Player.MouseScroll.ReadValue<Vector2>().y;

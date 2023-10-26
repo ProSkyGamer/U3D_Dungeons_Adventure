@@ -72,6 +72,24 @@ public class EnemyController : MonoBehaviour
             isHasAnyClass = true;
     }
 
+    private void Start()
+    {
+        enemyHealth.OnEnemyDie += EnemyHealth_OnEnemyDie;
+    }
+
+    private void EnemyHealth_OnEnemyDie(object sender, EventArgs e)
+    {
+        foreach (var player in playerAttackedEnemy)
+        {
+            player.ReceiveExperience(experienceForKill);
+            player.ReceiveCoins(coinsForKill);
+        }
+
+        OnEnemyDeath?.Invoke(this, EventArgs.Empty);
+
+        Destroy(gameObject);
+    }
+
     private void Update()
     {
         if (GameStageManager.Instance.IsPlaying())
@@ -256,16 +274,5 @@ public class EnemyController : MonoBehaviour
     public int GetCurrentShieldDurability()
     {
         return enemyHealth.GetCurrentShieldDurability();
-    }
-
-    private void OnDestroy()
-    {
-        foreach (var player in playerAttackedEnemy)
-        {
-            player.ReceiveExperience(experienceForKill);
-            player.ReceiveCoins(coinsForKill);
-        }
-
-        OnEnemyDeath?.Invoke(this, EventArgs.Empty);
     }
 }

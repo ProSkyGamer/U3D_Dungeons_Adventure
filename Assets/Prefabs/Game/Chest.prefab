@@ -116,7 +116,7 @@ Transform:
   m_Children:
   - {fileID: 1638954616002929654}
   m_Father: {fileID: 0}
-  m_RootOrder: 8
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &2617205398004337126
 BoxCollider:
@@ -172,4 +172,5 @@ MonoBehaviour:
   experienceForChest: 10
   weaponDropChance: 1
   availableWeaponToDrop:
-  - {fileID: 11400000, guid: 73c19464ef9ef2e4f929c229c30c7e6c, type: 2}
+  - {fileID: 11400000, guid: a4c47b49e85556943b37ac7d2898ca88, type: 2}
+  - {fileID: 11400000, guid: e12a5c783a72d91459b7aa16c397ac6e, type: 2}
