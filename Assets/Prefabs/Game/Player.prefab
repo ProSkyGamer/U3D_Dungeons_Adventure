@@ -220,11 +220,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4354c4b84f46ccc4984727453762cbd6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentOwnedWeapon:
-  - {fileID: 11400000, guid: f3f8b02a5a67bc044bac5575e77075fc, type: 2}
+  firstChosenWeapon: {fileID: 11400000, guid: 17362f7aa07e08248b4a6fe3b05ff6a4, type: 2}
   maxOwnedWeaponCount: 3
-  currentChooseWeapon: {fileID: 11400000, guid: f3f8b02a5a67bc044bac5575e77075fc,
-    type: 2}
   comboAttackResetTime: 3
   baseAttack: 100
   weaponAttackRange: 3

@@ -47,10 +47,14 @@ public class PlayerEffects : MonoBehaviour
         PlayerAttackController.OnCurrentWeaponChangeEventArgs e)
     {
         if (e.previousWeapon != null)
-            DispelBuff(e.previousWeapon.additionalWeaponStatType, e.previousWeapon.additionalWeaponStatTypeScale);
+        {
+            e.previousWeapon.TryGetWeaponSo(out var previousWeaponSo);
+            DispelBuff(previousWeaponSo.additionalWeaponStatType, previousWeaponSo.additionalWeaponStatTypeScale);
+        }
 
-        ApplyBuff(e.newWeapon.additionalWeaponStatType, 0, true,
-            e.newWeapon.additionalWeaponStatTypeScale);
+        e.newWeapon.TryGetWeaponSo(out var newWeaponSo);
+        ApplyBuff(newWeaponSo.additionalWeaponStatType, 0, true,
+            newWeaponSo.additionalWeaponStatTypeScale);
     }
 
     private void Update()

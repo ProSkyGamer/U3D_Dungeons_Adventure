@@ -78,6 +78,7 @@ public class UpgradesTabUI : MonoBehaviour
 
         CharacterUI.OnUpgradesTabButtonClick += CharacterUI_OnUpgradesTabButtonClick;
         CharacterUI.OnStatsTabButtonClick += CharacterUI_OnOtherTabButtonClick;
+        CharacterUI.OnWeaponsTabButtonClick += CharacterUI_OnOtherTabButtonClick;
 
         PlayerController.Instance.OnSkillPointsValueChange += PlayerController_OnSkillPointsValueChange;
     }

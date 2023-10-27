@@ -1,9 +1,12 @@
 using UnityEngine;
 
+[CreateAssetMenu]
 public class InventoryObject : ScriptableObject
 {
     [SerializeField] private Sprite inventoryObjectSprite;
     [SerializeField] private string inventoryObjectName;
+
+    [SerializeField] private WeaponSO weaponSo;
 
     private IInventoryParent inventoryObjectParent;
 
@@ -16,14 +19,13 @@ public class InventoryObject : ScriptableObject
 
     public void SetInventoryParentBySlot(IInventoryParent inventoryParent, int slotNumber)
     {
-        if (inventoryObjectParent.IsSlotNumberAvailable(slotNumber))
-        {
-            inventoryObjectParent?.RemoveInventoryObjectBySlot(
-                inventoryObjectParent.GetSlotNumberByInventoryObject(this));
+        if (!inventoryParent.IsSlotNumberAvailable(slotNumber)) return;
 
-            inventoryObjectParent = inventoryParent;
-            inventoryParent.AddInventoryObjectToSlot(this, slotNumber);
-        }
+        inventoryObjectParent?.RemoveInventoryObjectBySlot(
+            inventoryObjectParent.GetSlotNumberByInventoryObject(this));
+
+        inventoryObjectParent = inventoryParent;
+        inventoryParent.AddInventoryObjectToSlot(this, slotNumber);
     }
 
     public IInventoryParent GetInventoryObjectParent()
@@ -41,9 +43,17 @@ public class InventoryObject : ScriptableObject
         return inventoryObjectName;
     }
 
+    public bool TryGetWeaponSo(out WeaponSO gottenWeaponSo)
+    {
+        gottenWeaponSo = weaponSo;
+        return gottenWeaponSo != null;
+    }
+
     public void SetInventoryObject(InventoryObject inventoryObject)
     {
         inventoryObjectSprite = inventoryObject.GetInventoryObjectSprite();
         inventoryObjectName = inventoryObject.GetInventoryObjectName();
+
+        inventoryObject.TryGetWeaponSo(out weaponSo);
     }
 }

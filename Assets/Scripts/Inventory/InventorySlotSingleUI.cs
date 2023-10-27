@@ -15,6 +15,8 @@ public class InventorySlotSingleUI : MonoBehaviour, IPointerEnterHandler, IPoint
 
     public static event EventHandler OnCurrentSlotSelected;
 
+    private CharacterInventoryUI.InventoryType inventoryType;
+
     [SerializeField] private Image inventorySlotImage;
     [SerializeField] private TextMeshProUGUI inventorySlotText;
 
@@ -26,8 +28,12 @@ public class InventorySlotSingleUI : MonoBehaviour, IPointerEnterHandler, IPoint
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        if (storedItem != null)
-            StartDraggingItem();
+        if (storedItem == null) return;
+
+        if (inventoryType == CharacterInventoryUI.InventoryType.PlayerWeaponInventory &&
+            PlayerController.Instance.GetPlayerAttackInventory().GetCurrentInventoryObjectsCount() <= 1) return;
+
+        StartDraggingItem();
     }
 
     private void Start()
@@ -39,7 +45,7 @@ public class InventorySlotSingleUI : MonoBehaviour, IPointerEnterHandler, IPoint
     {
         isCurrentlyDragging = true;
         OnCurrentSlotSelected += InventorySlotSingleUI_OnCurrentSlotSelected;
-        StatsTabUI.OnStopItemDragging += StatsTabUI_OnStopItemDragging;
+        CharacterInventoryUI.OnStopItemDragging += StatsTabUI_OnStopItemDragging;
 
         var slotSingleUI = sender as InventorySlotSingleUI;
 
@@ -53,7 +59,7 @@ public class InventorySlotSingleUI : MonoBehaviour, IPointerEnterHandler, IPoint
         isCurrentSlotSelected = false;
         isCurrentlyDragging = false;
 
-        StatsTabUI.OnStopItemDragging -= StatsTabUI_OnStopItemDragging;
+        CharacterInventoryUI.OnStopItemDragging -= StatsTabUI_OnStopItemDragging;
     }
 
     private void InventorySlotSingleUI_OnCurrentSlotSelected(object sender, EventArgs e)
@@ -79,6 +85,10 @@ public class InventorySlotSingleUI : MonoBehaviour, IPointerEnterHandler, IPoint
     {
         if (!isCurrentlyDragging) return;
 
+        if (inventoryType == CharacterInventoryUI.InventoryType.PlayerWeaponInventory)
+            if (!CharacterInventoryUI.GetCurrentDraggingObject().TryGetWeaponSo(out _))
+                return;
+
         Debug.Log($"Selected Slot {slotNumber}");
         isCurrentSlotSelected = true;
         OnCurrentSlotSelected?.Invoke(this, EventArgs.Empty);
@@ -98,11 +108,12 @@ public class InventorySlotSingleUI : MonoBehaviour, IPointerEnterHandler, IPoint
         UpdateVisual();
     }
 
-    public void SetInventorySlotNumber(int newSlotNumber)
+    public void SetStarterData(int newSlotNumber, CharacterInventoryUI.InventoryType newInventoryType)
     {
         if (slotNumber != -1) return;
 
         slotNumber = newSlotNumber;
+        inventoryType = newInventoryType;
         UpdateVisual();
     }
 

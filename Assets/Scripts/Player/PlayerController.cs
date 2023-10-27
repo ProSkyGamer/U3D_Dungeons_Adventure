@@ -212,7 +212,8 @@ public class PlayerController : MonoBehaviour
                 chargedAttackPressTimer -= Time.deltaTime;
                 if (chargedAttackPressTimer <= 0)
                 {
-                    var chargedAttackStaminaCost = playerAttackController.GetCurrentWeapon().chargedAttackStaminaCost;
+                    playerAttackController.GetCurrentInventoryObjectWeapon().TryGetWeaponSo(out var currentWeaponSo);
+                    var chargedAttackStaminaCost = currentWeaponSo.chargedAttackStaminaCost;
                     if (staminaController.IsHaveNeededStamina(chargedAttackStaminaCost))
                     {
                         ChargedAttack();
@@ -307,19 +308,9 @@ public class PlayerController : MonoBehaviour
         playerAttackController.ChargeAttack();
     }
 
-    public void PickUpWeapon(WeaponSO weapon)
+    private void ChangeWeapon(InventoryObject weaponInventoryObject)
     {
-        playerAttackController.TryAddOwnedWeapon(weapon);
-    }
-
-    private void ChangeWeapon(WeaponSO weapon)
-    {
-        playerAttackController.TryChangeWeapon(weapon);
-    }
-
-    private void RemoveWeapon(WeaponSO weapon)
-    {
-        playerAttackController.TryRemoveOwnedWeapon(weapon);
+        playerAttackController.TryChangeWeapon(weaponInventoryObject);
     }
 
     #endregion
@@ -417,6 +408,11 @@ public class PlayerController : MonoBehaviour
         return playerHealth.GetCurrentDefence() - playerHealth.GetBaseDefence();
     }
 
+    public int GetMaxOwnedWeaponsCount()
+    {
+        return playerAttackController.GetMaxOwnedWeaponsCount();
+    }
+
     public PlayerEffects GetPlayerEffects()
     {
         return playerEffects;
@@ -425,6 +421,11 @@ public class PlayerController : MonoBehaviour
     public PlayerInventory GetPlayerInventory()
     {
         return playerInventory;
+    }
+
+    public IInventoryParent GetPlayerAttackInventory()
+    {
+        return playerAttackController;
     }
 
     #endregion

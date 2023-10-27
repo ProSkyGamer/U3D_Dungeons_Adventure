@@ -83,4 +83,14 @@ public class PlayerInventory : MonoBehaviour, IInventoryParent
     {
         return playerMaxSlots;
     }
+
+    public int GetCurrentInventoryObjectsCount()
+    {
+        var storedInventoryObjectsCount = 0;
+        foreach (var inventoryObject in storedInventoryObjects)
+            if (inventoryObject != null)
+                storedInventoryObjectsCount++;
+
+        return storedInventoryObjectsCount;
+    }
 }

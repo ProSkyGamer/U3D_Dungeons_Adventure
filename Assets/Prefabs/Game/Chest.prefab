@@ -172,5 +172,6 @@ MonoBehaviour:
   experienceForChest: 10
   weaponDropChance: 1
   availableWeaponToDrop:
-  - {fileID: 11400000, guid: a4c47b49e85556943b37ac7d2898ca88, type: 2}
-  - {fileID: 11400000, guid: e12a5c783a72d91459b7aa16c397ac6e, type: 2}
+  - {fileID: 11400000, guid: 17362f7aa07e08248b4a6fe3b05ff6a4, type: 2}
+  - {fileID: 11400000, guid: 07ce8239023607748bd1873a2e96f962, type: 2}
+  - {fileID: 11400000, guid: 5d4f6ee1d6246ba42a539e81986e7b18, type: 2}

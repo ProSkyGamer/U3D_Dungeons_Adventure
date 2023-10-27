@@ -4,15 +4,13 @@ using Unity.Mathematics;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public class PlayerAttackController : MonoBehaviour
+public class PlayerAttackController : MonoBehaviour, IInventoryParent
 {
-    [SerializeField]
-    private List<WeaponSO> currentOwnedWeapon;
-
+    [SerializeField] private InventoryObject firstChosenWeapon;
+    private InventoryObject[] currentOwnedWeapon;
     [SerializeField] private int maxOwnedWeaponCount = 3;
 
-    [SerializeField]
-    private WeaponSO currentChooseWeapon;
+    private InventoryObject currentChooseWeapon;
 
     private int currentAttackCombo = -1;
 
@@ -41,20 +39,26 @@ public class PlayerAttackController : MonoBehaviour
 
     public class OnCurrentWeaponChangeEventArgs : EventArgs
     {
-        public WeaponSO previousWeapon;
-        public WeaponSO newWeapon;
+        public InventoryObject previousWeapon;
+        public InventoryObject newWeapon;
     }
 
     private bool isFirstUpdate = true;
 
     private void Awake()
     {
+        currentOwnedWeapon = new InventoryObject[maxOwnedWeaponCount];
+
         currentAttack = baseAttack;
 
         currentCritRate = baseCritRate;
         currentCritDamage = baseCritDamage;
 
         comboAttackResetTimer = comboAttackResetTime;
+
+        if (firstChosenWeapon == null) return;
+
+        firstChosenWeapon.SetInventoryParent(this);
     }
 
     private void Update()
@@ -63,8 +67,7 @@ public class PlayerAttackController : MonoBehaviour
         {
             isFirstUpdate = false;
 
-            if (currentOwnedWeapon.Count > 0)
-                TryChangeWeapon(currentOwnedWeapon[0]);
+            if (currentOwnedWeapon.Length > 0) TryChangeWeapon(currentOwnedWeapon[0]);
         }
 
         if (currentAttackCombo != -1)
@@ -100,17 +103,18 @@ public class PlayerAttackController : MonoBehaviour
         currentCritDamage += percentageBuff;
     }
 
-    public void TryChangeWeapon(WeaponSO weapon)
+    public void TryChangeWeapon(InventoryObject weaponInventoryObject)
     {
-        if (currentOwnedWeapon.Contains(weapon))
+        if (IsHasThisWeapon(weaponInventoryObject))
         {
+            weaponInventoryObject.TryGetWeaponSo(out var weapon);
             if (weapon.comboAttackScales.Capacity >= weapon.comboAttack)
             {
                 OnCurrentWeaponChange?.Invoke(this, new OnCurrentWeaponChangeEventArgs
                 {
-                    previousWeapon = currentChooseWeapon, newWeapon = weapon
+                    previousWeapon = currentChooseWeapon, newWeapon = weaponInventoryObject
                 });
-                currentChooseWeapon = weapon;
+                currentChooseWeapon = weaponInventoryObject;
             }
             else
             {
@@ -122,43 +126,39 @@ public class PlayerAttackController : MonoBehaviour
 
     public void TryChangeToNextWeapon()
     {
-        if (currentOwnedWeapon.Count > 1)
+        if (GetCurrentInventoryObjectsCount() > 1)
         {
             var currentWeaponIndex = 0;
-            for (var i = 0; i < currentOwnedWeapon.Count; i++)
+            for (var i = 0; i < currentOwnedWeapon.Length; i++)
                 if (currentOwnedWeapon[i] == currentChooseWeapon)
                     currentWeaponIndex = i;
 
-            var nextWeaponIndex = currentWeaponIndex == currentOwnedWeapon.Count - 1 ? 0 : currentWeaponIndex++;
+            var nextWeaponIndex = -1;
+            var currentCycle = 1;
+            while (nextWeaponIndex == -1)
+            {
+                nextWeaponIndex = currentWeaponIndex == currentOwnedWeapon.Length - 1
+                    ? 0 + currentCycle - 1
+                    : currentWeaponIndex + currentCycle;
+
+                if (IsSlotNumberAvailable(nextWeaponIndex))
+                    nextWeaponIndex = -1;
+
+                currentCycle++;
+            }
 
             TryChangeWeapon(currentOwnedWeapon[nextWeaponIndex]);
         }
     }
 
-    public void TryAddOwnedWeapon(WeaponSO weapon)
-    {
-        if (currentOwnedWeapon.Count > maxOwnedWeaponCount) return;
-        if (currentOwnedWeapon.Contains(weapon)) return;
-
-        currentOwnedWeapon.Add(weapon);
-    }
-
-    public void TryRemoveOwnedWeapon(WeaponSO weapon)
-    {
-        if (currentOwnedWeapon.Count <= 1) return;
-
-        if (currentOwnedWeapon.Contains(weapon))
-            currentOwnedWeapon.Remove(weapon);
-    }
-
     public void TryDropCurrentWeapon()
     {
-        if (currentOwnedWeapon.Count > 1)
-        {
-            currentOwnedWeapon.Remove(currentChooseWeapon);
+        if (GetCurrentInventoryObjectsCount() <= 1) return;
 
-            TryChangeWeapon(currentOwnedWeapon[0]);
-        }
+
+        currentChooseWeapon.SetInventoryParent(null);
+
+        TryChangeWeapon(currentOwnedWeapon[0]);
     }
 
     public void NormalAttack()
@@ -166,11 +166,12 @@ public class PlayerAttackController : MonoBehaviour
         if (currentChooseWeapon == null) return;
 
         currentAttackCombo++;
-        if (currentAttackCombo >= currentChooseWeapon.comboAttack)
+        currentChooseWeapon.TryGetWeaponSo(out var currentChooseWeaponSo);
+        if (currentAttackCombo >= currentChooseWeaponSo.comboAttack)
             currentAttackCombo = 0;
 
         var normalAttackDamage = CalculateDamage(currentAttack,
-            currentChooseWeapon.comboAttackScales[currentAttackCombo],
+            currentChooseWeaponSo.comboAttackScales[currentAttackCombo],
             normalAttackDamageBonus, currentCritRate, currentCritDamage);
 
         var enemiesToAttack = FindEnemiesToAttack();
@@ -193,8 +194,9 @@ public class PlayerAttackController : MonoBehaviour
 
         ResetNormalAttackCombo();
 
+        currentChooseWeapon.TryGetWeaponSo(out var currentChooseWeaponSo);
         var chargeAttackDamage = CalculateDamage(currentAttack,
-            currentChooseWeapon.chargedAttackDamageScale,
+            currentChooseWeaponSo.chargedAttackDamageScale,
             chargedAttackDamageBonus, currentCritRate, currentCritDamage);
 
         var enemiesToAttack = FindEnemiesToAttack();
@@ -238,9 +240,18 @@ public class PlayerAttackController : MonoBehaviour
         return critValue;
     }
 
+    private bool IsHasThisWeapon(InventoryObject inventoryObjectWeapon)
+    {
+        foreach (var weapon in currentOwnedWeapon)
+            if (weapon == inventoryObjectWeapon)
+                return true;
+
+        return false;
+    }
+
     #region GetVariablesData
 
-    public WeaponSO GetCurrentWeapon()
+    public InventoryObject GetCurrentInventoryObjectWeapon()
     {
         return currentChooseWeapon;
     }
@@ -275,5 +286,94 @@ public class PlayerAttackController : MonoBehaviour
         return (int)(chargedAttackDamageBonus * 100);
     }
 
+    public int GetMaxOwnedWeaponsCount()
+    {
+        return maxOwnedWeaponCount;
+    }
+
     #endregion
+
+    public void AddInventoryObject(InventoryObject inventoryObject)
+    {
+        var storedSlot = GetFirstAvailableSlot();
+        if (storedSlot == -1) return;
+
+        currentOwnedWeapon[storedSlot] = inventoryObject;
+    }
+
+    public void AddInventoryObjectToSlot(InventoryObject inventoryObject, int slotNumber)
+    {
+        IsSlotNumberAvailable(slotNumber);
+
+        currentOwnedWeapon[slotNumber] = inventoryObject;
+    }
+
+    public InventoryObject GetInventoryObjectBySlot(int slotNumber)
+    {
+        return currentOwnedWeapon[slotNumber];
+    }
+
+    public void RemoveInventoryObjectBySlot(int slotNumber)
+    {
+        Debug.Log("Removed");
+        currentOwnedWeapon[slotNumber] = null;
+    }
+
+    public bool IsHasAnyInventoryObject()
+    {
+        foreach (var inventoryObject in currentOwnedWeapon)
+            if (inventoryObject != null)
+                return true;
+
+        return false;
+    }
+
+    public bool IsSlotNumberAvailable(int slotNumber)
+    {
+        if (slotNumber < 0 || slotNumber >= currentOwnedWeapon.Length) return false;
+
+        return currentOwnedWeapon[slotNumber] == null;
+    }
+
+    public bool IsHasAnyAvailableSlot()
+    {
+        foreach (var inventoryObject in currentOwnedWeapon)
+            if (inventoryObject == null)
+                return true;
+
+        return false;
+    }
+
+    public int GetFirstAvailableSlot()
+    {
+        for (var i = 0; i < currentOwnedWeapon.Length; i++)
+            if (currentOwnedWeapon[i] == null)
+                return i;
+
+        return -1;
+    }
+
+    public int GetSlotNumberByInventoryObject(InventoryObject inventoryObject)
+    {
+        for (var i = 0; i < currentOwnedWeapon.Length; i++)
+            if (currentOwnedWeapon[i] == inventoryObject)
+                return i;
+
+        return -1;
+    }
+
+    public int GetMaxSlotsCount()
+    {
+        return maxOwnedWeaponCount;
+    }
+
+    public int GetCurrentInventoryObjectsCount()
+    {
+        var storedInventoryObjectsCount = 0;
+        foreach (var inventoryObject in currentOwnedWeapon)
+            if (inventoryObject != null)
+                storedInventoryObjectsCount++;
+
+        return storedInventoryObjectsCount;
+    }
 }

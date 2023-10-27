@@ -10,4 +10,5 @@ public interface IInventoryParent
     public int GetFirstAvailableSlot();
     public int GetSlotNumberByInventoryObject(InventoryObject inventoryObject);
     public int GetMaxSlotsCount();
+    public int GetCurrentInventoryObjectsCount();
 }

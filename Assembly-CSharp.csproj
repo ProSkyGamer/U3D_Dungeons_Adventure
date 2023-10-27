@@ -53,7 +53,6 @@
      <Compile Include="Assets\Scripts\Interactions\Items To Interact\Merchant.cs" />
      <Compile Include="Assets\Mini First Person Controller\Scripts\Components\Jump.cs" />
      <Compile Include="Assets\Scripts\Enemies\EnemyAttackController.cs" />
-     <Compile Include="Assets\Scripts\Inventory\WeaponInventoryObject.cs" />
      <Compile Include="Assets\Scripts\Input\GameInputActions.cs" />
      <Compile Include="Assets\Scripts\ScriptableObjects\ShopItemSO\ShopItemSO.cs" />
      <Compile Include="Assets\Scripts\Inventory\InventoryObject.cs" />
@@ -64,8 +63,8 @@
      <Compile Include="Assets\Scripts\Enemies\EnemyEffects.cs" />
      <Compile Include="Assets\Scripts\UI\TempUI.cs" />
      <Compile Include="Assets\Scripts\Player\CameraController.cs" />
-     <Compile Include="Assets\Scripts\Player\PlayerController.cs" />
      <Compile Include="Assets\Scripts\Inventory\IInventoryParent.cs" />
+     <Compile Include="Assets\Scripts\Player\PlayerController.cs" />
      <Compile Include="Assets\Scripts\Enemies\EnemyMovement.cs" />
      <Compile Include="Assets\Mini First Person Controller\Scripts\Components\Crouch.cs" />
      <Compile Include="Assets\Scripts\Enemies\EnemyStatsUI.cs" />
@@ -75,6 +74,7 @@
      <Compile Include="Assets\Scripts\Interactions\Items To Interact\LootChest.cs" />
      <Compile Include="Assets\Scripts\Inventory\InventorySlotSingleUI.cs" />
      <Compile Include="Assets\Scripts\Dungeon\ProcedureDungeonGeneration.cs" />
+     <Compile Include="Assets\Scripts\UI\CharacterInventoryUI.cs" />
      <Compile Include="Assets\Scripts\Player\StaminaController.cs" />
      <Compile Include="Assets\Scripts\Enemies\EnemyHealth.cs" />
      <Compile Include="Assets\Scripts\Dungeon\StartingDungeonRoom.cs" />
@@ -83,6 +83,7 @@
      <Compile Include="Assets\Scripts\Player\PlayerAttackController.cs" />
      <Compile Include="Assets\Mini First Person Controller\Scripts\Components\Zoom.cs" />
      <Compile Include="Assets\Scripts\UI\ShopItemSingleUI.cs" />
+     <Compile Include="Assets\Scripts\UI\WeaponsTabUI.cs" />
      <Compile Include="Assets\Scripts\UI\InteractUI.cs" />
      <Compile Include="Assets\Scripts\Player\PlayerMovement.cs" />
      <Compile Include="Assets\Mini First Person Controller\Scripts\FirstPersonMovement.cs" />

@@ -9,10 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a7a4d7b035915874bb1ff50cb58927e6, type: 3}
-  m_Name: Weapon0SO
+  m_Script: {fileID: 11500000, guid: 328430a1a9a34634b8b2d967856983e4, type: 3}
+  m_Name: Weapon0
   m_EditorClassIdentifier: 
   inventoryObjectSprite: {fileID: 21300000, guid: 3086d66a563317b40a20a20da2c64ac0,
     type: 3}
-  inventoryObjectName: First Object
+  inventoryObjectName: Weapon 0
   weaponSo: {fileID: 11400000, guid: f3f8b02a5a67bc044bac5575e77075fc, type: 2}

@@ -402,7 +402,6 @@
 "Assets/Scripts/Inventory/InventoryObject.cs"
 "Assets/Scripts/Inventory/InventorySlotSingleUI.cs"
 "Assets/Scripts/Inventory/PlayerInventory.cs"
-"Assets/Scripts/Inventory/WeaponInventoryObject.cs"
 "Assets/Scripts/Player/CameraController.cs"
 "Assets/Scripts/Player/PlayerAttackController.cs"
 "Assets/Scripts/Player/PlayerController.cs"
@@ -412,6 +411,7 @@
 "Assets/Scripts/Player/StaminaController.cs"
 "Assets/Scripts/ScriptableObjects/ShopItemSO/ShopItemSO.cs"
 "Assets/Scripts/ScriptableObjects/WeaponSO/WeaponSO.cs"
+"Assets/Scripts/UI/CharacterInventoryUI.cs"
 "Assets/Scripts/UI/CharacterUI.cs"
 "Assets/Scripts/UI/InteractUI.cs"
 "Assets/Scripts/UI/ShopItemSingleUI.cs"
@@ -421,6 +421,7 @@
 "Assets/Scripts/UI/TempUI.cs"
 "Assets/Scripts/UI/UpgradeSingleUI.cs"
 "Assets/Scripts/UI/UpgradesTabUI.cs"
+"Assets/Scripts/UI/WeaponsTabUI.cs"
 -langversion:9.0
 
 /deterministic

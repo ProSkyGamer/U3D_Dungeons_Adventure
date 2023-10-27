@@ -1,20 +1,10 @@
 using System;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class StatsTabUI : MonoBehaviour
 {
-    public static event EventHandler OnStopItemDragging;
-
-    [SerializeField] private Transform playerInventorySlotPrefab;
-    [SerializeField] private Transform playerInventorySlotsGrid;
-
-    [SerializeField] private Image currentDraggingImage;
-    private InventoryObject currentDraggingObject;
-
-    private readonly List<InventorySlotSingleUI> allInventorySlots = new();
+    [SerializeField] private CharacterInventoryUI characterInventoryUI;
 
     [SerializeField] private TextMeshProUGUI baseHpText;
     [SerializeField] private TextMeshProUGUI additionalHpText;
@@ -31,33 +21,10 @@ public class StatsTabUI : MonoBehaviour
     {
         CharacterUI.OnStatsTabButtonClick += CharacterUI_OnStatsTabButtonClick;
         CharacterUI.OnUpgradesTabButtonClick += CharacterUI_OnOtherTabButtonClick;
-
-        InventorySlotSingleUI.OnStartItemDragging += InventorySlotSingleUI_OnStartItemDragging;
-
-        for (var i = 0; i < PlayerController.Instance.GetPlayerInventory().GetMaxSlotsCount(); i++)
-        {
-            var slotTransform = Instantiate(playerInventorySlotPrefab, playerInventorySlotsGrid);
-
-            var slotSingleUI = slotTransform.GetComponent<InventorySlotSingleUI>();
-            slotSingleUI.SetInventorySlotNumber(i);
-
-            allInventorySlots.Add(slotSingleUI);
-        }
-
-        playerInventorySlotPrefab.gameObject.SetActive(false);
-        currentDraggingImage.gameObject.SetActive(false);
+        CharacterUI.OnWeaponsTabButtonClick += CharacterUI_OnOtherTabButtonClick;
     }
 
     #region SubscribedEvents
-
-    private void InventorySlotSingleUI_OnStartItemDragging(object sender,
-        InventorySlotSingleUI.OnStartItemDraggingEventArgs e)
-    {
-        currentDraggingObject = e.draggingInventoryObject;
-
-        currentDraggingImage.gameObject.SetActive(true);
-        currentDraggingImage.sprite = currentDraggingObject.GetInventoryObjectSprite();
-    }
 
     private void CharacterUI_OnOtherTabButtonClick(object sender, EventArgs e)
     {
@@ -71,33 +38,6 @@ public class StatsTabUI : MonoBehaviour
 
     #endregion
 
-    private void Update()
-    {
-        if (currentDraggingObject != null)
-        {
-            currentDraggingImage.transform.position = GameInput.Instance.GetCurrentMousePosition();
-
-            if (GameInput.Instance.GetBindingValue(GameInput.Binding.UpgradesStartDragging) != 1f)
-            {
-                var selectedSlot = GetCurrentSelectedSlot();
-
-                selectedSlot.StoreItem(currentDraggingObject);
-
-                var newSlotNumber = selectedSlot.GetSlotNumber();
-                Debug.Log($"Trying to put in slot {newSlotNumber}");
-
-                currentDraggingObject.SetInventoryParentBySlot(PlayerController.Instance.GetPlayerInventory(),
-                    newSlotNumber);
-
-                currentDraggingImage.gameObject.SetActive(false);
-
-                currentDraggingObject = null;
-
-                OnStopItemDragging?.Invoke(this, EventArgs.Empty);
-            }
-        }
-    }
-
     private void Show()
     {
         gameObject.SetActive(true);
@@ -108,7 +48,7 @@ public class StatsTabUI : MonoBehaviour
     private void UpdatePageVisual()
     {
         UpdateStats();
-        UpdateInventory();
+        characterInventoryUI.UpdateInventory();
     }
 
     private void UpdateStats()
@@ -125,32 +65,8 @@ public class StatsTabUI : MonoBehaviour
         caDmgBonusText.text = $"+ {PlayerController.Instance.GetCurrentCaDmgBonus().ToString()} %";
     }
 
-    private void UpdateInventory()
-    {
-        var playerInventory = PlayerController.Instance.GetPlayerInventory();
-
-        for (var i = 0; i < allInventorySlots.Count; i++)
-        {
-            var inventoryObject = playerInventory.GetInventoryObjectBySlot(i);
-
-            if (inventoryObject == null) continue;
-
-            if (allInventorySlots[i].GetStoredItem() != inventoryObject)
-                allInventorySlots[i].StoreItem(inventoryObject);
-        }
-    }
-
     private void Hide()
     {
         gameObject.SetActive(false);
-    }
-
-    private InventorySlotSingleUI GetCurrentSelectedSlot()
-    {
-        foreach (var inventorySlot in allInventorySlots)
-            if (inventorySlot.IsCurrentSlotSelected())
-                return inventorySlot;
-
-        return null;
     }
 }
