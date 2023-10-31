@@ -13,6 +13,8 @@ public class UpgradesTabUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI availableSkillPointsText;
 
     [SerializeField] private Transform lineBetweenUpgradeTransform;
+    [SerializeField] private float minUpgradesFieldSize = 0.5f;
+    [SerializeField] private float maxUpgradesFieldSize = 2.5f;
 
     [SerializeField] private UpgradeSingleUI firstAtkUpgradeSingleUI;
     [SerializeField] private List<UpgradeButtons> allAtkUpgrades = new();
@@ -109,6 +111,7 @@ public class UpgradesTabUI : MonoBehaviour
 
     private void Update()
     {
+        var currentUpgradesFieldSize = allUpgradesField.localScale;
         if (isDragging)
             if (GameInput.Instance.GetBindingValue(GameInput.Binding.UpgradesStartDragging) == 1f)
             {
@@ -134,6 +137,18 @@ public class UpgradesTabUI : MonoBehaviour
             {
                 isDragging = false;
             }
+
+        var mouseScroll = GameInput.Instance.GetMouseScroll() * Time.deltaTime;
+        Debug.Log($"{currentUpgradesFieldSize.x} {currentUpgradesFieldSize.y}");
+        if (mouseScroll == 0) return;
+
+        mouseScroll = mouseScroll > 0 ? 1 : -1;
+        mouseScroll *= Time.deltaTime;
+        var newUpgradesFieldSizeScale = Mathf.Clamp(currentUpgradesFieldSize.x +
+                                                    mouseScroll, minUpgradesFieldSize, maxUpgradesFieldSize);
+        var newUpgradesFieldSize =
+            new Vector3(newUpgradesFieldSizeScale, newUpgradesFieldSizeScale, currentUpgradesFieldSize.z);
+        allUpgradesField.localScale = newUpgradesFieldSize;
     }
 
     private void Show()

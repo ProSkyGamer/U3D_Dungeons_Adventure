@@ -69,6 +69,7 @@
      <Compile Include="Assets\Mini First Person Controller\Scripts\Components\Crouch.cs" />
      <Compile Include="Assets\Scripts\Enemies\EnemyStatsUI.cs" />
      <Compile Include="Assets\Mini First Person Controller\Scripts\Components\GroundCheck.cs" />
+     <Compile Include="Assets\Scripts\Dungeon\DungeonDifficulty.cs" />
      <Compile Include="Assets\Scripts\Interactions\Items To Interact\InteractableItem.cs" />
      <Compile Include="Assets\Scripts\Dungeon\DungeonRoom.cs" />
      <Compile Include="Assets\Scripts\Interactions\Items To Interact\LootChest.cs" />

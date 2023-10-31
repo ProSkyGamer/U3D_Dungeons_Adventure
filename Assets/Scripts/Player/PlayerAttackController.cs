@@ -155,10 +155,15 @@ public class PlayerAttackController : MonoBehaviour, IInventoryParent
     {
         if (GetCurrentInventoryObjectsCount() <= 1) return;
 
+        var nearestWeapon = FindNearestInventoryObjectWeapon();
+        OnCurrentWeaponChange?.Invoke(this, new OnCurrentWeaponChangeEventArgs
+        {
+            previousWeapon = currentChooseWeapon, newWeapon = nearestWeapon
+        });
 
         currentChooseWeapon.SetInventoryParent(null);
 
-        TryChangeWeapon(currentOwnedWeapon[0]);
+        currentChooseWeapon = nearestWeapon;
     }
 
     public void NormalAttack()
@@ -225,7 +230,7 @@ public class PlayerAttackController : MonoBehaviour, IInventoryParent
 
         foreach (var hit in raycastHits)
             if (hit.transform.gameObject.TryGetComponent(out EnemyController enemyController))
-                enemiesToAttack.Add(hit.transform.gameObject.GetComponent<EnemyController>());
+                enemiesToAttack.Add(enemyController);
 
         //Debug.Log($"Enemies to attack {enemiesToAttack.Count} {raycastHits.Length}");
 
@@ -315,7 +320,12 @@ public class PlayerAttackController : MonoBehaviour, IInventoryParent
 
     public void RemoveInventoryObjectBySlot(int slotNumber)
     {
-        Debug.Log("Removed");
+        if (currentChooseWeapon == currentOwnedWeapon[slotNumber])
+        {
+            var nearestWeapon = FindNearestInventoryObjectWeapon(slotNumber);
+            TryChangeWeapon(nearestWeapon);
+        }
+
         currentOwnedWeapon[slotNumber] = null;
     }
 
@@ -326,6 +336,20 @@ public class PlayerAttackController : MonoBehaviour, IInventoryParent
                 return true;
 
         return false;
+    }
+
+    private InventoryObject FindNearestInventoryObjectWeapon(int startingPoint = 0)
+    {
+        var i = startingPoint < currentOwnedWeapon.Length - 1 ? startingPoint + 1 : 0;
+        while (i != startingPoint)
+        {
+            if (currentOwnedWeapon[i] != null)
+                return currentOwnedWeapon[i];
+
+            i = i < currentOwnedWeapon.Length - 1 ? i + 1 : 0;
+        }
+
+        return null;
     }
 
     public bool IsSlotNumberAvailable(int slotNumber)

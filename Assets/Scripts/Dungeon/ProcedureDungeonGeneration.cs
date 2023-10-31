@@ -5,25 +5,26 @@ using UnityEngine;
 using static DungeonRoom;
 using Random = UnityEngine.Random;
 
-
 public class ProcedureDungeonGeneration : MonoBehaviour
 {
     [SerializeField] private Vector2Int maxDungeonSize = new(5, 8);
+    [SerializeField] private int maxDungeonsRoomsCount = 10;
 
     [Serializable]
     private class DungeonRoomType
     {
         public Transform dungeonRoom;
         public int maxRoomCount = 1;
+        public bool isBuildingsUnlimited;
         [HideInInspector] public int createdRoomCount;
+        public int minRequiredRoomCount;
     }
 
     [SerializeField] private List<DungeonRoomType> dungeonRoomVariationsPrefabsList = new();
     [SerializeField] private DungeonRoomType startingRoom;
 
-    private int dungeonRooms;
-
     private readonly List<DungeonRoom> allRoomsList = new();
+    private readonly List<DungeonRoomType> allRequiredRoomsList = new();
 
     private List<List<bool>> dungeonMapUsedTilesList = new()
     {
@@ -32,9 +33,12 @@ public class ProcedureDungeonGeneration : MonoBehaviour
 
     private void Awake()
     {
-        dungeonRooms = 0;
         foreach (var dungeonRoomVariation in dungeonRoomVariationsPrefabsList)
-            dungeonRooms += dungeonRoomVariation.maxRoomCount;
+        {
+            if (dungeonRoomVariation.minRequiredRoomCount <= 0) continue;
+
+            allRequiredRoomsList.Add(dungeonRoomVariation);
+        }
 
         GenerateDungeon();
     }
@@ -75,12 +79,12 @@ public class ProcedureDungeonGeneration : MonoBehaviour
 
     private void GenerateDungeon()
     {
-        if (dungeonRooms > maxDungeonSize.x * maxDungeonSize.y)
+        if (maxDungeonsRoomsCount > maxDungeonSize.x * maxDungeonSize.y)
         {
-            Debug.LogError($"Dungeon rooms can't be {dungeonRooms} on field " +
+            Debug.LogError($"Dungeon rooms can't be {maxDungeonsRoomsCount} on field " +
                            $"{maxDungeonSize.x}x{maxDungeonSize.y}! Rooms value changed to " +
                            $"{maxDungeonSize.x * maxDungeonSize.y}");
-            dungeonRooms = maxDungeonSize.x * maxDungeonSize.y;
+            maxDungeonsRoomsCount = maxDungeonSize.x * maxDungeonSize.y;
         }
 
         GenerateDungeonRoom(startingRoom.dungeonRoom, transform.position,
@@ -88,7 +92,7 @@ public class ProcedureDungeonGeneration : MonoBehaviour
             new Vector2Int(0, 0));
 
 
-        while (allRoomsList.Count < dungeonRooms)
+        while (allRoomsList.Count < maxDungeonsRoomsCount)
         {
             var roomToCreatePrefab = GetRandomAvailableDungeonRoomType(out var isHaveAvailableRoom);
             if (isHaveAvailableRoom)
@@ -350,10 +354,22 @@ public class ProcedureDungeonGeneration : MonoBehaviour
     private Transform GetRandomAvailableDungeonRoomType(out bool isHaveAvailableRoom)
     {
         isHaveAvailableRoom = false;
+
+        if (maxDungeonsRoomsCount <= 0) return default;
+
         List<DungeonRoomType> currentAvailableDungeonRoomType = new();
-        foreach (var dungeonRoom in dungeonRoomVariationsPrefabsList)
-            if (dungeonRoom.createdRoomCount < dungeonRoom.maxRoomCount)
+
+        if (GetRemainingRequiredRoomsCount() <= maxDungeonsRoomsCount - allRoomsList.Count)
+        {
+            foreach (var dungeonRoom in dungeonRoomVariationsPrefabsList)
+                if (dungeonRoom.isBuildingsUnlimited || dungeonRoom.createdRoomCount < dungeonRoom.maxRoomCount)
+                    currentAvailableDungeonRoomType.Add(dungeonRoom);
+        }
+        else
+        {
+            foreach (var dungeonRoom in allRequiredRoomsList)
                 currentAvailableDungeonRoomType.Add(dungeonRoom);
+        }
 
         if (currentAvailableDungeonRoomType.Count > 0)
         {
@@ -361,9 +377,31 @@ public class ProcedureDungeonGeneration : MonoBehaviour
 
             var roomTypeIndex = Random.Range(0, currentAvailableDungeonRoomType.Count);
             currentAvailableDungeonRoomType[roomTypeIndex].createdRoomCount++;
+
+            currentAvailableDungeonRoomType[roomTypeIndex].minRequiredRoomCount =
+                currentAvailableDungeonRoomType[roomTypeIndex].minRequiredRoomCount > 0
+                    ? currentAvailableDungeonRoomType[roomTypeIndex].minRequiredRoomCount - 1
+                    : 0;
             return currentAvailableDungeonRoomType[roomTypeIndex].dungeonRoom;
         }
 
         return default;
+    }
+
+    private int GetRemainingRequiredRoomsCount()
+    {
+        var requiredRoomsCount = 0;
+        for (var i = 0; i < allRequiredRoomsList.Count; i++)
+            if (allRequiredRoomsList[i].minRequiredRoomCount > 0)
+            {
+                requiredRoomsCount += allRequiredRoomsList[i].minRequiredRoomCount;
+            }
+            else
+            {
+                allRequiredRoomsList.Remove(allRequiredRoomsList[i]);
+                i--;
+            }
+
+        return requiredRoomsCount;
     }
 }

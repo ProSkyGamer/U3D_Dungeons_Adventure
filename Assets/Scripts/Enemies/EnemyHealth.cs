@@ -36,6 +36,30 @@ public class EnemyHealth : MonoBehaviour
             (int)(maxDefence * (1 - maxDefenceAbsorption) / maxDefenceAbsorption);
     }
 
+    private void Start()
+    {
+        DungeonDifficulty.OnDungeonDifficultyChange += DungeonDifficulty_OnDungeonDifficultyChange;
+    }
+
+    private void DungeonDifficulty_OnDungeonDifficultyChange(object sender,
+        DungeonDifficulty.OnDungeonDifficultyChangeEventArgs e)
+    {
+        var currentHpDifficultyMultiplayer =
+            DungeonDifficulty.GetEnemiesHpMultiplayerByDungeonDifficulty(e.newDungeonDifficulty);
+        var currentHpPlayersCountMultiplayer = DungeonDifficulty.GetEnemiesHpMultiplayerByPlayersCount();
+
+        var healthPercentage = (float)currentHealth / maxHealth;
+
+        maxHealth = (int)(maxHealth * currentHpDifficultyMultiplayer * currentHpPlayersCountMultiplayer);
+
+        currentHealth = (int)(maxHealth * healthPercentage);
+
+        OnEnemyHealthChange?.Invoke(this, new OnEnemyHealthChangeEventArgs
+        {
+            currentHealth = currentHealth, maxHealth = maxHealth, lostHealth = 0, obtainedHealth = 0
+        });
+    }
+
     private void Update()
     {
         if (isFirstUpdate)
