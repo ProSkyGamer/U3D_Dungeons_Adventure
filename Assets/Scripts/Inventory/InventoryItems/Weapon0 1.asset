@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 328430a1a9a34634b8b2d967856983e4, type: 3}
   m_Name: Weapon0 1
   m_EditorClassIdentifier: 
-  inventoryObjectSprite: {fileID: 21300000, guid: 0c6a2a64ca9f9c946a7dbbd1674cf5bd,
+  inventoryObjectSprite: {fileID: 21300000, guid: 281160d54742cbb44a88a61bf8ccfb16,
     type: 3}
   inventoryObjectName: Weapon 1
   weaponSo: {fileID: 11400000, guid: 73c19464ef9ef2e4f929c229c30c7e6c, type: 2}
+  relicSo: {fileID: 0}

@@ -81,6 +81,7 @@ public class UpgradesTabUI : MonoBehaviour
         CharacterUI.OnUpgradesTabButtonClick += CharacterUI_OnUpgradesTabButtonClick;
         CharacterUI.OnStatsTabButtonClick += CharacterUI_OnOtherTabButtonClick;
         CharacterUI.OnWeaponsTabButtonClick += CharacterUI_OnOtherTabButtonClick;
+        CharacterUI.OnRelicsTabButtonClick += CharacterUI_OnOtherTabButtonClick;
 
         PlayerController.Instance.OnSkillPointsValueChange += PlayerController_OnSkillPointsValueChange;
     }
@@ -139,7 +140,6 @@ public class UpgradesTabUI : MonoBehaviour
             }
 
         var mouseScroll = GameInput.Instance.GetMouseScroll() * Time.deltaTime;
-        Debug.Log($"{currentUpgradesFieldSize.x} {currentUpgradesFieldSize.y}");
         if (mouseScroll == 0) return;
 
         mouseScroll = mouseScroll > 0 ? 1 : -1;

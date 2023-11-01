@@ -7,6 +7,7 @@ public class InventoryObject : ScriptableObject
     [SerializeField] private string inventoryObjectName;
 
     [SerializeField] private WeaponSO weaponSo;
+    [SerializeField] private RelicSO relicSo;
 
     private IInventoryParent inventoryObjectParent;
 
@@ -43,17 +44,24 @@ public class InventoryObject : ScriptableObject
         return inventoryObjectName;
     }
 
-    public bool TryGetWeaponSo(out WeaponSO gottenWeaponSo)
-    {
-        gottenWeaponSo = weaponSo;
-        return gottenWeaponSo != null;
-    }
-
     public void SetInventoryObject(InventoryObject inventoryObject)
     {
         inventoryObjectSprite = inventoryObject.GetInventoryObjectSprite();
         inventoryObjectName = inventoryObject.GetInventoryObjectName();
 
         inventoryObject.TryGetWeaponSo(out weaponSo);
+        inventoryObject.TryGetRelicSo(out relicSo);
+    }
+
+    public bool TryGetWeaponSo(out WeaponSO gottenWeaponSo)
+    {
+        gottenWeaponSo = weaponSo;
+        return gottenWeaponSo != null;
+    }
+
+    public bool TryGetRelicSo(out RelicSO gottenRelicSo)
+    {
+        gottenRelicSo = relicSo;
+        return gottenRelicSo != null;
     }
 }

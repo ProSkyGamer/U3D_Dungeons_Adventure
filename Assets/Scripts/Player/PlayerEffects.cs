@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -23,24 +24,65 @@ public class PlayerEffects : MonoBehaviour
         public float buffRemainingTime;
     }
 
+    public enum RelicBuffTypes
+    {
+        TakenDmgAbsorption,
+        TakenDmgIncrease,
+        NaDmgBuff,
+        CaDmgBuff,
+        ExpBuff,
+        DefBuff,
+        HpBuff,
+        HpRegeneratePerKill
+    }
+
+    [Serializable]
+    public class RelicBuff
+    {
+        public RelicBuffTypes relicBuffType;
+        public float relicBuffScale;
+    }
+
     #region Buffs
 
     private readonly List<PlayerBuff> allPlayerBuffList = new();
+    private readonly List<RelicBuff> allPlayerRelicBuffList = new();
 
     #endregion
 
     private PlayerHealth playerHealth;
     private PlayerAttackController playerAttackController;
+    private PlayerRelics playerRelics;
+    private PlayerController playerController;
 
     private void Awake()
     {
         playerHealth = GetComponent<PlayerHealth>();
         playerAttackController = GetComponent<PlayerAttackController>();
+        playerRelics = GetComponent<PlayerRelics>();
+        playerController = GetComponent<PlayerController>();
     }
 
     private void Start()
     {
         playerAttackController.OnCurrentWeaponChange += PlayerAttackController_OnCurrentWeaponChange;
+
+        playerRelics.OnRelicsChange += PlayerRelics_OnRelicsChange;
+    }
+
+    private void PlayerRelics_OnRelicsChange(object sender, PlayerRelics.OnRelicChangeEventArgs e)
+    {
+        if (e.addedRelic != null)
+        {
+            e.addedRelic.TryGetRelicSo(out var relicSo);
+            foreach (var relicBuff in relicSo.relicBuffs) AddRelicBuff(relicBuff);
+        }
+
+        if (e.removedRelic != null)
+        {
+            e.removedRelic.TryGetRelicSo(out var relicSo);
+            foreach (var relicBuff in relicSo.relicBuffs) RemoveRelicBuff(relicBuff);
+        }
     }
 
     private void PlayerAttackController_OnCurrentWeaponChange(object sender,
@@ -59,10 +101,10 @@ public class PlayerEffects : MonoBehaviour
 
     private void Update()
     {
-        TickAttackBuffTimers();
+        TickBuffTimers();
     }
 
-    private void TickAttackBuffTimers()
+    private void TickBuffTimers()
     {
         foreach (var buff in allPlayerBuffList)
             if (!buff.isBuffEndless)
@@ -101,7 +143,10 @@ public class PlayerEffects : MonoBehaviour
         foreach (var buff in allPlayerBuffList)
             if (buff.buffs == buffs && buff.percentageBuffScale == percentageBuff &&
                 buff.flatBuffScale == flatBuffScale)
+            {
                 AddRemoveBuffToController(buffs, percentageBuff, flatBuffScale);
+                return;
+            }
     }
 
     private void AddRemoveBuffToController(PlayerBuff.Buffs buffs, float percentageBuffScale,
@@ -129,6 +174,52 @@ public class PlayerEffects : MonoBehaviour
                 break;
             case PlayerBuff.Buffs.ChargedAttackDamageBonusBuff:
                 playerAttackController.ChangeChargedAttackBuff(percentageBuffScale);
+                break;
+        }
+    }
+
+    private void AddRelicBuff(RelicBuff relicBuff)
+    {
+        if (allPlayerRelicBuffList.Contains(relicBuff)) return;
+
+        allPlayerRelicBuffList.Add(relicBuff);
+        AddRemoveRelicBuffToController(relicBuff.relicBuffType, relicBuff.relicBuffScale);
+    }
+
+    private void RemoveRelicBuff(RelicBuff relicBuff)
+    {
+        if (!allPlayerRelicBuffList.Contains(relicBuff)) return;
+
+        allPlayerRelicBuffList.Remove(relicBuff);
+        AddRemoveRelicBuffToController(relicBuff.relicBuffType, -relicBuff.relicBuffScale);
+    }
+
+    private void AddRemoveRelicBuffToController(RelicBuffTypes relicBuffType, float percentageValue)
+    {
+        switch (relicBuffType)
+        {
+            case RelicBuffTypes.TakenDmgAbsorption:
+                playerHealth.ChangeTakenDamageAbsorptionBuff(percentageValue);
+                break;
+            case RelicBuffTypes.TakenDmgIncrease:
+                playerHealth.ChangeTakenDamageIncreaseDebuff(percentageValue);
+                break;
+            case RelicBuffTypes.NaDmgBuff:
+                playerAttackController.ChangeNormalAttackBuff(percentageValue);
+                break;
+            case RelicBuffTypes.CaDmgBuff:
+                playerAttackController.ChangeChargedAttackBuff(percentageValue);
+                break;
+            case RelicBuffTypes.ExpBuff:
+                playerController.ChangeExpAdditionalMultiplayer(percentageValue);
+                break;
+            case RelicBuffTypes.DefBuff:
+                playerHealth.ChangeDefenceBuff(percentageValue);
+                break;
+            case RelicBuffTypes.HpBuff:
+                playerHealth.ChangeHealthBuff(percentageValue);
+                break;
+            case RelicBuffTypes.HpRegeneratePerKill:
                 break;
         }
     }

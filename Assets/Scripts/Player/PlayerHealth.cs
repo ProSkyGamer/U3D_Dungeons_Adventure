@@ -15,6 +15,8 @@ public class PlayerHealth : MonoBehaviour
     private int additionalDefenceNumberFormula;
     private int currentDefence;
 
+    private float currentTakenDmgAbsorption;
+
     #endregion
 
     public static event EventHandler<OnCurrentPlayerHealthChangeEventArgs> OnCurrentPlayerHealthChange;
@@ -54,7 +56,8 @@ public class PlayerHealth : MonoBehaviour
     public void TakeDamage(int damage)
     {
         var takenDamage =
-            (int)(damage * (1 - (float)currentDefence / (additionalDefenceNumberFormula + currentDefence)));
+            (int)(damage * (1 - (float)currentDefence / (additionalDefenceNumberFormula + currentDefence)) *
+                  (1 - currentTakenDmgAbsorption));
 
         Debug.Log($"Taken damage {takenDamage} Def: {currentDefence} AddDef: {additionalDefenceNumberFormula}");
 
@@ -90,6 +93,16 @@ public class PlayerHealth : MonoBehaviour
     {
         currentDefence += (int)(baseDefence * percentageBuff);
         currentDefence += flatBuff;
+    }
+
+    public void ChangeTakenDamageAbsorptionBuff(float percentageBuff)
+    {
+        currentTakenDmgAbsorption += percentageBuff;
+    }
+
+    public void ChangeTakenDamageIncreaseDebuff(float percentageDebuff)
+    {
+        currentTakenDmgAbsorption -= percentageDebuff;
     }
 
     #region GetVariablesData

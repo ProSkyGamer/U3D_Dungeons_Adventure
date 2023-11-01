@@ -161,7 +161,7 @@ public class PlayerAttackController : MonoBehaviour, IInventoryParent
             previousWeapon = currentChooseWeapon, newWeapon = nearestWeapon
         });
 
-        currentChooseWeapon.SetInventoryParent(null);
+        currentChooseWeapon = null;
 
         currentChooseWeapon = nearestWeapon;
     }

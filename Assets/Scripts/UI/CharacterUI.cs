@@ -16,6 +16,7 @@ public class CharacterUI : MonoBehaviour
     public static event EventHandler OnWeaponsTabButtonClick;
 
     [SerializeField] private Button relicsTabButton;
+    public static event EventHandler OnRelicsTabButtonClick;
 
     private bool isFirstUpdate = true;
 
@@ -26,7 +27,7 @@ public class CharacterUI : MonoBehaviour
         statsTabButton.onClick.AddListener(() => { OnStatsTabButtonClick?.Invoke(this, EventArgs.Empty); });
         upgradesTabButton.onClick.AddListener(() => { OnUpgradesTabButtonClick?.Invoke(this, EventArgs.Empty); });
         weaponsTabButton.onClick.AddListener(() => { OnWeaponsTabButtonClick?.Invoke(this, EventArgs.Empty); });
-        relicsTabButton.onClick.AddListener(() => { });
+        relicsTabButton.onClick.AddListener(() => { OnRelicsTabButtonClick?.Invoke(this, EventArgs.Empty); });
     }
 
     private void Start()

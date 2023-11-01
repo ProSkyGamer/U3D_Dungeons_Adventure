@@ -10,7 +10,8 @@ public class CharacterInventoryUI : MonoBehaviour
     public enum InventoryType
     {
         PlayerInventory,
-        PlayerWeaponInventory
+        PlayerWeaponInventory,
+        PlayerRelicsInventory
     }
 
     [SerializeField] private InventoryType inventoryType = InventoryType.PlayerInventory;
@@ -35,6 +36,9 @@ public class CharacterInventoryUI : MonoBehaviour
                 break;
             case InventoryType.PlayerWeaponInventory:
                 maxSlotCount = PlayerController.Instance.GetMaxOwnedWeaponsCount();
+                break;
+            case InventoryType.PlayerRelicsInventory:
+                maxSlotCount = PlayerController.Instance.GetPlayerRelicsInventory().GetMaxSlotsCount();
                 break;
         }
 
@@ -77,19 +81,7 @@ public class CharacterInventoryUI : MonoBehaviour
 
             var newSlotNumber = selectedSlot.GetSlotNumber();
 
-            IInventoryParent inventoryToPlace;
-            switch (inventoryType)
-            {
-                default:
-                    inventoryToPlace = PlayerController.Instance.GetPlayerInventory();
-                    break;
-                case InventoryType.PlayerInventory:
-                    inventoryToPlace = PlayerController.Instance.GetPlayerInventory();
-                    break;
-                case InventoryType.PlayerWeaponInventory:
-                    inventoryToPlace = PlayerController.Instance.GetPlayerAttackInventory();
-                    break;
-            }
+            var inventoryToPlace = GetCurrentPlayerInventoryByType();
 
             currentDraggingObject.SetInventoryParentBySlot(inventoryToPlace,
                 newSlotNumber);
@@ -106,21 +98,8 @@ public class CharacterInventoryUI : MonoBehaviour
     {
         currentDraggingImage.gameObject.SetActive(false);
 
-        IInventoryParent playerInventory;
-        switch (inventoryType)
-        {
-            default:
-                playerInventory = PlayerController.Instance.GetPlayerInventory();
-                break;
-            case InventoryType.PlayerInventory:
-                playerInventory = PlayerController.Instance.GetPlayerInventory();
-                break;
-            case InventoryType.PlayerWeaponInventory:
-                playerInventory = PlayerController.Instance.GetPlayerAttackInventory();
-                break;
-        }
 
-
+        var playerInventory = GetCurrentPlayerInventoryByType();
         for (var i = 0; i < allInventorySlots.Count; i++)
         {
             var inventoryObject = playerInventory.GetInventoryObjectBySlot(i);
@@ -133,6 +112,21 @@ public class CharacterInventoryUI : MonoBehaviour
 
             if (allInventorySlots[i].GetStoredItem() != inventoryObject)
                 allInventorySlots[i].StoreItem(inventoryObject);
+        }
+    }
+
+    private IInventoryParent GetCurrentPlayerInventoryByType()
+    {
+        switch (inventoryType)
+        {
+            default:
+                return PlayerController.Instance.GetPlayerInventory();
+            case InventoryType.PlayerInventory:
+                return PlayerController.Instance.GetPlayerInventory();
+            case InventoryType.PlayerWeaponInventory:
+                return PlayerController.Instance.GetPlayerAttackInventory();
+            case InventoryType.PlayerRelicsInventory:
+                return PlayerController.Instance.GetPlayerRelicsInventory();
         }
     }
 

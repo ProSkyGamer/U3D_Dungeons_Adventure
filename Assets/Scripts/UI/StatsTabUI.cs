@@ -22,6 +22,7 @@ public class StatsTabUI : MonoBehaviour
         CharacterUI.OnStatsTabButtonClick += CharacterUI_OnStatsTabButtonClick;
         CharacterUI.OnUpgradesTabButtonClick += CharacterUI_OnOtherTabButtonClick;
         CharacterUI.OnWeaponsTabButtonClick += CharacterUI_OnOtherTabButtonClick;
+        CharacterUI.OnRelicsTabButtonClick += CharacterUI_OnOtherTabButtonClick;
     }
 
     #region SubscribedEvents

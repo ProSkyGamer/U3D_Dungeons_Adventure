@@ -5,29 +5,29 @@ m_ProjectFiles:
     m_ContentTrackingEnabled: 1
     m_ModificationDate:
       serializedVersion: 2
-      ticks: 638318535262169367
-    m_Hash: 187669359
+      ticks: 638343561753163618
+    m_Hash: 386668495
   m_LockFileStatus:
     m_FilePath: D:/Unity/3D Dungeons Adventure/Packages/packages-lock.json
     m_PathExists: 1
     m_ContentTrackingEnabled: 1
     m_ModificationDate:
       serializedVersion: 2
-      ticks: 638318535262329367
-    m_Hash: 1525416835
+      ticks: 638343562544243889
+    m_Hash: 3898726066
 m_EmbeddedPackageManifests:
   m_ManifestsStatus: {}
 m_LocalPackages:
   m_LocalFileStatus: []
 m_ProjectPath: D:/Unity/3D Dungeons Adventure/Packages
-m_EditorVersion: 2022.2.11f1 (621cd60d08fd)
+m_EditorVersion: 2022.3.12f1 (4fe6e059c7ef)
 m_ResolvedPackages:
-- packageId: com.unity.ai.navigation@1.1.4
+- packageId: com.unity.ai.navigation@1.1.5
   testable: 0
   isDirectDependency: 1
-  version: 1.1.4
+  version: 1.1.5
   source: 1
-  resolvedPath: D:\Unity\3D Dungeons Adventure\Library\PackageCache\com.unity.ai.navigation@1.1.4
+  resolvedPath: D:\Unity\3D Dungeons Adventure\Library\PackageCache\com.unity.ai.navigation@1.1.5
   assetPath: Packages/com.unity.ai.navigation
   name: com.unity.ai.navigation
   displayName: AI Navigation
@@ -52,13 +52,13 @@ m_ResolvedPackages:
     - 1.1.1
     - 1.1.3
     - 1.1.4
+    - 1.1.5
     - 2.0.0-pre.3
     - 2.0.0-pre.4
+    - 2.0.0
     compatible:
-    - 1.1.1
-    - 1.1.3
-    - 1.1.4
-    recommended: 1.1.4
+    - 1.1.5
+    recommended: 1.1.5
     deprecated: []
   dependencies:
   - name: com.unity.modules.ai
@@ -75,30 +75,30 @@ m_ResolvedPackages:
     isDefault: 1
     capabilities: 7
     configSource: 0
-  hideInEditor: 0
+  hideInEditor: 1
   isAssetStorePackage: 0
-  datePublishedTicks: 638224218100000000
+  datePublishedTicks: 638319373850000000
   documentationUrl: https://docs.unity3d.com/Packages/com.unity.ai.navigation@1.1/manual/index.html
   hasRepository: 1
   repository:
     type: git
     url: https://github.cds.internal.unity3d.com/unity/com.unity.ai.navigation.git
-    revision: 3e8d494400ccac6cbd90ee1b474470f4b1299bfa
+    revision: a905e1ab41c8afae1a75688ceb3b4dfa1686ea75
     path: 
   unityLifecycle:
-    version: 1.1.1
+    version: 1.1.5
     nextVersion: 
     recommendedVersion: 
     isDeprecated: 0
     deprecationMessage: 
   isDeprecated: 0
   deprecationMessage: 
-- packageId: com.unity.collab-proxy@2.0.0
+- packageId: com.unity.collab-proxy@2.2.0
   testable: 0
   isDirectDependency: 1
-  version: 2.0.0
+  version: 2.2.0
   source: 1
-  resolvedPath: D:\Unity\3D Dungeons Adventure\Library\PackageCache\com.unity.collab-proxy@2.0.0
+  resolvedPath: D:\Unity\3D Dungeons Adventure\Library\PackageCache\com.unity.collab-proxy@2.2.0
   assetPath: Packages/com.unity.collab-proxy
   name: com.unity.collab-proxy
   displayName: Version Control
@@ -107,11 +107,10 @@ m_ResolvedPackages:
     email: 
     url: 
   category: Editor
-  type: asset
-  description: The Version Control package gives you the ability to use either Collaborate
-    or Plastic SCM for Unity (beta) in the Unity editor. To use Plastic SCM for Unity
-    (beta), a Plastic SCM subscription is required. Learn more about how you can
-    get started for free by visiting plasticscm.com.
+  type: assets
+  description: The package gives you the ability to use Unity Version Control in
+    the Unity editor. To use Unity Version Control, a subscription is required. Learn
+    more about how you can get started for free by visiting https://unity.com/solutions/version-control
   status: 0
   errors: []
   versions:
@@ -185,18 +184,10 @@ m_ResolvedPackages:
     - 2.1.0-preview.5
     - 2.1.0-preview.6
     - 2.1.0
+    - 2.2.0
     compatible:
-    - 2.0.0
-    - 2.0.1
-    - 2.0.3
-    - 2.0.4
-    - 2.0.5
-    - 2.0.7
-    - 2.1.0-preview.3
-    - 2.1.0-preview.5
-    - 2.1.0-preview.6
-    - 2.1.0
-    recommended: 2.0.7
+    - 2.2.0
+    recommended: 2.2.0
     deprecated: []
   dependencies: []
   resolvedDependencies: []
@@ -207,6 +198,7 @@ m_ResolvedPackages:
   - collaborate
   - collaboration
   - control
+  - devops
   - plastic
   - plasticscm
   - source
@@ -222,18 +214,18 @@ m_ResolvedPackages:
     isDefault: 1
     capabilities: 7
     configSource: 0
-  hideInEditor: 0
+  hideInEditor: 1
   isAssetStorePackage: 0
-  datePublishedTicks: 638095491550000000
-  documentationUrl: https://docs.unity3d.com/Packages/com.unity.collab-proxy@2.0/manual/index.html
+  datePublishedTicks: 638326189440000000
+  documentationUrl: https://docs.unity3d.com/Packages/com.unity.collab-proxy@2.2/manual/index.html
   hasRepository: 1
   repository:
     type: git
     url: https://github.cds.internal.unity3d.com/unity/com.unity.cloud.collaborate.git
-    revision: a1b1151e0c90bc327ea95678473c1f3a935b2c9e
+    revision: 33c8fba1793946be3c73f738edf70db0b5546afd
     path: 
   unityLifecycle:
-    version: 2.0.0
+    version: 2.2.0
     nextVersion: 
     recommendedVersion: 
     isDeprecated: 0
@@ -301,14 +293,11 @@ m_ResolvedPackages:
     - 3.0.22
     - 3.0.24
     - 3.0.25
+    - 3.0.26
     compatible:
-    - 3.0.18
-    - 3.0.20
-    - 3.0.21
-    - 3.0.22
-    - 3.0.24
     - 3.0.25
-    recommended: 3.0.25
+    - 3.0.26
+    recommended: 3.0.26
     deprecated: []
   dependencies:
   - name: com.unity.ext.nunit
@@ -325,7 +314,7 @@ m_ResolvedPackages:
     isDefault: 1
     capabilities: 7
     configSource: 0
-  hideInEditor: 0
+  hideInEditor: 1
   isAssetStorePackage: 0
   datePublishedTicks: 638300315270000000
   documentationUrl: https://docs.unity3d.com/Packages/com.unity.ide.rider@3.0/manual/index.html
@@ -336,19 +325,19 @@ m_ResolvedPackages:
     revision: e103b4771a884e656407e1b7219e5e3c20222552
     path: 
   unityLifecycle:
-    version: 3.0.18
+    version: 3.0.25
     nextVersion: 
     recommendedVersion: 
     isDeprecated: 0
     deprecationMessage: 
   isDeprecated: 0
   deprecationMessage: 
-- packageId: com.unity.ide.visualstudio@2.0.17
+- packageId: com.unity.ide.visualstudio@2.0.21
   testable: 0
   isDirectDependency: 1
-  version: 2.0.17
+  version: 2.0.21
   source: 1
-  resolvedPath: D:\Unity\3D Dungeons Adventure\Library\PackageCache\com.unity.ide.visualstudio@2.0.17
+  resolvedPath: D:\Unity\3D Dungeons Adventure\Library\PackageCache\com.unity.ide.visualstudio@2.0.21
   assetPath: Packages/com.unity.ide.visualstudio
   name: com.unity.ide.visualstudio
   displayName: Visual Studio Editor
@@ -357,7 +346,7 @@ m_ResolvedPackages:
     email: 
     url: 
   category: 
-  type: asset
+  type: assets
   description: Code editor integration for supporting Visual Studio as code editor
     for unity. Adds support for generating csproj files for intellisense purposes,
     auto discovery of installations, etc.
@@ -388,12 +377,11 @@ m_ResolvedPackages:
     - 2.0.18
     - 2.0.20
     - 2.0.21
+    - 2.0.22
     compatible:
-    - 2.0.17
-    - 2.0.18
-    - 2.0.20
     - 2.0.21
-    recommended: 2.0.21
+    - 2.0.22
+    recommended: 2.0.22
     deprecated: []
   dependencies:
   - name: com.unity.test-framework
@@ -416,18 +404,18 @@ m_ResolvedPackages:
     isDefault: 1
     capabilities: 7
     configSource: 0
-  hideInEditor: 0
+  hideInEditor: 1
   isAssetStorePackage: 0
-  datePublishedTicks: 638059987360000000
+  datePublishedTicks: 638300315250000000
   documentationUrl: https://docs.unity3d.com/Packages/com.unity.ide.visualstudio@2.0/manual/index.html
   hasRepository: 1
   repository:
     type: git
     url: https://github.cds.internal.unity3d.com/unity/com.unity.ide.visualstudio.git
-    revision: 1f126893bfb18ea9661fb15771613e841467073c
+    revision: eb2b500b99f6429d3d9dcb8acbcbd366dfbb42be
     path: 
   unityLifecycle:
-    version: 2.0.17
+    version: 2.0.21
     nextVersion: 
     recommendedVersion: 
     isDeprecated: 0
@@ -502,12 +490,12 @@ m_ResolvedPackages:
     deprecationMessage: 
   isDeprecated: 0
   deprecationMessage: 
-- packageId: com.unity.inputsystem@1.5.1
+- packageId: com.unity.inputsystem@1.7.0
   testable: 0
   isDirectDependency: 1
-  version: 1.5.1
+  version: 1.7.0
   source: 1
-  resolvedPath: D:\Unity\3D Dungeons Adventure\Library\PackageCache\com.unity.inputsystem@1.5.1
+  resolvedPath: D:\Unity\3D Dungeons Adventure\Library\PackageCache\com.unity.inputsystem@1.7.0
   assetPath: Packages/com.unity.inputsystem
   name: com.unity.inputsystem
   displayName: Input System
@@ -516,7 +504,7 @@ m_ResolvedPackages:
     email: 
     url: 
   category: 
-  type: asset
+  type: assets
   description: A new input system which can be used as a more extensible and customizable
     alternative to Unity's classic input system in UnityEngine.Input.
   status: 0
@@ -566,13 +554,9 @@ m_ResolvedPackages:
     - 1.7.0
     - 1.8.0-pre.1
     compatible:
-    - 1.5.0
-    - 1.5.1
-    - 1.6.1
-    - 1.6.3
     - 1.7.0
     - 1.8.0-pre.1
-    recommended: 1.5.1
+    recommended: 1.7.0
     deprecated: []
   dependencies:
   - name: com.unity.modules.uielements
@@ -603,30 +587,30 @@ m_ResolvedPackages:
     isDefault: 1
     capabilities: 7
     configSource: 0
-  hideInEditor: 0
+  hideInEditor: 1
   isAssetStorePackage: 0
-  datePublishedTicks: 638152610980000000
-  documentationUrl: https://docs.unity3d.com/Packages/com.unity.inputsystem@1.5/manual/index.html
+  datePublishedTicks: 638277060810000000
+  documentationUrl: https://docs.unity3d.com/Packages/com.unity.inputsystem@1.7/manual/index.html
   hasRepository: 1
   repository:
     type: git
     url: https://github.com/Unity-Technologies/InputSystem.git
-    revision: 3062b2c3402b5f7f435d79acbd6011a621bfeb3e
+    revision: e29989176f3a8473ba30854e4bfae953083eba28
     path: 
   unityLifecycle:
-    version: 1.5.0
+    version: 1.7.0
     nextVersion: 
     recommendedVersion: 
     isDeprecated: 0
     deprecationMessage: 
   isDeprecated: 0
   deprecationMessage: 
-- packageId: com.unity.render-pipelines.universal@14.0.6
+- packageId: com.unity.render-pipelines.universal@14.0.9
   testable: 0
   isDirectDependency: 1
-  version: 14.0.6
+  version: 14.0.9
   source: 2
-  resolvedPath: D:\Unity\3D Dungeons Adventure\Library\PackageCache\com.unity.render-pipelines.universal@14.0.6
+  resolvedPath: D:\Unity\3D Dungeons Adventure\Library\PackageCache\com.unity.render-pipelines.universal@14.0.9
   assetPath: Packages/com.unity.render-pipelines.universal
   name: com.unity.render-pipelines.universal
   displayName: Universal RP
@@ -689,27 +673,27 @@ m_ResolvedPackages:
     - 10.9.0
     - 10.10.0
     - 10.10.1
-    - 14.0.6
+    - 14.0.9
     compatible:
-    - 14.0.6
-    recommended: 14.0.6
+    - 14.0.9
+    recommended: 14.0.9
     deprecated: []
   dependencies:
   - name: com.unity.mathematics
     version: 1.2.1
   - name: com.unity.burst
-    version: 1.8.2
+    version: 1.8.9
   - name: com.unity.render-pipelines.core
-    version: 14.0.6
+    version: 14.0.9
   - name: com.unity.shadergraph
-    version: 14.0.6
+    version: 14.0.9
   resolvedDependencies:
   - name: com.unity.mathematics
     version: 1.2.6
   - name: com.unity.burst
-    version: 1.8.3
+    version: 1.8.9
   - name: com.unity.render-pipelines.core
-    version: 14.0.6
+    version: 14.0.9
   - name: com.unity.ugui
     version: 1.0.0
   - name: com.unity.modules.ui
@@ -723,7 +707,7 @@ m_ResolvedPackages:
   - name: com.unity.modules.jsonserialize
     version: 1.0.0
   - name: com.unity.shadergraph
-    version: 14.0.6
+    version: 14.0.9
   - name: com.unity.searcher
     version: 4.9.2
   keywords:
@@ -752,7 +736,7 @@ m_ResolvedPackages:
     revision: 
     path: 
   unityLifecycle:
-    version: 14.0.6
+    version: 14.0.9
     nextVersion: 
     recommendedVersion: 
     isDeprecated: 0
@@ -868,7 +852,7 @@ m_ResolvedPackages:
     isDefault: 1
     capabilities: 7
     configSource: 0
-  hideInEditor: 0
+  hideInEditor: 1
   isAssetStorePackage: 0
   datePublishedTicks: 637938212700000000
   documentationUrl: 
@@ -1049,7 +1033,7 @@ m_ResolvedPackages:
     isDefault: 1
     capabilities: 7
     configSource: 0
-  hideInEditor: 0
+  hideInEditor: 1
   isAssetStorePackage: 0
   datePublishedTicks: 637547111200000000
   documentationUrl: 
@@ -1067,12 +1051,12 @@ m_ResolvedPackages:
     deprecationMessage: 
   isDeprecated: 0
   deprecationMessage: 
-- packageId: com.unity.timeline@1.7.3
+- packageId: com.unity.timeline@1.7.6
   testable: 0
   isDirectDependency: 1
-  version: 1.7.3
+  version: 1.7.6
   source: 1
-  resolvedPath: D:\Unity\3D Dungeons Adventure\Library\PackageCache\com.unity.timeline@1.7.3
+  resolvedPath: D:\Unity\3D Dungeons Adventure\Library\PackageCache\com.unity.timeline@1.7.6
   assetPath: Packages/com.unity.timeline
   name: com.unity.timeline
   displayName: Timeline
@@ -1081,7 +1065,7 @@ m_ResolvedPackages:
     email: 
     url: 
   category: 
-  type: asset
+  type: assets
   description: Use Unity Timeline to create cinematic content, game-play sequences,
     audio sequences, and complex particle effects.
   status: 0
@@ -1165,23 +1149,24 @@ m_ResolvedPackages:
     - 1.7.3
     - 1.7.4
     - 1.7.5
+    - 1.7.6
     - 1.8.0
     - 1.8.1
     - 1.8.2
     - 1.8.3
     - 1.8.4
     - 1.8.5
+    - 1.8.6
     compatible:
-    - 1.7.3
-    - 1.7.4
-    - 1.7.5
+    - 1.7.6
     - 1.8.0
     - 1.8.1
     - 1.8.2
     - 1.8.3
     - 1.8.4
     - 1.8.5
-    recommended: 1.7.5
+    - 1.8.6
+    recommended: 1.7.6
     deprecated: []
   dependencies:
   - name: com.unity.modules.director
@@ -1215,18 +1200,18 @@ m_ResolvedPackages:
     isDefault: 1
     capabilities: 7
     configSource: 0
-  hideInEditor: 0
+  hideInEditor: 1
   isAssetStorePackage: 0
-  datePublishedTicks: 638119854890000000
+  datePublishedTicks: 638326112840000000
   documentationUrl: https://docs.unity3d.com/Packages/com.unity.timeline@1.7/manual/index.html
   hasRepository: 1
   repository:
     type: git
     url: https://github.cds.internal.unity3d.com/unity/com.unity.timeline.git
-    revision: f7767cd40a861592dca709fc360e85920c06705c
+    revision: 02f49ada64a9f88044207cf42ba407dc634ef8e6
     path: 
   unityLifecycle:
-    version: 1.7.3
+    version: 1.7.6
     nextVersion: 
     recommendedVersion: 
     isDeprecated: 0
@@ -1304,12 +1289,12 @@ m_ResolvedPackages:
     deprecationMessage: 
   isDeprecated: 0
   deprecationMessage: 
-- packageId: com.unity.visualscripting@1.8.0
+- packageId: com.unity.visualscripting@1.9.1
   testable: 0
   isDirectDependency: 1
-  version: 1.8.0
+  version: 1.9.1
   source: 1
-  resolvedPath: D:\Unity\3D Dungeons Adventure\Library\PackageCache\com.unity.visualscripting@1.8.0
+  resolvedPath: D:\Unity\3D Dungeons Adventure\Library\PackageCache\com.unity.visualscripting@1.9.1
   assetPath: Packages/com.unity.visualscripting
   name: com.unity.visualscripting
   displayName: Visual Scripting
@@ -1355,10 +1340,8 @@ m_ResolvedPackages:
     - 1.9.0
     - 1.9.1
     compatible:
-    - 1.8.0
-    - 1.9.0
     - 1.9.1
-    recommended: 1.8.0
+    recommended: 1.9.1
     deprecated:
     - 1.8.0-pre.1
   dependencies:
@@ -1386,16 +1369,16 @@ m_ResolvedPackages:
     configSource: 0
   hideInEditor: 1
   isAssetStorePackage: 0
-  datePublishedTicks: 638060044680000000
+  datePublishedTicks: 638284821510000000
   documentationUrl: 
   hasRepository: 1
   repository:
     type: git
     url: https://github.cds.internal.unity3d.com/unity/com.unity.visualscripting.git
-    revision: 0de66378b19e990494d98f39ecc2b6aa5ac65351
+    revision: 5e78e9c354ed1567dbcea08e2bd9992e4a473cfb
     path: 
   unityLifecycle:
-    version: 1.8.0
+    version: 1.9.1
     nextVersion: 
     recommendedVersion: 
     isDeprecated: 0
@@ -3356,7 +3339,7 @@ m_ResolvedPackages:
     isDefault: 1
     capabilities: 7
     configSource: 0
-  hideInEditor: 0
+  hideInEditor: 1
   isAssetStorePackage: 0
   datePublishedTicks: 637429759280000000
   documentationUrl: 
@@ -3430,7 +3413,7 @@ m_ResolvedPackages:
     isDefault: 1
     capabilities: 7
     configSource: 0
-  hideInEditor: 0
+  hideInEditor: 1
   isAssetStorePackage: 0
   datePublishedTicks: 637841876140000000
   documentationUrl: 
@@ -3448,12 +3431,12 @@ m_ResolvedPackages:
     deprecationMessage: 
   isDeprecated: 0
   deprecationMessage: 
-- packageId: com.unity.burst@1.8.3
+- packageId: com.unity.burst@1.8.9
   testable: 0
   isDirectDependency: 0
-  version: 1.8.3
+  version: 1.8.9
   source: 1
-  resolvedPath: D:\Unity\3D Dungeons Adventure\Library\PackageCache\com.unity.burst@1.8.3
+  resolvedPath: D:\Unity\3D Dungeons Adventure\Library\PackageCache\com.unity.burst@1.8.9
   assetPath: Packages/com.unity.burst
   name: com.unity.burst
   displayName: Burst
@@ -3462,7 +3445,7 @@ m_ResolvedPackages:
     email: 
     url: 
   category: 
-  type: asset
+  type: assets
   description: Burst is a compiler that translates from IL/.NET bytecode to highly
     optimized native code using LLVM.
   status: 0
@@ -3594,10 +3577,6 @@ m_ResolvedPackages:
     - 1.8.8
     - 1.8.9
     compatible:
-    - 1.8.3
-    - 1.8.4
-    - 1.8.7
-    - 1.8.8
     - 1.8.9
     recommended: 1.8.9
     deprecated: []
@@ -3616,30 +3595,30 @@ m_ResolvedPackages:
     isDefault: 1
     capabilities: 7
     configSource: 0
-  hideInEditor: 0
+  hideInEditor: 1
   isAssetStorePackage: 0
-  datePublishedTicks: 638112786110000000
+  datePublishedTicks: 638314141790000000
   documentationUrl: https://docs.unity3d.com/Packages/com.unity.burst@1.8/manual/index.html
   hasRepository: 1
   repository:
     type: git
     url: git@github.cds.internal.unity3d.com:unity/burst
-    revision: fd494a093a254696a2158a7b231d6b5b80549261
+    revision: 1aa8f2db606554f28aa01007e92600cd24643852
     path: 
   unityLifecycle:
-    version: 1.8.3
+    version: 1.8.9
     nextVersion: 
     recommendedVersion: 
     isDeprecated: 0
     deprecationMessage: 
   isDeprecated: 0
   deprecationMessage: 
-- packageId: com.unity.render-pipelines.core@14.0.6
+- packageId: com.unity.render-pipelines.core@14.0.9
   testable: 0
   isDirectDependency: 0
-  version: 14.0.6
+  version: 14.0.9
   source: 2
-  resolvedPath: D:\Unity\3D Dungeons Adventure\Library\PackageCache\com.unity.render-pipelines.core@14.0.6
+  resolvedPath: D:\Unity\3D Dungeons Adventure\Library\PackageCache\com.unity.render-pipelines.core@14.0.9
   assetPath: Packages/com.unity.render-pipelines.core
   name: com.unity.render-pipelines.core
   displayName: Core RP Library
@@ -3758,10 +3737,10 @@ m_ResolvedPackages:
     - 10.9.0
     - 10.10.0
     - 10.10.1
-    - 14.0.6
+    - 14.0.9
     compatible:
-    - 14.0.6
-    recommended: 14.0.6
+    - 14.0.9
+    recommended: 14.0.9
     deprecated: []
   dependencies:
   - name: com.unity.ugui
@@ -3805,19 +3784,19 @@ m_ResolvedPackages:
     revision: 
     path: 
   unityLifecycle:
-    version: 14.0.6
+    version: 14.0.9
     nextVersion: 
     recommendedVersion: 
     isDeprecated: 0
     deprecationMessage: 
   isDeprecated: 0
   deprecationMessage: 
-- packageId: com.unity.shadergraph@14.0.6
+- packageId: com.unity.shadergraph@14.0.9
   testable: 0
   isDirectDependency: 0
-  version: 14.0.6
+  version: 14.0.9
   source: 2
-  resolvedPath: D:\Unity\3D Dungeons Adventure\Library\PackageCache\com.unity.shadergraph@14.0.6
+  resolvedPath: D:\Unity\3D Dungeons Adventure\Library\PackageCache\com.unity.shadergraph@14.0.9
   assetPath: Packages/com.unity.shadergraph
   name: com.unity.shadergraph
   displayName: Shader Graph
@@ -3933,19 +3912,19 @@ m_ResolvedPackages:
     - 10.9.0
     - 10.10.0
     - 10.10.1
-    - 14.0.6
+    - 14.0.9
     compatible:
-    - 14.0.6
-    recommended: 14.0.6
+    - 14.0.9
+    recommended: 14.0.9
     deprecated: []
   dependencies:
   - name: com.unity.render-pipelines.core
-    version: 14.0.6
+    version: 14.0.9
   - name: com.unity.searcher
     version: 4.9.2
   resolvedDependencies:
   - name: com.unity.render-pipelines.core
-    version: 14.0.6
+    version: 14.0.9
   - name: com.unity.ugui
     version: 1.0.0
   - name: com.unity.modules.ui
@@ -3980,7 +3959,7 @@ m_ResolvedPackages:
     revision: 
     path: 
   unityLifecycle:
-    version: 14.0.6
+    version: 14.0.9
     nextVersion: 
     recommendedVersion: 
     isDeprecated: 0
@@ -4041,7 +4020,7 @@ m_ResolvedPackages:
     isDefault: 1
     capabilities: 7
     configSource: 0
-  hideInEditor: 0
+  hideInEditor: 1
   isAssetStorePackage: 0
   datePublishedTicks: 637831252240000000
   documentationUrl: 

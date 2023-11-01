@@ -77,6 +77,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unity.AI.Navigation.Updater
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unity.ShaderGraph.Utilities", "Unity.ShaderGraph.Utilities.csproj", "{6118ef98-e70c-9a3c-45e7-3cddd5b5a75d}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unity.InputSystem.ForUI", "Unity.InputSystem.ForUI.csproj", "{e459eab3-eb41-526a-864a-757f2a4dfebe}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unity.Mathematics.Editor", "Unity.Mathematics.Editor.csproj", "{234877a4-6362-6001-6c42-24170bc057df}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unity.InputSystem.TestFramework", "Unity.InputSystem.TestFramework.csproj", "{a8186005-6bb9-2fa1-e3f4-b7babc610d45}"
@@ -212,6 +214,8 @@ Global
 		{8cbd71ef-a1ac-a14e-8f31-4da15ed554e8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6118ef98-e70c-9a3c-45e7-3cddd5b5a75d}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6118ef98-e70c-9a3c-45e7-3cddd5b5a75d}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{e459eab3-eb41-526a-864a-757f2a4dfebe}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{e459eab3-eb41-526a-864a-757f2a4dfebe}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{234877a4-6362-6001-6c42-24170bc057df}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{234877a4-6362-6001-6c42-24170bc057df}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{a8186005-6bb9-2fa1-e3f4-b7babc610d45}.Debug|Any CPU.ActiveCfg = Debug|Any CPU

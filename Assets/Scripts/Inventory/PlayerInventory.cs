@@ -32,7 +32,6 @@ public class PlayerInventory : MonoBehaviour, IInventoryParent
 
     public void RemoveInventoryObjectBySlot(int slotNumber)
     {
-        Debug.Log("Removed");
         storedInventoryObjects[slotNumber] = null;
     }
 

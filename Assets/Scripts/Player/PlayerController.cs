@@ -7,6 +7,7 @@ using UnityEngine;
 [RequireComponent(typeof(StaminaController))]
 [RequireComponent(typeof(PlayerEffects))]
 [RequireComponent(typeof(PlayerInventory))]
+[RequireComponent(typeof(PlayerRelics))]
 public class PlayerController : MonoBehaviour
 {
     public static PlayerController Instance { get; private set; }
@@ -25,6 +26,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float experienceIncreaseForNextLevel = 0.2f;
     private int currentLevelXpNeeded;
     private int currentXp;
+    private float additionalExpMultiplayer;
 
     private int currentAvailableSkillPoint;
     private int currentCoins;
@@ -52,6 +54,7 @@ public class PlayerController : MonoBehaviour
     private StaminaController staminaController;
     private PlayerEffects playerEffects;
     private PlayerInventory playerInventory;
+    private PlayerRelics playerRelics;
 
     private bool isFirstUpdate = true;
 
@@ -68,6 +71,7 @@ public class PlayerController : MonoBehaviour
         staminaController = GetComponent<StaminaController>();
         playerEffects = GetComponent<PlayerEffects>();
         playerInventory = GetComponent<PlayerInventory>();
+        playerRelics = GetComponent<PlayerRelics>();
 
         timerForConstantSprint = timeForConstantSprint;
         waitingForStaminaRegenerationTimer = waitingForStaminaRegenerationTime;
@@ -259,7 +263,7 @@ public class PlayerController : MonoBehaviour
 
     public void ReceiveExperience(int experience)
     {
-        currentXp += experience;
+        currentXp += (int)(experience * additionalExpMultiplayer);
 
         if (currentXp >= currentLevelXpNeeded)
         {
@@ -273,6 +277,11 @@ public class PlayerController : MonoBehaviour
         {
             currentXp = currentXp, maxXp = currentLevelXpNeeded
         });
+    }
+
+    public void ChangeExpAdditionalMultiplayer(float additionalValue)
+    {
+        additionalExpMultiplayer += additionalValue;
     }
 
     public void ReceiveCoins(int coins)
@@ -426,6 +435,11 @@ public class PlayerController : MonoBehaviour
     public IInventoryParent GetPlayerAttackInventory()
     {
         return playerAttackController;
+    }
+
+    public IInventoryParent GetPlayerRelicsInventory()
+    {
+        return playerRelics;
     }
 
     #endregion
