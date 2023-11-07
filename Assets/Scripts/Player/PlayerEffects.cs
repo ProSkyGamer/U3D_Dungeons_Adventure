@@ -4,6 +4,13 @@ using UnityEngine;
 
 public class PlayerEffects : MonoBehaviour
 {
+    public event EventHandler<OnPlayerRelicOutOfUsagesCountEventArgs> OnPlayerRelicOutOfUsagesCount;
+
+    public class OnPlayerRelicOutOfUsagesCountEventArgs : EventArgs
+    {
+        public RelicBuff relicBuff;
+    }
+
     public class PlayerBuff
     {
         public enum Buffs
@@ -41,6 +48,15 @@ public class PlayerEffects : MonoBehaviour
     {
         public RelicBuffTypes relicBuffType;
         public float relicBuffScale;
+        public bool isHasLimit;
+        public int maxUsagesLimit;
+        [HideInInspector] public int currentUsages;
+    }
+
+    public class RelicBuffEffectTriggeredEventArgs : EventArgs
+    {
+        public RelicBuffTypes buffType;
+        public int spentValue;
     }
 
     #region Buffs
@@ -52,6 +68,7 @@ public class PlayerEffects : MonoBehaviour
 
     private PlayerHealth playerHealth;
     private PlayerAttackController playerAttackController;
+    private PlayerWeapons playerWeapons;
     private PlayerRelics playerRelics;
     private PlayerController playerController;
 
@@ -59,13 +76,14 @@ public class PlayerEffects : MonoBehaviour
     {
         playerHealth = GetComponent<PlayerHealth>();
         playerAttackController = GetComponent<PlayerAttackController>();
+        playerWeapons = GetComponent<PlayerWeapons>();
         playerRelics = GetComponent<PlayerRelics>();
         playerController = GetComponent<PlayerController>();
     }
 
     private void Start()
     {
-        playerAttackController.OnCurrentWeaponChange += PlayerAttackController_OnCurrentWeaponChange;
+        playerWeapons.OnCurrentWeaponChange += PlayerAttackController_OnCurrentWeaponChange;
 
         playerRelics.OnRelicsChange += PlayerRelics_OnRelicsChange;
     }
@@ -86,7 +104,7 @@ public class PlayerEffects : MonoBehaviour
     }
 
     private void PlayerAttackController_OnCurrentWeaponChange(object sender,
-        PlayerAttackController.OnCurrentWeaponChangeEventArgs e)
+        PlayerWeapons.OnCurrentWeaponChangeEventArgs e)
     {
         if (e.previousWeapon != null)
         {
@@ -101,6 +119,8 @@ public class PlayerEffects : MonoBehaviour
 
     private void Update()
     {
+        if (GameStageManager.Instance.IsPause()) return;
+
         TickBuffTimers();
     }
 
@@ -182,8 +202,8 @@ public class PlayerEffects : MonoBehaviour
     {
         if (allPlayerRelicBuffList.Contains(relicBuff)) return;
 
+        AddRemoveRelicBuffToController(relicBuff);
         allPlayerRelicBuffList.Add(relicBuff);
-        AddRemoveRelicBuffToController(relicBuff.relicBuffType, relicBuff.relicBuffScale);
     }
 
     private void RemoveRelicBuff(RelicBuff relicBuff)
@@ -191,15 +211,26 @@ public class PlayerEffects : MonoBehaviour
         if (!allPlayerRelicBuffList.Contains(relicBuff)) return;
 
         allPlayerRelicBuffList.Remove(relicBuff);
-        AddRemoveRelicBuffToController(relicBuff.relicBuffType, -relicBuff.relicBuffScale);
+        AddRemoveRelicBuffToController(relicBuff, true);
     }
 
-    private void AddRemoveRelicBuffToController(RelicBuffTypes relicBuffType, float percentageValue)
+    private void AddRemoveRelicBuffToController(RelicBuff relicBuff, bool isRemoving = false)
     {
+        var relicBuffType = relicBuff.relicBuffType;
+        var percentageValue = relicBuff.relicBuffScale;
+        percentageValue = isRemoving ? -percentageValue : percentageValue;
+        var isLimited = relicBuff.isHasLimit;
+
         switch (relicBuffType)
         {
             case RelicBuffTypes.TakenDmgAbsorption:
                 playerHealth.ChangeTakenDamageAbsorptionBuff(percentageValue);
+                if (isLimited)
+                    if (!IsAlreadyHasCurrentLimitedBuff(relicBuffType))
+                        if (!isRemoving)
+                            playerHealth.OnHealthAbsorptionTriggered += BuffedController_OnLimitedBuffEffectTriggered;
+                        else
+                            playerHealth.OnHealthAbsorptionTriggered -= BuffedController_OnLimitedBuffEffectTriggered;
                 break;
             case RelicBuffTypes.TakenDmgIncrease:
                 playerHealth.ChangeTakenDamageIncreaseDebuff(percentageValue);
@@ -220,7 +251,44 @@ public class PlayerEffects : MonoBehaviour
                 playerHealth.ChangeHealthBuff(percentageValue);
                 break;
             case RelicBuffTypes.HpRegeneratePerKill:
+                playerController.AddRegeneratingHpAfterEnemyDeath(percentageValue);
+                if (isLimited)
+                    if (!IsAlreadyHasCurrentLimitedBuff(relicBuffType))
+                        if (!isRemoving)
+                            playerController.OnPlayerRegenerateHpAfterEnemyDeath +=
+                                BuffedController_OnLimitedBuffEffectTriggered;
+                        else
+                            playerController.OnPlayerRegenerateHpAfterEnemyDeath -=
+                                BuffedController_OnLimitedBuffEffectTriggered;
                 break;
         }
+    }
+
+    private void BuffedController_OnLimitedBuffEffectTriggered(object sender, RelicBuffEffectTriggeredEventArgs e)
+    {
+        var relicsToDeleteList = new List<RelicBuff>();
+
+        foreach (var relicBuff in allPlayerRelicBuffList)
+            if (relicBuff.isHasLimit && e.buffType == relicBuff.relicBuffType)
+            {
+                relicBuff.currentUsages += e.spentValue;
+                if (relicBuff.maxUsagesLimit <= relicBuff.currentUsages)
+                    relicsToDeleteList.Add(relicBuff);
+            }
+
+        foreach (var relicBuff in relicsToDeleteList)
+            OnPlayerRelicOutOfUsagesCount?.Invoke(this, new OnPlayerRelicOutOfUsagesCountEventArgs
+            {
+                relicBuff = relicBuff
+            });
+    }
+
+    private bool IsAlreadyHasCurrentLimitedBuff(RelicBuffTypes relicBuffType)
+    {
+        foreach (var relicBuff in allPlayerRelicBuffList)
+            if (relicBuff.isHasLimit && relicBuff.relicBuffType == relicBuffType)
+                return true;
+
+        return false;
     }
 }

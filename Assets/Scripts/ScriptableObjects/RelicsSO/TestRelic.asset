@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: TestRelic
   m_EditorClassIdentifier: 
   relicBuffs:
-  - relicBuffType: 2
-    relicBuffScale: 0.3
-  - relicBuffType: 3
-    relicBuffScale: 0.3
+  - relicBuffType: 7
+    relicBuffScale: 0.5
+    isHasLimit: 1
+    maxUsagesLimit: 1
+    currentUsages: 105

@@ -19,6 +19,7 @@ public class GameInput : MonoBehaviour
         Attack,
         Interact,
         Sprint,
+        Pause,
         ChangeMovementMode,
         ChangeCurrentWeapon,
         OpenCharacterInfo,
@@ -30,6 +31,7 @@ public class GameInput : MonoBehaviour
     public event EventHandler OnAttackAction;
     public event EventHandler OnInteractAction;
     public event EventHandler OnSprintAction;
+    public event EventHandler OnPauseAction;
     public event EventHandler OnChangeMovementModeAction;
     public event EventHandler OnChangeCurrentWeaponAction;
     public event EventHandler OnOpenCharacterInfoAction;
@@ -63,6 +65,12 @@ public class GameInput : MonoBehaviour
         gameInputActions.Player.DropCurrentWeapon.performed += DropCurrentWeapon_OnPerformed;
         gameInputActions.Player.OpenCharacterInfo.performed += OpenCharacterInfo_OnPerformed;
         gameInputActions.Player.UpgradesStartDraging.performed += UpgradesStartDragging_OnPerformed;
+        gameInputActions.Player.GamePause.performed += GamePause_OnPerformed;
+    }
+
+    private void GamePause_OnPerformed(InputAction.CallbackContext obj)
+    {
+        OnPauseAction?.Invoke(this, EventArgs.Empty);
     }
 
     private void UpgradesStartDragging_OnPerformed(InputAction.CallbackContext obj)
@@ -184,6 +192,8 @@ public class GameInput : MonoBehaviour
                 return gameInputActions.Player.OpenCharacterInfo.bindings[0].ToDisplayString();
             case Binding.UpgradesStartDragging:
                 return gameInputActions.Player.UpgradesStartDraging.bindings[0].ToDisplayString();
+            case Binding.Pause:
+                return gameInputActions.Player.GamePause.bindings[0].ToDisplayString();
         }
     }
 
@@ -239,6 +249,9 @@ public class GameInput : MonoBehaviour
                 break;
             case Binding.UpgradesStartDragging:
                 inputValue = gameInputActions.Player.UpgradesStartDraging.IsPressed() ? 1f : 0f;
+                break;
+            case Binding.Pause:
+                inputValue = gameInputActions.Player.GamePause.IsPressed() ? 1f : 0f;
                 break;
         }
 

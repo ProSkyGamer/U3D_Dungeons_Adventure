@@ -92,12 +92,12 @@ public class EnemyController : MonoBehaviour
 
     private void Update()
     {
-        if (GameStageManager.Instance.IsPlaying())
-        {
-            TryFindNearestPlayer();
-            TryAttack();
-            EnemyClassesTimerTick();
-        }
+        if (GameStageManager.Instance.IsPause()) currentFollowingPlayer = transform;
+        if (!GameStageManager.Instance.IsPlaying()) return;
+
+        TryFindNearestPlayer();
+        TryAttack();
+        EnemyClassesTimerTick();
     }
 
     private void TryFindNearestPlayer()
@@ -252,11 +252,10 @@ public class EnemyController : MonoBehaviour
         }
     }
 
-    public void ReceiveDamage(int damage, Transform attackedPlayerTransform)
+    public void ReceiveDamage(int damage, PlayerController attackedPlayerController)
     {
-        if (attackedPlayerTransform.TryGetComponent(out PlayerController attackedPlayer))
-            if (!playerAttackedEnemy.Contains(attackedPlayer))
-                playerAttackedEnemy.Add(attackedPlayer);
+        if (!playerAttackedEnemy.Contains(attackedPlayerController))
+            playerAttackedEnemy.Add(attackedPlayerController);
 
         enemyHealth.TakeDamage(damage);
     }

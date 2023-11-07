@@ -4,7 +4,7 @@ using UnityEngine;
 public class InventoryObject : ScriptableObject
 {
     [SerializeField] private Sprite inventoryObjectSprite;
-    [SerializeField] private string inventoryObjectName;
+    [SerializeField] private TextTranslationsSO inventoryObjectNameTextTranslationSo;
 
     [SerializeField] private WeaponSO weaponSo;
     [SerializeField] private RelicSO relicSo;
@@ -39,15 +39,15 @@ public class InventoryObject : ScriptableObject
         return inventoryObjectSprite;
     }
 
-    public string GetInventoryObjectName()
+    public TextTranslationsSO GetInventoryObjectNameTextTranslationSo()
     {
-        return inventoryObjectName;
+        return inventoryObjectNameTextTranslationSo;
     }
 
     public void SetInventoryObject(InventoryObject inventoryObject)
     {
         inventoryObjectSprite = inventoryObject.GetInventoryObjectSprite();
-        inventoryObjectName = inventoryObject.GetInventoryObjectName();
+        inventoryObjectNameTextTranslationSo = inventoryObject.GetInventoryObjectNameTextTranslationSo();
 
         inventoryObject.TryGetWeaponSo(out weaponSo);
         inventoryObject.TryGetRelicSo(out relicSo);

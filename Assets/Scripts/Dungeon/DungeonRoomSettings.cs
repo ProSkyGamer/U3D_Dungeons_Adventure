@@ -16,7 +16,7 @@ public class DungeonRoomSettings : MonoBehaviour
 
     private void Start()
     {
-        StartingDungeonRoom.OnDungeonStart += StartingDungeonRoom_OnDungeonStart;
+        GameStageManager.Instance.OnGameStart += StartingDungeonRoom_OnDungeonStart;
     }
 
     private void StartingDungeonRoom_OnDungeonStart(object sender, EventArgs e)

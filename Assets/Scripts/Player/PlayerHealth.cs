@@ -27,6 +27,8 @@ public class PlayerHealth : MonoBehaviour
         public int currentHealth;
     }
 
+    public event EventHandler<PlayerEffects.RelicBuffEffectTriggeredEventArgs> OnHealthAbsorptionTriggered;
+
     private bool isFirstUpdate = true;
 
     private void Awake()
@@ -59,7 +61,20 @@ public class PlayerHealth : MonoBehaviour
             (int)(damage * (1 - (float)currentDefence / (additionalDefenceNumberFormula + currentDefence)) *
                   (1 - currentTakenDmgAbsorption));
 
-        Debug.Log($"Taken damage {takenDamage} Def: {currentDefence} AddDef: {additionalDefenceNumberFormula}");
+        if (currentTakenDmgAbsorption != 0f)
+        {
+            var relicAbsorbedDamage =
+                (int)(damage * (1 - (float)currentDefence / (additionalDefenceNumberFormula + currentDefence))) -
+                takenDamage;
+
+            OnHealthAbsorptionTriggered?.Invoke(this, new PlayerEffects.RelicBuffEffectTriggeredEventArgs
+            {
+                buffType = relicAbsorbedDamage > 0
+                    ? PlayerEffects.RelicBuffTypes.TakenDmgAbsorption
+                    : PlayerEffects.RelicBuffTypes.TakenDmgIncrease,
+                spentValue = relicAbsorbedDamage
+            });
+        }
 
         currentHealth = Mathf.Clamp(currentHealth - takenDamage, 0, maxHealth);
         OnCurrentPlayerHealthChange?.Invoke(this, new OnCurrentPlayerHealthChangeEventArgs
@@ -72,6 +87,16 @@ public class PlayerHealth : MonoBehaviour
 
     public void RegenerateHealth(int healthToRegenerate)
     {
+        currentHealth = Mathf.Clamp(currentHealth + healthToRegenerate, 0, maxHealth);
+        OnCurrentPlayerHealthChange?.Invoke(this, new OnCurrentPlayerHealthChangeEventArgs
+        {
+            currentHealth = currentHealth, maxHealth = maxHealth
+        });
+    }
+
+    public void RegenerateHealth(float healthPercentageToRegenerate)
+    {
+        var healthToRegenerate = (int)(healthPercentageToRegenerate * maxHealth);
         currentHealth = Mathf.Clamp(currentHealth + healthToRegenerate, 0, maxHealth);
         OnCurrentPlayerHealthChange?.Invoke(this, new OnCurrentPlayerHealthChangeEventArgs
         {

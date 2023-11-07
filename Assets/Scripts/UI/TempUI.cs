@@ -17,6 +17,14 @@ public class TempUI : MonoBehaviour
 
         PlayerController.Instance.OnExperienceChange += PlayerController_OnExperienceChange;
         PlayerController.Instance.OnSkillPointsValueChange += PlayerController_OnSkillPointsValueChange;
+
+        GameStageManager.Instance.OnGamePause += GameStageManager_OnGamePause;
+    }
+
+    private void GameStageManager_OnGamePause(object sender, EventArgs e)
+    {
+        if (GameStageManager.Instance.IsPause()) Hide();
+        else Show();
     }
 
     private void PlayerController_OnSkillPointsValueChange(object sender, EventArgs e)
@@ -38,5 +46,15 @@ public class TempUI : MonoBehaviour
         PlayerHealth.OnCurrentPlayerHealthChangeEventArgs e)
     {
         healthText.text = $"{e.currentHealth} / {e.maxHealth}";
+    }
+
+    private void Show()
+    {
+        gameObject.SetActive(true);
+    }
+
+    private void Hide()
+    {
+        gameObject.SetActive(false);
     }
 }

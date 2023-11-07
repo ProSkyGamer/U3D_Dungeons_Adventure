@@ -11,12 +11,36 @@ public class PlayerRelics : MonoBehaviour, IInventoryParent
         public InventoryObject removedRelic;
     }
 
-    [SerializeField] private int maxRelicsSlotsCount = 4;
+    [SerializeField] private int maxRelicsSlotsCount = 3;
     private InventoryObject[] allStoredRelics;
+
+    private PlayerEffects playerEffects;
 
     private void Awake()
     {
         allStoredRelics = new InventoryObject[maxRelicsSlotsCount];
+
+        playerEffects = GetComponent<PlayerEffects>();
+    }
+
+    private void Start()
+    {
+        playerEffects.OnPlayerRelicOutOfUsagesCount += PlayerEffects_OnPlayerRelicOutOfUsagesCount;
+    }
+
+    private void PlayerEffects_OnPlayerRelicOutOfUsagesCount(object sender,
+        PlayerEffects.OnPlayerRelicOutOfUsagesCountEventArgs e)
+    {
+        for (var i = 0; i < allStoredRelics.Length; i++)
+        {
+            allStoredRelics[i].TryGetRelicSo(out var relicSo);
+            foreach (var relicBuff in relicSo.relicBuffs)
+                if (relicBuff.isHasLimit && relicBuff.relicBuffType == e.relicBuff.relicBuffType)
+                {
+                    RemoveInventoryObjectBySlot(i);
+                    return;
+                }
+        }
     }
 
     public void AddInventoryObject(InventoryObject inventoryObject)

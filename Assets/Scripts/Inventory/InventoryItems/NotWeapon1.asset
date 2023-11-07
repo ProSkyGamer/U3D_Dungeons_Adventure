@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   inventoryObjectSprite: {fileID: 21300000, guid: 1cc4a70085896c04bbfbf60669963fc8,
     type: 3}
-  inventoryObjectName: Not Weapon 0
+  inventoryObjectNameTextTranslationSo: {fileID: 11400000, guid: 239f8a7a479e9b0449abdd7617b4b952,
+    type: 2}
   weaponSo: {fileID: 0}
   relicSo: {fileID: 0}

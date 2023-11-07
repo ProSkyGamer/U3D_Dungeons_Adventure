@@ -33,6 +33,8 @@ public class InteractUI : MonoBehaviour
 
     public void Update()
     {
+        if (GameStageManager.Instance.IsPause()) return;
+
         if (allInteractButtonsList.Count > 0)
         {
             if (EventSystem.current.currentSelectedGameObject != activeButton.gameObject) activeButton.Select();
@@ -129,6 +131,8 @@ public class InteractUI : MonoBehaviour
 
     private void GameInput_OnInteractAction(object sender, EventArgs e)
     {
+        if (GameStageManager.Instance.IsPause()) return;
+
         for (var i = 0; i < allInteractButtonsList.Count; i++)
             if (allInteractButtonsList[i] == activeButton)
                 allInteractableItemButtonsList[i].OnInteract();

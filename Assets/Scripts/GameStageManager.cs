@@ -5,6 +5,10 @@ public class GameStageManager : MonoBehaviour
 {
     public static GameStageManager Instance { get; private set; }
 
+    public event EventHandler OnGameStart;
+    public event EventHandler OnGamePause;
+    public event EventHandler OnGameEnd;
+
     private enum GameStages
     {
         WaitingForStart,
@@ -14,6 +18,9 @@ public class GameStageManager : MonoBehaviour
     }
 
     private GameStages currentGameStage = GameStages.WaitingForStart;
+    private GameStages gameStageBeforePause;
+
+    private bool isPauseOnPressing = true;
 
     private void Awake()
     {
@@ -26,11 +33,51 @@ public class GameStageManager : MonoBehaviour
     private void Start()
     {
         StartingDungeonRoom.OnDungeonStart += StartingDungeonRoom_OnDungeonStart;
+
+        GameInput.Instance.OnPauseAction += GameInput_OnPauseAction;
+        PauseUI.OnResumeButtonClick += GameInput_OnPauseAction;
+        SettingsUI.OnSettingsClose += UIElement_OnRestorePausingByButton;
+
+        GameInput.Instance.OnOpenCharacterInfoAction += UIElement_OnStopPausingByButton;
+        ShopUI.Instance.OnShopOpen += UIElement_OnStopPausingByButton;
+        PauseUI.OnSettingsButtonClick += UIElement_OnStopPausingByButton;
+    }
+
+    private void UIElement_OnRestorePausingByButton(object sender, EventArgs e)
+    {
+        isPauseOnPressing = true;
+    }
+
+    private void UIElement_OnStopPausingByButton(object sender, EventArgs e)
+    {
+        isPauseOnPressing = false;
+    }
+
+    private void GameInput_OnPauseAction(object sender, EventArgs e)
+    {
+        if (!isPauseOnPressing)
+        {
+            isPauseOnPressing = true;
+            return;
+        }
+
+        if (currentGameStage != GameStages.Pause)
+        {
+            gameStageBeforePause = currentGameStage;
+            currentGameStage = GameStages.Pause;
+        }
+        else
+        {
+            currentGameStage = gameStageBeforePause;
+        }
+
+        OnGamePause?.Invoke(this, EventArgs.Empty);
     }
 
     private void StartingDungeonRoom_OnDungeonStart(object sender, EventArgs e)
     {
         currentGameStage = GameStages.Playing;
+        OnGameStart?.Invoke(this, EventArgs.Empty);
     }
 
     public bool IsWaitingForStart()

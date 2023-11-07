@@ -8,7 +8,7 @@ public class LootChest : InteractableItem
     [SerializeField] private int experienceForChest = 10;
 
     [SerializeField] [Range(0f, 1f)] private float weaponDropChance = 1f;
-    [SerializeField] private List<InventoryObject> availableWeaponToDrop = new();
+    [SerializeField] private List<InventoryObject> availableItemsToDrop = new();
 
     private bool isLootChestLocked;
 
@@ -34,11 +34,11 @@ public class LootChest : InteractableItem
         if (experienceForChest != 0)
             player.ReceiveExperience(experienceForChest);
 
-        if (availableWeaponToDrop.Count != 0 &&
+        if (availableItemsToDrop.Count != 0 &&
             Random.Range(0, 100) < weaponDropChance * 100)
         {
-            var weaponToDropIndex = Random.Range(0, availableWeaponToDrop.Count);
-            weaponToDrop = availableWeaponToDrop[weaponToDropIndex];
+            var weaponToDropIndex = Random.Range(0, availableItemsToDrop.Count);
+            weaponToDrop = availableItemsToDrop[weaponToDropIndex];
 
             var weaponToDropNewObject = ScriptableObject.CreateInstance<InventoryObject>();
             weaponToDropNewObject.SetInventoryObject(weaponToDrop);

@@ -171,7 +171,25 @@ MonoBehaviour:
   coinsInChest: 100
   experienceForChest: 10
   weaponDropChance: 1
-  availableWeaponToDrop:
-  - {fileID: 11400000, guid: 17362f7aa07e08248b4a6fe3b05ff6a4, type: 2}
+  availableItemsToDrop:
   - {fileID: 11400000, guid: 62b9acf8d75953c4c9dc647926f53689, type: 2}
+  - {fileID: 11400000, guid: 20f85fe7748bc5e4c9e6c63bab873ce6, type: 2}
+  - {fileID: 11400000, guid: c99e52bdac8cd734ca3cd464f77f39ba, type: 2}
+  - {fileID: 11400000, guid: d8c4acdd64706ca4797bf7510af7f23c, type: 2}
+  - {fileID: 11400000, guid: ff72a5cee6ba36844a8403aba0f3a73e, type: 2}
+  - {fileID: 11400000, guid: c0d4dbf2ea9ff3547810eb08ffcbb8fa, type: 2}
+  - {fileID: 11400000, guid: d2dfcd563318e89488ff17b7e9ccbd72, type: 2}
+  - {fileID: 11400000, guid: eec5a4ddf5283bc48bf5398cad541a2b, type: 2}
+  - {fileID: 11400000, guid: 3cef434ddd693af46a0a70ddbf467a45, type: 2}
+  - {fileID: 11400000, guid: f0d84e10b2535914195b69dd25dc7b06, type: 2}
+  - {fileID: 11400000, guid: 17362f7aa07e08248b4a6fe3b05ff6a4, type: 2}
+  - {fileID: 11400000, guid: 07ce8239023607748bd1873a2e96f962, type: 2}
   - {fileID: 11400000, guid: 5d4f6ee1d6246ba42a539e81986e7b18, type: 2}
+  - {fileID: 11400000, guid: 17362f7aa07e08248b4a6fe3b05ff6a4, type: 2}
+  - {fileID: 11400000, guid: 07ce8239023607748bd1873a2e96f962, type: 2}
+  - {fileID: 11400000, guid: 17362f7aa07e08248b4a6fe3b05ff6a4, type: 2}
+  - {fileID: 11400000, guid: 07ce8239023607748bd1873a2e96f962, type: 2}
+  - {fileID: 11400000, guid: 17362f7aa07e08248b4a6fe3b05ff6a4, type: 2}
+  - {fileID: 11400000, guid: 07ce8239023607748bd1873a2e96f962, type: 2}
+  - {fileID: 11400000, guid: 17362f7aa07e08248b4a6fe3b05ff6a4, type: 2}
+  - {fileID: 11400000, guid: 07ce8239023607748bd1873a2e96f962, type: 2}

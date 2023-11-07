@@ -43,8 +43,8 @@ public class CameraController : MonoBehaviour
 
     private void Update()
     {
-        if (isCameraMovementLocked)
-            return;
+        if (GameStageManager.Instance.IsPause()) return;
+        if (isCameraMovementLocked) return;
 
         CameraMovement();
         CameraScroll();

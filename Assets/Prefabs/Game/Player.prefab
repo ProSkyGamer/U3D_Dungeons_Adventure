@@ -25,13 +25,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3126356343070788518}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0.9, z: 0}
   m_LocalScale: {x: 1, y: 0.9, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4252335467063684347}
-  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &272840089945953890
 MeshFilter:
@@ -101,6 +101,8 @@ GameObject:
   - component: {fileID: 6435627681822023902}
   - component: {fileID: 7995302803797805552}
   - component: {fileID: 5830442008227960675}
+  - component: {fileID: 8014053188586307146}
+  - component: {fileID: 5276156391153461877}
   m_Layer: 6
   m_Name: Player
   m_TagString: Untagged
@@ -115,6 +117,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7672009534980938123}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -122,7 +125,6 @@ Transform:
   m_Children:
   - {fileID: 7238952937869680919}
   m_Father: {fileID: 0}
-  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!136 &245144274155069264
 CapsuleCollider:
@@ -169,7 +171,7 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 0
+  m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 80
@@ -193,6 +195,10 @@ MonoBehaviour:
   sprintSpeed: 5
   staminaSprintCostPerSecond: 7.5
   waitingForStaminaRegenerationTime: 2.5
+  weaponAttackRange: 3
+  enemiesLayer:
+    serializedVersion: 2
+    m_Bits: 128
   chargedAttackPressTime: 1
   cameraController: {fileID: 0}
 --- !u!114 &7085638092880543809
@@ -220,14 +226,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4354c4b84f46ccc4984727453762cbd6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  firstChosenWeapon: {fileID: 11400000, guid: 17362f7aa07e08248b4a6fe3b05ff6a4, type: 2}
-  maxOwnedWeaponCount: 3
   comboAttackResetTime: 3
   baseAttack: 100
-  weaponAttackRange: 3
-  enemiesLayer:
-    serializedVersion: 2
-    m_Bits: 128
   baseCritRate: 0.05
   baseCritDamage: 0.5
 --- !u!114 &9127793870788687417
@@ -285,3 +285,30 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerMaxSlots: 10
+--- !u!114 &8014053188586307146
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7672009534980938123}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2c218fa717562a941924ff39667343b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxRelicsSlotsCount: 3
+--- !u!114 &5276156391153461877
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7672009534980938123}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 171df5ea4c02b5f4a8cb059a15fa70c4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  firstChosenWeapon: {fileID: 11400000, guid: 17362f7aa07e08248b4a6fe3b05ff6a4, type: 2}
+  maxOwnedWeaponCount: 3

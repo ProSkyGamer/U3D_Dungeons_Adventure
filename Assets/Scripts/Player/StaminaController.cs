@@ -30,6 +30,8 @@ public class StaminaController : MonoBehaviour
 
     private void Update()
     {
+        if (GameStageManager.Instance.IsPause()) return;
+
         if (isFirstUpdate)
         {
             isFirstUpdate = false;
