@@ -9,7 +9,6 @@ public class ShopUI : MonoBehaviour
     public static ShopUI Instance { get; private set; }
 
     public event EventHandler OnShopOpen;
-
     public event EventHandler OnShopClose;
 
     [SerializeField] private Button closeButton;
@@ -67,7 +66,7 @@ public class ShopUI : MonoBehaviour
 
             var createdTabSingleUI = createdTab.GetComponent<TabSingleUI>();
 
-            createdTabSingleUI.SetTabName(showTabsToShow[i].shopTabName);
+            createdTabSingleUI.SetTabName(showTabsToShow[i].shopTabNameTextTranslationsSo);
             createdTabSingleUI.SetShopItemsList(showTabsToShow[i].shopTabItems);
 
             if (i == 0)

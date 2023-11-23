@@ -13,6 +13,7 @@ public class UpgradeSingleUI : MonoBehaviour
 
     private PlayerEffects.PlayerBuff.Buffs buffType;
     private float buffValue;
+    private int itemUpgradeID;
     [SerializeField] private Transform lockedObjectTransform;
 
     private bool isBought;
@@ -52,20 +53,32 @@ public class UpgradeSingleUI : MonoBehaviour
             buffType, 0, true, buffValue);
         isBought = true;
 
+        PlayerBoughtUpgrades.AddBoughtUpgrade(buffType, buffValue, itemUpgradeID);
+
         OnUpgradeBuy?.Invoke(this, EventArgs.Empty);
         UpdateVisual();
     }
 
     public void SetUpgradeType(PlayerEffects.PlayerBuff.Buffs upgradeBuffType, float upgradeBuffValue,
-        TextTranslationsSO upgradeTypeTextTranslationSo)
+        TextTranslationsSO upgradeTypeTextTranslationSo, int id)
     {
         if (buffValue != 0f) return;
 
         buffType = upgradeBuffType;
         buffValue = upgradeBuffValue;
+        itemUpgradeID = id;
 
         upgradeTypeTextTranslationSingle.ChangeTextTranslationSO(upgradeTypeTextTranslationSo);
         upgradeValueText.text = $"{upgradeBuffValue * 100} %";
+
+        if (!PlayerBoughtUpgrades.IsUpgradeAlreadyBought(buffType, buffValue, itemUpgradeID)) return;
+
+        PlayerController.Instance.GetPlayerEffects().ApplyBuff(
+            buffType, 0, true, buffValue);
+        isBought = true;
+
+        OnUpgradeBuy?.Invoke(this, EventArgs.Empty);
+        UpdateVisual();
     }
 
     public void AddLockUpgrade(UpgradeSingleUI upgradeLock)
@@ -90,6 +103,8 @@ public class UpgradeSingleUI : MonoBehaviour
         lockedObjectTransform.gameObject.SetActive(isBought || IsLocked() ||
                                                    PlayerController.Instance.GetCurrentSkillPointsValue() <= 0);
 
+        if (upgradeButton == null)
+            upgradeButton = GetComponent<Button>();
         upgradeButton.interactable =
             !isBought && !IsLocked() && PlayerController.Instance.GetCurrentSkillPointsValue() > 0;
     }

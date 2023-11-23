@@ -42,6 +42,6 @@ public static class TextTranslationController
         TextTranslationsSO textTranslationsSO)
     {
         return language == Languages.English ? textTranslationsSO.englishTextTranslation :
-            language == Languages.Russian ? textTranslationsSO.russianTextTranslation : null;
+            language == Languages.Russian ? textTranslationsSO.russianTextTranslation : "Undefined Language";
     }
 }

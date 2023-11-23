@@ -6,8 +6,8 @@ public class PlayerHealth : MonoBehaviour
     #region GeneralStats
 
     [SerializeField] private int baseHealth = 100;
-    private int maxHealth;
-    private int currentHealth;
+    private static int maxHealth;
+    private static int currentHealth;
 
     [SerializeField] private int baseDefence = 100;
     [SerializeField] private int maxDefence = 1000;
@@ -33,8 +33,11 @@ public class PlayerHealth : MonoBehaviour
 
     private void Awake()
     {
-        maxHealth = baseHealth;
-        currentHealth = maxHealth;
+        if (currentHealth == 0)
+        {
+            maxHealth = baseHealth;
+            currentHealth = maxHealth;
+        }
 
         currentDefence = baseDefence;
 
@@ -153,4 +156,9 @@ public class PlayerHealth : MonoBehaviour
     }
 
     #endregion
+
+    public static void ResetStaticData()
+    {
+        OnCurrentPlayerHealthChange = null;
+    }
 }

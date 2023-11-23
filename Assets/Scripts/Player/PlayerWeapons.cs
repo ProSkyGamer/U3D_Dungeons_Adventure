@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 
+[RequireComponent(typeof(PlayerWeaponsVisual))]
 public class PlayerWeapons : MonoBehaviour, IInventoryParent
 {
     public event EventHandler<OnCurrentWeaponChangeEventArgs> OnCurrentWeaponChange;
@@ -12,20 +13,62 @@ public class PlayerWeapons : MonoBehaviour, IInventoryParent
     }
 
     [SerializeField] private InventoryObject firstChosenWeapon;
-    private InventoryObject[] currentOwnedWeapon;
+    private static InventoryObject[] currentOwnedWeapon;
     [SerializeField] private int maxOwnedWeaponCount = 3;
 
-    private InventoryObject currentChooseWeapon;
+    private static InventoryObject currentChooseWeapon;
 
     private bool isFirstUpdate = true;
 
     private void Awake()
     {
+        if (currentOwnedWeapon != null)
+        {
+            OnCurrentWeaponChange?.Invoke(this, new OnCurrentWeaponChangeEventArgs
+            {
+                newWeapon = currentChooseWeapon
+            });
+            return;
+        }
+
         currentOwnedWeapon = new InventoryObject[maxOwnedWeaponCount];
 
-        if (firstChosenWeapon == null) return;
+        if (firstChosenWeapon == null) Debug.LogError("No First Weapon");
 
-        firstChosenWeapon.SetInventoryParent(this);
+        var firstChosenWeaponNewObject = ScriptableObject.CreateInstance<InventoryObject>();
+        firstChosenWeaponNewObject.SetInventoryObject(firstChosenWeapon);
+
+        firstChosenWeaponNewObject.SetInventoryParent(this);
+    }
+
+    private void Start()
+    {
+        GameInput.Instance.OnChangeCurrentWeaponAction += GameInput_OnChangeCurrentWeaponAction;
+        GameInput.Instance.OnDropWeaponAction += GameInput_OnDropWeaponAction;
+    }
+
+    private void GameInput_OnChangeCurrentWeaponAction(object sender, EventArgs e)
+    {
+        if (GetCurrentInventoryObjectsCount() <= 1) return;
+
+        var currentSelectedWeaponSlotNumber = GetSlotNumberByInventoryObject(currentChooseWeapon);
+
+        var nextChosenWeapon = FindNearestInventoryObjectWeapon(currentSelectedWeaponSlotNumber);
+
+        TryChangeWeapon(nextChosenWeapon);
+    }
+
+    private void GameInput_OnDropWeaponAction(object sender, EventArgs e)
+    {
+        if (GetCurrentInventoryObjectsCount() <= 1) return;
+
+        var currentSelectedWeaponSlotNumber = GetSlotNumberByInventoryObject(currentChooseWeapon);
+
+        var nextChosenWeapon = FindNearestInventoryObjectWeapon(currentSelectedWeaponSlotNumber);
+
+        TryChangeWeapon(nextChosenWeapon);
+
+        currentOwnedWeapon[currentSelectedWeaponSlotNumber].RemoveInventoryParent();
     }
 
     private void Update()
@@ -38,7 +81,7 @@ public class PlayerWeapons : MonoBehaviour, IInventoryParent
         }
     }
 
-    public void TryChangeWeapon(InventoryObject weaponInventoryObject)
+    private void TryChangeWeapon(InventoryObject weaponInventoryObject)
     {
         if (IsHasThisWeapon(weaponInventoryObject))
         {
@@ -57,48 +100,6 @@ public class PlayerWeapons : MonoBehaviour, IInventoryParent
                                $" current {weapon.comboAttackScales.Capacity}");
             }
         }
-    }
-
-    public void TryChangeToNextWeapon()
-    {
-        if (GetCurrentInventoryObjectsCount() > 1)
-        {
-            var currentWeaponIndex = 0;
-            for (var i = 0; i < currentOwnedWeapon.Length; i++)
-                if (currentOwnedWeapon[i] == currentChooseWeapon)
-                    currentWeaponIndex = i;
-
-            var nextWeaponIndex = -1;
-            var currentCycle = 1;
-            while (nextWeaponIndex == -1)
-            {
-                nextWeaponIndex = currentWeaponIndex == currentOwnedWeapon.Length - 1
-                    ? 0 + currentCycle - 1
-                    : currentWeaponIndex + currentCycle;
-
-                if (IsSlotNumberAvailable(nextWeaponIndex))
-                    nextWeaponIndex = -1;
-
-                currentCycle++;
-            }
-
-            TryChangeWeapon(currentOwnedWeapon[nextWeaponIndex]);
-        }
-    }
-
-    public void TryDropCurrentWeapon()
-    {
-        if (GetCurrentInventoryObjectsCount() <= 1) return;
-
-        var nearestWeapon = FindNearestInventoryObjectWeapon();
-        OnCurrentWeaponChange?.Invoke(this, new OnCurrentWeaponChangeEventArgs
-        {
-            previousWeapon = currentChooseWeapon, newWeapon = nearestWeapon
-        });
-
-        currentChooseWeapon = null;
-
-        currentChooseWeapon = nearestWeapon;
     }
 
     private bool IsHasThisWeapon(InventoryObject inventoryObjectWeapon)

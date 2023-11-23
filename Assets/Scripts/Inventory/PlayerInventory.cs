@@ -3,10 +3,12 @@ using UnityEngine;
 public class PlayerInventory : MonoBehaviour, IInventoryParent
 {
     [SerializeField] private int playerMaxSlots = 9;
-    private InventoryObject[] storedInventoryObjects;
+    private static InventoryObject[] storedInventoryObjects;
 
     private void Awake()
     {
+        if (storedInventoryObjects != null) return;
+
         storedInventoryObjects = new InventoryObject[playerMaxSlots];
     }
 

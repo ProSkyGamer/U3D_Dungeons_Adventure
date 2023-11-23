@@ -1,12 +1,11 @@
 using System;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class TabSingleUI : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI tabNameText;
+    [SerializeField] private TextTranslationSingleUI tabNameTextTranslationSingleUI;
 
     [SerializeField] private Transform shopItemsGrid;
     [SerializeField] private Transform shopItemPrefab;
@@ -32,9 +31,9 @@ public class TabSingleUI : MonoBehaviour
         ClearShopItemsGrid();
     }
 
-    public void SetTabName(string tabName)
+    public void SetTabName(TextTranslationsSO tabNameTextTranslationsSo)
     {
-        tabNameText.text = tabName;
+        tabNameTextTranslationSingleUI.ChangeTextTranslationSO(tabNameTextTranslationsSo);
     }
 
     public void SetShopItemsList(List<ShopItemSO> tabShopItems)

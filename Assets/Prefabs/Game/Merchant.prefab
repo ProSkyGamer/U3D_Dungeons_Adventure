@@ -26,6 +26,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 466686032751654056}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 1.661, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -33,7 +34,6 @@ Transform:
   m_Children:
   - {fileID: 5812702471106750727}
   m_Father: {fileID: 0}
-  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &4535101221338316016
 BoxCollider:
@@ -69,9 +69,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   interactDistance: 2.5
-  playerLayer:
-    serializedVersion: 2
-    m_Bits: 64
+  buttonTextTranslationsSo: {fileID: 11400000, guid: 22c386f0449590f4b88fd608a5b58a61,
+    type: 2}
 --- !u!114 &2496447859891703775
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -86,14 +85,39 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isCanInteract: 1
   allShopTabs:
-  - shopTabName: Experience & Level
+  - shopTabNameTextTranslationsSo: {fileID: 11400000, guid: cb66798ae56c6ff489d144f0215eccee,
+      type: 2}
     shopTabItems:
-    - {fileID: 11400000, guid: b27b1261fff22d64dad2ee7043150715, type: 2}
     - {fileID: 11400000, guid: 50c6119675c98b746822688a5e69c1eb, type: 2}
     - {fileID: 11400000, guid: e643253d58e1b1e41bd73e44a6489310, type: 2}
-    - {fileID: 11400000, guid: 7e514cb7674948549952f3b90ed721af, type: 2}
-    isAllItemsWillSold: 1
-    maxRandomItems: 0
+    - {fileID: 11400000, guid: b27b1261fff22d64dad2ee7043150715, type: 2}
+    - {fileID: 11400000, guid: d22019e22755f974e82ba6fa3c9f40ce, type: 2}
+    - {fileID: 11400000, guid: 92c68d13af69bab4e95e03f6e5f7dd63, type: 2}
+    - {fileID: 11400000, guid: 53494cb249a912042bee786dad1208b7, type: 2}
+    - {fileID: 11400000, guid: d73b712f8ad499547ae897bc2503882c, type: 2}
+    - {fileID: 11400000, guid: 24c59d43104f24e4da978d5df38270a6, type: 2}
+    - {fileID: 11400000, guid: bb6d85af7e9767b4eb01ad7e43985051, type: 2}
+    isAllItemsWillSold: 0
+    maxRandomItems: 2
+  - shopTabNameTextTranslationsSo: {fileID: 11400000, guid: 8eab65929bc6b45468edfdf88c56d2cf,
+      type: 2}
+    shopTabItems:
+    - {fileID: 11400000, guid: 4e6614ef57ebd6c438a9b6a33db764b7, type: 2}
+    - {fileID: 11400000, guid: 6cdde1b62d409354f930b05864da8d74, type: 2}
+    - {fileID: 11400000, guid: 9712d011ed8326e4ea9bce5c58a14551, type: 2}
+    - {fileID: 11400000, guid: 6d886b1716158ee4a90ebab144d8c833, type: 2}
+    - {fileID: 11400000, guid: 93f4b872e4adcf8419066d561a2daa28, type: 2}
+    - {fileID: 11400000, guid: 9fc9d58e8fb4e8f4689276b347b391b1, type: 2}
+    - {fileID: 11400000, guid: 826e0f42d6d41a64ba6a448dda2fa55d, type: 2}
+    isAllItemsWillSold: 0
+    maxRandomItems: 3
+  - shopTabNameTextTranslationsSo: {fileID: 11400000, guid: 65d43279f4db1ef45800340fde22e6ee,
+      type: 2}
+    shopTabItems:
+    - {fileID: 11400000, guid: c2ad2c6a9d9dd5a44a211b0b338bea27, type: 2}
+    - {fileID: 11400000, guid: 86e926cf9f67e9b4da80e6f7ea4e6d4a, type: 2}
+    isAllItemsWillSold: 0
+    maxRandomItems: 1
 --- !u!1 &7677373501177236952
 GameObject:
   m_ObjectHideFlags: 0
@@ -119,13 +143,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7677373501177236952}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 2, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5232677212991391377}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &2772729453784972419
 MeshFilter:

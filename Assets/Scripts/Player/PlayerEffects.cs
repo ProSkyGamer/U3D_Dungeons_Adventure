@@ -164,7 +164,7 @@ public class PlayerEffects : MonoBehaviour
             if (buff.buffs == buffs && buff.percentageBuffScale == percentageBuff &&
                 buff.flatBuffScale == flatBuffScale)
             {
-                AddRemoveBuffToController(buffs, percentageBuff, flatBuffScale);
+                AddRemoveBuffToController(buffs, -percentageBuff, -flatBuffScale);
                 return;
             }
     }

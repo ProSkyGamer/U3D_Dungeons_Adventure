@@ -12,7 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1aca975b9a72cdb40b6e6343abedbaf5, type: 3}
   m_Name: TestWeaponSO2
   m_EditorClassIdentifier: 
-  weaponType: 0
+  weaponType: 1
+  weaponVisual: {fileID: 8156390610259069869, guid: 0a3098c5fdd6d814d9dd1350a1bfcf1c,
+    type: 3}
   comboAttack: 3
   comboAttackScales:
   - 0.4

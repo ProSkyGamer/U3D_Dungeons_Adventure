@@ -99,4 +99,11 @@ public class GameStageManager : MonoBehaviour
     {
         return currentGameStage == GameStages.Ended;
     }
+
+    public void OnDestroy()
+    {
+        OnGameStart = null;
+        OnGamePause = null;
+        OnGameEnd = null;
+    }
 }

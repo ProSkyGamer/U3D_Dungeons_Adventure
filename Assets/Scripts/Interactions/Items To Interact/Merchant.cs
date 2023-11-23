@@ -8,8 +8,8 @@ public class Merchant : InteractableItem
     [Serializable]
     public class ShopTab
     {
-        public string shopTabName;
-        public List<ShopItemSO> shopTabItems;
+        public TextTranslationsSO shopTabNameTextTranslationsSo;
+        public List<ShopItemSO> shopTabItems = new();
 
         public bool isAllItemsWillSold;
         public int maxRandomItems = 3;
@@ -22,22 +22,40 @@ public class Merchant : InteractableItem
     private void Awake()
     {
         foreach (var shopTab in allShopTabs)
-            if (shopTab.shopTabItems.Count > shopTab.maxRandomItems || shopTab.isAllItemsWillSold)
+            if (shopTab.shopTabItems.Count <= shopTab.maxRandomItems || shopTab.isAllItemsWillSold)
             {
                 currentShopTabs.Add(shopTab);
             }
             else
             {
                 var createdShopTab = new ShopTab();
-                createdShopTab.shopTabName = shopTab.shopTabName;
-                while (createdShopTab.shopTabItems.Count < shopTab.maxRandomItems)
+                createdShopTab.shopTabNameTextTranslationsSo = shopTab.shopTabNameTextTranslationsSo;
+
+                for (var i = 0; i < shopTab.shopTabItems.Count; i++)
+                {
+                    var shopTabItem = shopTab.shopTabItems[i];
+                    if (!shopTabItem.isObjectMustBeSelling) continue;
+
+                    var newShopItem = ScriptableObject.CreateInstance<ShopItemSO>();
+                    newShopItem.SetShopItem(shopTabItem);
+
+                    createdShopTab.shopTabItems.Add(newShopItem);
+                    shopTab.shopTabItems.Remove(shopTabItem);
+                    i--;
+                }
+
+                for (var i = 0; i < shopTab.maxRandomItems; i++)
                 {
                     var chosenItemIndex = Random.Range(0, shopTab.shopTabItems.Count);
                     var chosenItem = shopTab.shopTabItems[chosenItemIndex];
 
                     if (createdShopTab.shopTabItems.Contains(chosenItem)) continue;
 
-                    createdShopTab.shopTabItems.Add(chosenItem);
+                    var newShopItem = ScriptableObject.CreateInstance<ShopItemSO>();
+                    newShopItem.SetShopItem(chosenItem);
+
+                    createdShopTab.shopTabItems.Add(newShopItem);
+                    shopTab.shopTabItems.Remove(chosenItem);
                 }
 
                 currentShopTabs.Add(createdShopTab);

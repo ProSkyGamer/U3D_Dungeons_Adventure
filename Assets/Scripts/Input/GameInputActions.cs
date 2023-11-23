@@ -152,6 +152,24 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""ShowCursor"",
+                    ""type"": ""Button"",
+                    ""id"": ""3c09ec62-db2c-4f89-b2ea-8abe441d0584"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""InventorySlotInteract"",
+                    ""type"": ""Button"",
+                    ""id"": ""2f4f44b2-3fe6-4bf5-9594-7f51321dd23c"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -352,6 +370,28 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
                     ""action"": ""GamePause"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""fab0b07b-d064-4636-8fb8-8d1d0d060336"",
+                    ""path"": ""<Keyboard>/alt"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ShowCursor"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""d7894690-d624-462a-9de1-7e8fb5e22262"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""InventorySlotInteract"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -374,6 +414,8 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
         m_Player_UpgradesStartDraging = m_Player.FindAction("UpgradesStartDraging", throwIfNotFound: true);
         m_Player_CurrentMousePosition = m_Player.FindAction("CurrentMousePosition", throwIfNotFound: true);
         m_Player_GamePause = m_Player.FindAction("GamePause", throwIfNotFound: true);
+        m_Player_ShowCursor = m_Player.FindAction("ShowCursor", throwIfNotFound: true);
+        m_Player_InventorySlotInteract = m_Player.FindAction("InventorySlotInteract", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -449,6 +491,8 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_UpgradesStartDraging;
     private readonly InputAction m_Player_CurrentMousePosition;
     private readonly InputAction m_Player_GamePause;
+    private readonly InputAction m_Player_ShowCursor;
+    private readonly InputAction m_Player_InventorySlotInteract;
     public struct PlayerActions
     {
         private @GameInputActions m_Wrapper;
@@ -467,6 +511,8 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
         public InputAction @UpgradesStartDraging => m_Wrapper.m_Player_UpgradesStartDraging;
         public InputAction @CurrentMousePosition => m_Wrapper.m_Player_CurrentMousePosition;
         public InputAction @GamePause => m_Wrapper.m_Player_GamePause;
+        public InputAction @ShowCursor => m_Wrapper.m_Player_ShowCursor;
+        public InputAction @InventorySlotInteract => m_Wrapper.m_Player_InventorySlotInteract;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -518,6 +564,12 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
             @GamePause.started += instance.OnGamePause;
             @GamePause.performed += instance.OnGamePause;
             @GamePause.canceled += instance.OnGamePause;
+            @ShowCursor.started += instance.OnShowCursor;
+            @ShowCursor.performed += instance.OnShowCursor;
+            @ShowCursor.canceled += instance.OnShowCursor;
+            @InventorySlotInteract.started += instance.OnInventorySlotInteract;
+            @InventorySlotInteract.performed += instance.OnInventorySlotInteract;
+            @InventorySlotInteract.canceled += instance.OnInventorySlotInteract;
         }
 
         private void UnregisterCallbacks(IPlayerActions instance)
@@ -564,6 +616,12 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
             @GamePause.started -= instance.OnGamePause;
             @GamePause.performed -= instance.OnGamePause;
             @GamePause.canceled -= instance.OnGamePause;
+            @ShowCursor.started -= instance.OnShowCursor;
+            @ShowCursor.performed -= instance.OnShowCursor;
+            @ShowCursor.canceled -= instance.OnShowCursor;
+            @InventorySlotInteract.started -= instance.OnInventorySlotInteract;
+            @InventorySlotInteract.performed -= instance.OnInventorySlotInteract;
+            @InventorySlotInteract.canceled -= instance.OnInventorySlotInteract;
         }
 
         public void RemoveCallbacks(IPlayerActions instance)
@@ -597,5 +655,7 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
         void OnUpgradesStartDraging(InputAction.CallbackContext context);
         void OnCurrentMousePosition(InputAction.CallbackContext context);
         void OnGamePause(InputAction.CallbackContext context);
+        void OnShowCursor(InputAction.CallbackContext context);
+        void OnInventorySlotInteract(InputAction.CallbackContext context);
     }
 }

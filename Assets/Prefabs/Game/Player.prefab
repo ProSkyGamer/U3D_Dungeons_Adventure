@@ -1,5 +1,36 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &670938541699061755
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8853440134721287407}
+  m_Layer: 6
+  m_Name: PlayerWeaponsVisual
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8853440134721287407
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 670938541699061755}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.6, y: 1.08, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4252335467063684347}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3126356343070788518
 GameObject:
   m_ObjectHideFlags: 0
@@ -83,6 +114,37 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &6233091916619734382
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5934049027216015079}
+  m_Layer: 6
+  m_Name: BulletSpawnPosition
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5934049027216015079
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6233091916619734382}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.6, y: 1.08, z: 0.111}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4252335467063684347}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7672009534980938123
 GameObject:
   m_ObjectHideFlags: 0
@@ -103,6 +165,7 @@ GameObject:
   - component: {fileID: 5830442008227960675}
   - component: {fileID: 8014053188586307146}
   - component: {fileID: 5276156391153461877}
+  - component: {fileID: 1148613835792543096}
   m_Layer: 6
   m_Name: Player
   m_TagString: Untagged
@@ -124,6 +187,8 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7238952937869680919}
+  - {fileID: 5934049027216015079}
+  - {fileID: 8853440134721287407}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!136 &245144274155069264
@@ -189,17 +254,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   experienceForFirstLevel: 100
-  experienceIncreaseForNextLevel: 0.2
+  experienceIncreaseForNextLevel: 0.1
   walkSpeed: 1
   runSpeed: 3
   sprintSpeed: 5
   staminaSprintCostPerSecond: 7.5
   waitingForStaminaRegenerationTime: 2.5
-  weaponAttackRange: 3
-  enemiesLayer:
-    serializedVersion: 2
-    m_Bits: 128
-  chargedAttackPressTime: 1
   cameraController: {fileID: 0}
 --- !u!114 &7085638092880543809
 MonoBehaviour:
@@ -227,6 +287,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   comboAttackResetTime: 3
+  chargedAttackPressTime: 1
+  meleeWeaponAttackRange: 3
+  rangedWeaponAttackRange: 10
+  bulletPrefab: {fileID: 4288998629912929518, guid: 3d3c1170cf557c34bb7a1a17733c83b9,
+    type: 3}
+  bulletLifetime: 3
+  bulletSpawnPosition: {fileID: 5934049027216015079}
+  enemiesLayer:
+    serializedVersion: 2
+    m_Bits: 128
   baseAttack: 100
   baseCritRate: 0.05
   baseCritDamage: 0.5
@@ -312,3 +382,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   firstChosenWeapon: {fileID: 11400000, guid: 17362f7aa07e08248b4a6fe3b05ff6a4, type: 2}
   maxOwnedWeaponCount: 3
+--- !u!114 &1148613835792543096
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7672009534980938123}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb2eed9602008fd4aabcc93adaecb9b8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerWeaponTransform: {fileID: 8853440134721287407}

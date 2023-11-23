@@ -4,7 +4,7 @@ using UnityEngine;
 public class AddInteractButtonUI : MonoBehaviour
 {
     [SerializeField] private float interactDistance = 2.5f;
-    [SerializeField] private LayerMask playerLayer;
+    [SerializeField] private TextTranslationsSO buttonTextTranslationsSo;
 
     private readonly List<InteractableItem> interactableItemsList = new();
 
@@ -23,14 +23,14 @@ public class AddInteractButtonUI : MonoBehaviour
             var castCubeLength = new Vector3(interactDistance, interactDistance, interactDistance);
 
             var raycastHits = Physics.BoxCastAll(castPosition, castCubeLength,
-                Vector3.forward, Quaternion.identity, interactDistance, playerLayer);
+                Vector3.forward, Quaternion.identity, interactDistance);
 
             foreach (var hit in raycastHits)
-                if (hit.transform.gameObject.TryGetComponent(out PlayerController player))
+                if (hit.transform.gameObject.TryGetComponent(out PlayerController _))
                 {
                     if (!isHasInteractButtonOnScreen)
                     {
-                        InteractUI.Instance.AddButtonInteractToScreen(this);
+                        InteractUI.Instance.AddButtonInteractToScreen(this, buttonTextTranslationsSo);
                         isHasInteractButtonOnScreen = true;
                     }
 

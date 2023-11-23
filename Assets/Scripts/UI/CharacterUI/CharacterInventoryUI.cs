@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class CharacterInventoryUI : MonoBehaviour
 {
+    public event EventHandler OnAnySlotInteractButtonPressed;
     public static event EventHandler OnStopItemDragging;
 
     public enum InventoryType
@@ -18,14 +19,21 @@ public class CharacterInventoryUI : MonoBehaviour
 
     [SerializeField] private Transform playerInventorySlotPrefab;
     [SerializeField] private Transform playerInventorySlotsGrid;
+    [SerializeField] private bool isInventoryInteractable = true;
+    [SerializeField] private bool isShowingObjectName = true;
 
     [SerializeField] private Image currentDraggingImage;
+    [SerializeField] private Transform slotDescriptionPrefab;
+    private Transform currentSlotDescription;
+    [SerializeField] private Transform slotInteractButtonsPrefab;
+    private Transform currentSlotInteractButtons;
     private static InventoryObject currentDraggingObject;
 
     private readonly List<InventorySlotSingleUI> allInventorySlots = new();
 
     private void Start()
     {
+        OnAnySlotInteractButtonPressed += CharacterInventoryUI_OnAnySlotInteractButtonPressed;
         InventorySlotSingleUI.OnStartItemDragging += InventorySlotSingleUI_OnStartItemDragging;
 
         var maxSlotCount = 0;
@@ -47,18 +55,81 @@ public class CharacterInventoryUI : MonoBehaviour
             var slotTransform = Instantiate(playerInventorySlotPrefab, playerInventorySlotsGrid);
 
             var slotSingleUI = slotTransform.GetComponent<InventorySlotSingleUI>();
-            slotSingleUI.SetStarterData(i, inventoryType);
+            slotSingleUI.SetStarterData(i, inventoryType, isInventoryInteractable, isShowingObjectName, this);
 
             allInventorySlots.Add(slotSingleUI);
         }
 
         playerInventorySlotPrefab.gameObject.SetActive(false);
         currentDraggingImage.gameObject.SetActive(false);
+
+        InventorySlotSingleUI.OnDisplaySlotDescription += InventorySlotSingleUI_OnDisplaySlotDescription;
+        InventorySlotSingleUI.OnStopDisplaySlotDescription += InventorySlotSingleUI_OnStopDisplaySlotDescription;
+        CharacterUI.OnCharacterUIClose += InventorySlotSingleUI_OnStopDisplaySlotDescription;
+
+        InventorySlotSingleUI.OnDisplaySlotInteractButtons += InventorySlotSingleUI_OnDisplaySlotInteractButtons;
+    }
+
+    private void CharacterInventoryUI_OnAnySlotInteractButtonPressed(object sender, EventArgs e)
+    {
+        UpdateInventory();
+    }
+
+    private void InventorySlotSingleUI_OnDisplaySlotInteractButtons(object sender,
+        InventorySlotSingleUI.OnDisplaySlotInteractButtonsEventArgs e)
+    {
+        if (currentSlotInteractButtons != null)
+        {
+            Destroy(currentSlotInteractButtons.gameObject);
+            currentSlotInteractButtons = null;
+        }
+
+        if (e.displayedInventory != this) return;
+
+        var newSlotInteractButton = Instantiate(slotInteractButtonsPrefab,
+            GameInput.Instance.GetCurrentMousePosition(),
+            Quaternion.identity, transform.GetComponentsInParent<Transform>()[1]);
+
+        var slotInteractButtonsUI = newSlotInteractButton.GetComponent<InventorySlotInteractButtons>();
+        slotInteractButtonsUI.SetSlotInfo(e.inventoryObject, inventoryType,
+            () => { OnAnySlotInteractButtonPressed?.Invoke(this, EventArgs.Empty); });
+        currentSlotInteractButtons = newSlotInteractButton;
+    }
+
+    private void InventorySlotSingleUI_OnStopDisplaySlotDescription(object sender, EventArgs e)
+    {
+        if (currentSlotDescription != null)
+        {
+            Destroy(currentSlotDescription.gameObject);
+            currentSlotDescription = null;
+        }
+    }
+
+    private void InventorySlotSingleUI_OnDisplaySlotDescription(object sender,
+        InventorySlotSingleUI.OnDisplaySlotDescriptionEventArgs e)
+    {
+        if (currentSlotInteractButtons != null)
+        {
+            Destroy(currentSlotInteractButtons.gameObject);
+            currentSlotInteractButtons = null;
+        }
+
+        if (e.displayedInventory != this) return;
+
+        var newSlotDescription = Instantiate(slotDescriptionPrefab,
+            GameInput.Instance.GetCurrentMousePosition(), Quaternion.identity,
+            transform.GetComponentsInParent<Transform>()[1]);
+        var inventoryItemSlotDescription = newSlotDescription.GetComponent<InventoryItemDescription>();
+        inventoryItemSlotDescription.SetInventoryObject(e.inventoryObject);
+
+        currentSlotDescription = newSlotDescription;
     }
 
     private void InventorySlotSingleUI_OnStartItemDragging(object sender,
         InventorySlotSingleUI.OnStartItemDraggingEventArgs e)
     {
+        if (!isInventoryInteractable) return;
+
         currentDraggingObject = e.draggingInventoryObject;
 
         currentDraggingImage.gameObject.SetActive(true);
@@ -142,5 +213,10 @@ public class CharacterInventoryUI : MonoBehaviour
     public static InventoryObject GetCurrentDraggingObject()
     {
         return currentDraggingObject;
+    }
+
+    public static void ResetStaticData()
+    {
+        OnStopItemDragging = null;
     }
 }

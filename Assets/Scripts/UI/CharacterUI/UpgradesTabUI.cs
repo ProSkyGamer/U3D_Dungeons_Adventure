@@ -68,7 +68,7 @@ public class UpgradesTabUI : MonoBehaviour
             var upgradeSingleUI = upgradeTransform.gameObject.GetComponent<UpgradeSingleUI>();
 
             upgradeSingleUI.SetUpgradeType(allUpgrades[i].buffType, allUpgrades[i].buffValue,
-                lineTypeTextTranslationsSo);
+                lineTypeTextTranslationsSo, i);
             upgradeSingleUI.AddLockUpgrade(previousUpgrade);
 
             Instantiate(lineBetweenUpgradeTransform,
@@ -79,7 +79,7 @@ public class UpgradesTabUI : MonoBehaviour
             previousUpgrade = upgradeSingleUI;
         }
 
-        firstUpgrade.SetUpgradeType(allUpgrades[0].buffType, allUpgrades[0].buffValue, lineTypeTextTranslationsSo);
+        firstUpgrade.SetUpgradeType(allUpgrades[0].buffType, allUpgrades[0].buffValue, lineTypeTextTranslationsSo, 0);
     }
 
     private void Start()

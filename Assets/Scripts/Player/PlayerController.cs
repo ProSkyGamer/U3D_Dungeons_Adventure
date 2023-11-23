@@ -22,18 +22,20 @@ public class PlayerController : MonoBehaviour
         public int maxXp;
     }
 
+    public event EventHandler OnStopSprinting;
+
     public event EventHandler OnCoinsValueChange;
     public event EventHandler OnSkillPointsValueChange;
     public event EventHandler<PlayerEffects.RelicBuffEffectTriggeredEventArgs> OnPlayerRegenerateHpAfterEnemyDeath;
 
     [SerializeField] private int experienceForFirstLevel = 100;
     [SerializeField] private float experienceIncreaseForNextLevel = 0.2f;
-    private int currentLevelXpNeeded;
-    private int currentXp;
+    private static int currentLevelXpNeeded;
+    private static int currentXp;
     private float additionalExpMultiplayer;
 
-    private int currentAvailableSkillPoint;
-    private int currentCoins;
+    private static int currentAvailableSkillPoint;
+    private static int currentCoins;
 
     [SerializeField] private float walkSpeed = 1f;
     [SerializeField] private float runSpeed = 3f;
@@ -47,13 +49,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float waitingForStaminaRegenerationTime = 2.5f;
     private float waitingForStaminaRegenerationTimer;
 
-    [SerializeField] private float weaponAttackRange = 3f;
-    [SerializeField] private LayerMask enemiesLayer;
     private readonly List<EnemyController> attackedNotDeadEnemies = new();
 
-    private bool isTryingToChargedAttack;
-    [SerializeField] private float chargedAttackPressTime = 1f;
-    private float chargedAttackPressTimer;
 
     private float hpRegenerationAmountAfterEnemyDeath;
 
@@ -88,6 +85,7 @@ public class PlayerController : MonoBehaviour
         timerForConstantSprint = timeForConstantSprint;
         waitingForStaminaRegenerationTimer = waitingForStaminaRegenerationTime;
 
+        if (currentLevelXpNeeded != 0) return;
         currentLevelXpNeeded = experienceForFirstLevel;
     }
 
@@ -96,11 +94,19 @@ public class PlayerController : MonoBehaviour
         GameInput.Instance.OnChangeCameraModeAction += GameInput_OnChangeCameraModeAction;
         GameInput.Instance.OnSprintAction += GameInput_OnSprintAction;
         GameInput.Instance.OnChangeMovementModeAction += GameInput_OnChangeMovementMode;
-        GameInput.Instance.OnAttackAction += GameInput_OnAttackAction;
-        GameInput.Instance.OnChangeCurrentWeaponAction += GameInput_OnChangeCurrentWeaponAction;
-        GameInput.Instance.OnDropWeaponAction += GameInput_OnDropWeaponAction;
 
         staminaController.OnAllStaminaSpend += StaminaController_OnAllStaminaSpend;
+
+        playerAttackController.OnEnemyHitted += PlayerAttackController_OnEnemyHitted;
+    }
+
+    private void PlayerAttackController_OnEnemyHitted(object sender, PlayerAttackController.OnEnemyHittedEventArgs e)
+    {
+        if (!attackedNotDeadEnemies.Contains(e.hittedEnemy))
+        {
+            attackedNotDeadEnemies.Add(e.hittedEnemy);
+            e.hittedEnemy.OnEnemyDeath += EnemyController_OnEnemyDeath;
+        }
     }
 
     #region SubscribedEvents
@@ -108,22 +114,7 @@ public class PlayerController : MonoBehaviour
     private void StaminaController_OnAllStaminaSpend(object sender, EventArgs e)
     {
         isSprinting = false;
-    }
-
-    private void GameInput_OnDropWeaponAction(object sender, EventArgs e)
-    {
-        playerWeapons.TryDropCurrentWeapon();
-    }
-
-    private void GameInput_OnChangeCurrentWeaponAction(object sender, EventArgs e)
-    {
-        playerWeapons.TryChangeToNextWeapon();
-    }
-
-    private void GameInput_OnAttackAction(object sender, EventArgs e)
-    {
-        NormalAttack();
-        isTryingToChargedAttack = true;
+        OnStopSprinting?.Invoke(this, EventArgs.Empty);
     }
 
     private void GameInput_OnChangeMovementMode(object sender, EventArgs e)
@@ -135,8 +126,6 @@ public class PlayerController : MonoBehaviour
     {
         if (staminaController.IsHaveAvailableStamina())
             isSprinting = true;
-
-        waitingForStaminaRegenerationTimer = waitingForStaminaRegenerationTime;
     }
 
     private void GameInput_OnChangeCameraModeAction(object sender, EventArgs e)
@@ -169,10 +158,10 @@ public class PlayerController : MonoBehaviour
             {
                 currentXp = currentXp, maxXp = currentLevelXpNeeded
             });
+            OnSkillPointsValueChange?.Invoke(this, EventArgs.Empty);
         }
 
         TryMove();
-        TryChargedAttack();
         TryStartStaminaRegeneration();
     }
 
@@ -196,6 +185,7 @@ public class PlayerController : MonoBehaviour
                     {
                         timerForConstantSprint = timeForConstantSprint;
                         isSprinting = false;
+                        OnStopSprinting?.Invoke(this, EventArgs.Empty);
                     }
             }
             else
@@ -214,39 +204,7 @@ public class PlayerController : MonoBehaviour
         timerForConstantSprint = timeForConstantSprint;
 
         isSprinting = false;
-    }
-
-    private void TryChargedAttack()
-    {
-        if (isTryingToChargedAttack)
-        {
-            if (GameInput.Instance.GetBindingValue(GameInput.Binding.Attack) == 1f)
-            {
-                chargedAttackPressTimer -= Time.deltaTime;
-                if (chargedAttackPressTimer <= 0)
-                {
-                    var currentWeaponSo = playerWeapons.GetCurrentWeaponSo();
-                    var chargedAttackStaminaCost = currentWeaponSo.chargedAttackStaminaCost;
-                    if (staminaController.IsHaveNeededStamina(chargedAttackStaminaCost))
-                    {
-                        ChargedAttack();
-
-                        staminaController.SpendStamina(chargedAttackStaminaCost);
-
-                        waitingForStaminaRegenerationTimer = waitingForStaminaRegenerationTime;
-                    }
-                }
-            }
-            else
-            {
-                isTryingToChargedAttack = false;
-            }
-        }
-        else
-        {
-            if (chargedAttackPressTimer != chargedAttackPressTime)
-                chargedAttackPressTimer = chargedAttackPressTime;
-        }
+        OnStopSprinting?.Invoke(this, EventArgs.Empty);
     }
 
     private void TryStartStaminaRegeneration()
@@ -256,7 +214,10 @@ public class PlayerController : MonoBehaviour
         {
             waitingForStaminaRegenerationTimer -= Time.deltaTime;
 
-            if (waitingForStaminaRegenerationTimer <= 0) staminaController.StartStaminaRegeneration();
+            if (waitingForStaminaRegenerationTimer > 0) return;
+
+            staminaController.StartStaminaRegeneration();
+            waitingForStaminaRegenerationTimer = waitingForStaminaRegenerationTime;
         }
     }
 
@@ -279,7 +240,7 @@ public class PlayerController : MonoBehaviour
     {
         currentXp += (int)(experience * (1 + additionalExpMultiplayer));
 
-        if (currentXp >= currentLevelXpNeeded)
+        while (currentXp >= currentLevelXpNeeded)
         {
             currentXp -= currentLevelXpNeeded;
             currentLevelXpNeeded += (int)(currentLevelXpNeeded * experienceIncreaseForNextLevel);
@@ -317,46 +278,6 @@ public class PlayerController : MonoBehaviour
     }
 
     #region Attack & Weapons
-
-    private void NormalAttack()
-    {
-        playerAttackController.NormalAttack(FindEnemiesToAttack(), this);
-    }
-
-    private void ChargedAttack()
-    {
-        isTryingToChargedAttack = false;
-        chargedAttackPressTimer = chargedAttackPressTime;
-
-        playerAttackController.ChargeAttack(FindEnemiesToAttack(), this);
-    }
-
-    private List<EnemyController> FindEnemiesToAttack()
-    {
-        var castPosition = transform.position;
-        var castCubeLength = new Vector3(weaponAttackRange, weaponAttackRange, weaponAttackRange);
-
-        var raycastHits = Physics.BoxCastAll(castPosition, castCubeLength, Vector3.forward,
-            Quaternion.identity, weaponAttackRange, enemiesLayer);
-
-        List<EnemyController> enemiesToAttack = new();
-
-        foreach (var hit in raycastHits)
-            if (hit.transform.gameObject.TryGetComponent(out EnemyController enemyController))
-            {
-                enemiesToAttack.Add(enemyController);
-
-                if (!attackedNotDeadEnemies.Contains(enemyController))
-                {
-                    enemyController.OnEnemyDeath += EnemyController_OnEnemyDeath;
-                    attackedNotDeadEnemies.Add(enemyController);
-                }
-            }
-
-        //Debug.Log($"Enemies to attack {enemiesToAttack.Count} {raycastHits.Length}");
-
-        return enemiesToAttack;
-    }
 
     private void EnemyController_OnEnemyDeath(object sender, EventArgs e)
     {
@@ -474,7 +395,7 @@ public class PlayerController : MonoBehaviour
         return playerEffects;
     }
 
-    public PlayerInventory GetPlayerInventory()
+    public IInventoryParent GetPlayerInventory()
     {
         return playerInventory;
     }

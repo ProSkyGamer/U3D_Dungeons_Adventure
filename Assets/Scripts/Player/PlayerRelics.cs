@@ -12,13 +12,20 @@ public class PlayerRelics : MonoBehaviour, IInventoryParent
     }
 
     [SerializeField] private int maxRelicsSlotsCount = 3;
-    private InventoryObject[] allStoredRelics;
+    private static InventoryObject[] allStoredRelics;
 
     private PlayerEffects playerEffects;
 
     private void Awake()
     {
-        allStoredRelics = new InventoryObject[maxRelicsSlotsCount];
+        if (allStoredRelics == null)
+            allStoredRelics = new InventoryObject[maxRelicsSlotsCount];
+        else
+            foreach (var storedRelic in allStoredRelics)
+                OnRelicsChange?.Invoke(this, new OnRelicChangeEventArgs
+                {
+                    addedRelic = storedRelic
+                });
 
         playerEffects = GetComponent<PlayerEffects>();
     }

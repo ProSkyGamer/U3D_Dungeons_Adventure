@@ -8,6 +8,7 @@ public class InventoryObject : ScriptableObject
 
     [SerializeField] private WeaponSO weaponSo;
     [SerializeField] private RelicSO relicSo;
+    [SerializeField] private TextTranslationsSO objectDescriptionTextTranslationSo;
 
     private IInventoryParent inventoryObjectParent;
 
@@ -44,13 +45,32 @@ public class InventoryObject : ScriptableObject
         return inventoryObjectNameTextTranslationSo;
     }
 
+    public TextTranslationsSO GetInventoryObjectDescriptionTextTranslationSo()
+    {
+        return objectDescriptionTextTranslationSo;
+    }
+
     public void SetInventoryObject(InventoryObject inventoryObject)
     {
         inventoryObjectSprite = inventoryObject.GetInventoryObjectSprite();
         inventoryObjectNameTextTranslationSo = inventoryObject.GetInventoryObjectNameTextTranslationSo();
+        objectDescriptionTextTranslationSo = inventoryObject.GetInventoryObjectDescriptionTextTranslationSo();
 
-        inventoryObject.TryGetWeaponSo(out weaponSo);
-        inventoryObject.TryGetRelicSo(out relicSo);
+        if (inventoryObject.TryGetWeaponSo(out var newWeaponSo))
+        {
+            var newWeapon = CreateInstance<WeaponSO>();
+            newWeapon.SetWeaponsSo(newWeaponSo);
+            weaponSo = newWeapon;
+        }
+
+        if (inventoryObject.TryGetRelicSo(out var newRelicSo))
+        {
+            var newRelic = CreateInstance<RelicSO>();
+
+
+            newRelic.SetRelicSo(newRelicSo);
+            relicSo = newRelic;
+        }
     }
 
     public bool TryGetWeaponSo(out WeaponSO gottenWeaponSo)
@@ -63,5 +83,11 @@ public class InventoryObject : ScriptableObject
     {
         gottenRelicSo = relicSo;
         return gottenRelicSo != null;
+    }
+
+    public void RemoveInventoryParent()
+    {
+        inventoryObjectParent?.RemoveInventoryObjectBySlot(inventoryObjectParent.GetSlotNumberByInventoryObject(this));
+        inventoryObjectParent = null;
     }
 }

@@ -74,22 +74,15 @@ public class InteractUI : MonoBehaviour
     }
 
     public void AddButtonInteractToScreen(
-        AddInteractButtonUI interactButtonUI /*, TextTranslationsSO textTranslationsSO*/)
+        AddInteractButtonUI interactButtonUI, TextTranslationsSO textTranslationsSo)
     {
         if (allInteractButtonsList.Count == 0)
             Show();
 
         var interactableItemButtonTransform = Instantiate(interactButtonPrefab, buttonsLayoutGroup);
-        var interactableItemButton = interactableItemButtonTransform.GetComponent<Button>();
-        /*interactableItemButtonTransform.GetComponentInChildren<TextTranslationUI>()
-            .ChangeTextTranslationSO(textTranslationsSO);
-        interactableItemButtonTransform.GetComponentsInChildren<TextMeshProUGUI>()[0].text =
-            TextTranslationManager.GetTextFromTextTranslationSOByLanguage(
-                TextTranslationManager.GetCurrentLanguage(), textTranslationsSO);
-        interactableItemButtonTransform.GetComponentsInChildren<TextMeshProUGUI>()[1].text =
-            Input.Instance.GetBindingText(Input.Binding.Interact);*/
-
-        interactableItemButton.onClick.AddListener(interactButtonUI.OnInteract);
+        var interactButtonSingle = interactableItemButtonTransform.GetComponent<InteractButtonSingleUI>();
+        interactButtonSingle.InitializeButton(interactButtonUI, textTranslationsSo);
+        var interactableItemButton = interactButtonSingle.GetInteractButton();
 
         if (activeButton == null)
             activeButton = interactableItemButton;

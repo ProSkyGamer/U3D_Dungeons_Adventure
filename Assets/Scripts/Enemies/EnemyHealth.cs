@@ -38,15 +38,15 @@ public class EnemyHealth : MonoBehaviour
 
     private void Start()
     {
-        DungeonDifficulty.OnDungeonDifficultyChange += DungeonDifficulty_OnDungeonDifficultyChange;
+        DungeonSettings.OnDungeonDifficultyChange += DungeonDifficulty_OnDungeonDifficultyChange;
     }
 
     private void DungeonDifficulty_OnDungeonDifficultyChange(object sender,
-        DungeonDifficulty.OnDungeonDifficultyChangeEventArgs e)
+        DungeonSettings.OnDungeonDifficultyChangeEventArgs e)
     {
         var currentHpDifficultyMultiplayer =
-            DungeonDifficulty.GetEnemiesHpMultiplayerByDungeonDifficulty(e.newDungeonDifficulty);
-        var currentHpPlayersCountMultiplayer = DungeonDifficulty.GetEnemiesHpMultiplayerByPlayersCount();
+            DungeonSettings.GetEnemiesHpMultiplayerByDungeonDifficulty(e.newDungeonDifficulty);
+        var currentHpPlayersCountMultiplayer = DungeonSettings.GetEnemiesHpMultiplayerByPlayersCount();
 
         var healthPercentage = (float)currentHealth / maxHealth;
 

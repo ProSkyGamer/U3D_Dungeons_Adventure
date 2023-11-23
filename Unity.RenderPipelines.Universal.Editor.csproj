@@ -174,8 +174,8 @@
      <Compile Include="Library\PackageCache\com.unity.render-pipelines.universal@14.0.9\Editor\ShaderGUI\ShadingModels\LitDetailGUI.cs" />
      <Compile Include="Library\PackageCache\com.unity.render-pipelines.universal@14.0.9\Editor\Lighting\UniversalRenderPipelineSerializedLight.cs" />
      <Compile Include="Library\PackageCache\com.unity.render-pipelines.universal@14.0.9\Editor\ShaderGraph\Includes\DecalMeshBiasTypeEnum.cs" />
-     <Compile Include="Library\PackageCache\com.unity.render-pipelines.universal@14.0.9\Editor\2D\Renderer2DAnalytics.cs" />
      <Compile Include="Library\PackageCache\com.unity.render-pipelines.universal@14.0.9\Editor\RenderStateDataEditor.cs" />
+     <Compile Include="Library\PackageCache\com.unity.render-pipelines.universal@14.0.9\Editor\2D\Renderer2DAnalytics.cs" />
      <Compile Include="Library\PackageCache\com.unity.render-pipelines.universal@14.0.9\Editor\UniversalAnalytics.cs" />
      <Compile Include="Library\PackageCache\com.unity.render-pipelines.universal@14.0.9\Editor\Lighting\UniversalRenderPipelineLightUI.Skin.cs" />
      <Compile Include="Library\PackageCache\com.unity.render-pipelines.universal@14.0.9\Editor\Converter\ConversionIndexers.cs" />

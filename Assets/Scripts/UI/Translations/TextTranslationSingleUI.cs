@@ -28,6 +28,9 @@ public class TextTranslationSingleUI : MonoBehaviour
     {
         this.textTranslationsSO = textTranslationsSO;
 
+        if (currentLabelText == null)
+            currentLabelText = GetComponent<TextMeshProUGUI>();
+
         currentLabelText.text =
             TextTranslationController.GetTextFromTextTranslationSOByLanguage(
                 TextTranslationController.GetCurrentLanguage(), textTranslationsSO);

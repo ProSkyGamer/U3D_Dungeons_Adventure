@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: TestWeaponSO
   m_EditorClassIdentifier: 
   weaponType: 0
+  weaponVisual: {fileID: 6815916627772204711, guid: 00c854ea2ee995b47b9ec889fc53ef0c,
+    type: 3}
   comboAttack: 3
   comboAttackScales:
   - 0.5

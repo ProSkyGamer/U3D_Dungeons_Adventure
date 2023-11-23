@@ -13,10 +13,23 @@ public class WeaponSO : ScriptableObject
     [Header("All scales must be in this variant (0.753)")]
     public WeaponType weaponType;
 
+    public Transform weaponVisual;
     [Range(1, 6)] public int comboAttack = 1;
     public List<float> comboAttackScales = new();
     public float chargedAttackDamageScale;
     public float chargedAttackStaminaCost = 25f;
     public PlayerEffects.PlayerBuff.Buffs additionalWeaponStatType = PlayerEffects.PlayerBuff.Buffs.AtkBuff;
     public float additionalWeaponStatTypeScale = 0.1f;
+
+    public void SetWeaponsSo(WeaponSO weaponToSet)
+    {
+        weaponType = weaponToSet.weaponType;
+        weaponVisual = weaponToSet.weaponVisual;
+        comboAttack = weaponToSet.comboAttack;
+        comboAttackScales = weaponToSet.comboAttackScales;
+        chargedAttackDamageScale = weaponToSet.chargedAttackDamageScale;
+        chargedAttackStaminaCost = weaponToSet.chargedAttackStaminaCost;
+        additionalWeaponStatType = weaponToSet.additionalWeaponStatType;
+        additionalWeaponStatTypeScale = weaponToSet.additionalWeaponStatTypeScale;
+    }
 }

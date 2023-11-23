@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ada620e26b8cb3c4eabf5bbec6881bd7, type: 3}
+  m_Name: DEF 0.3 ShopItemsSO
+  m_EditorClassIdentifier: 
+  soldItemType: 2
+  boughtItemValue: 1
+  coinsCost: 200
+  inventoryObjectToSold: {fileID: 11400000, guid: ff72a5cee6ba36844a8403aba0f3a73e,
+    type: 2}
+  maxBoughtCount: 1
+  isBoughtsUnlimited: 0
+  isObjectMustBeSelling: 0
+  itemNameTextTranslationsSo: {fileID: 11400000, guid: 04671ee9253ec23449fa08b7d80ca4fa,
+    type: 2}
+  boughtItemImage: {fileID: 0}

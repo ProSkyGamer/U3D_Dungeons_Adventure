@@ -26,13 +26,15 @@ public class ProcedureDungeonGeneration : MonoBehaviour
     private readonly List<DungeonRoom> allRoomsList = new();
     private readonly List<DungeonRoomType> allRequiredRoomsList = new();
 
-    private List<List<bool>> dungeonMapUsedTilesList = new()
+    private readonly List<List<bool>> dungeonMapUsedTilesList = new()
     {
         new List<bool>(1)
     };
 
     private void Awake()
     {
+        maxDungeonsRoomsCount = DungeonSettings.GetCurrentDungeonRoomsCount();
+
         foreach (var dungeonRoomVariation in dungeonRoomVariationsPrefabsList)
         {
             if (dungeonRoomVariation.minRequiredRoomCount <= 0) continue;
@@ -41,40 +43,6 @@ public class ProcedureDungeonGeneration : MonoBehaviour
         }
 
         GenerateDungeon();
-    }
-
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            foreach (var room in allRoomsList) Destroy(room.gameObject);
-            allRoomsList.Clear();
-            dungeonMapUsedTilesList.Clear();
-            dungeonMapUsedTilesList = new List<List<bool>>
-            {
-                new(1)
-            };
-            foreach (var roomTransform in GetComponentsInChildren<Transform>())
-                if (roomTransform != transform && transform != roomTransform)
-                    Destroy(roomTransform.gameObject);
-
-            foreach (var dungeonRoomVariation in dungeonRoomVariationsPrefabsList)
-                dungeonRoomVariation.createdRoomCount = 0;
-            GenerateDungeon();
-        }
-
-        if (Input.GetKeyDown(KeyCode.J))
-        {
-            var tileMapString = "";
-            foreach (var tileList in dungeonMapUsedTilesList)
-            {
-                foreach (var tile in tileList) tileMapString += tile ? "x " : "o ";
-
-                tileMapString += "\n";
-            }
-
-            Debug.Log(tileMapString);
-        }
     }
 
     private void GenerateDungeon()
@@ -359,7 +327,7 @@ public class ProcedureDungeonGeneration : MonoBehaviour
 
         List<DungeonRoomType> currentAvailableDungeonRoomType = new();
 
-        if (GetRemainingRequiredRoomsCount() <= maxDungeonsRoomsCount - allRoomsList.Count)
+        if (GetRemainingRequiredRoomsCount() < maxDungeonsRoomsCount - allRoomsList.Count)
         {
             foreach (var dungeonRoom in dungeonRoomVariationsPrefabsList)
                 if (dungeonRoom.isBuildingsUnlimited || dungeonRoom.createdRoomCount < dungeonRoom.maxRoomCount)

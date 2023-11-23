@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class CameraController : MonoBehaviour
@@ -14,10 +15,13 @@ public class CameraController : MonoBehaviour
     [SerializeField] private CameraModes currentCameraMode = CameraModes.ThirdPerson;
     [SerializeField] private bool isCameraMovementLocked;
 
-    [SerializeField] private float minCameraDistance = 1.5f;
-    [SerializeField] private float maxCameraDistance = 3.5f;
+    [SerializeField] private float minCameraDistance = 4f;
+    [SerializeField] private float maxCameraDistance = 6f;
+    [SerializeField] private float playerHideDistance = 3f;
     [SerializeField] private Vector3 additionalCameraOffset;
     private float currentCameraDistance;
+    private float previousCameraDistance;
+    private readonly float smoothAutoCameraDistanceSpeed = 0.2f;
 
     [SerializeField] private float sensitivity = 1.5f;
     [SerializeField] private float smoothing = 2f;
@@ -30,6 +34,9 @@ public class CameraController : MonoBehaviour
     private Vector2 velocity;
     private Vector2 frameVelocity;
 
+    private bool isAnyInterfaceOpened;
+    private bool isShowingCursor;
+
     private Transform cameraTransform;
 
     private void Awake()
@@ -39,15 +46,67 @@ public class CameraController : MonoBehaviour
         currentCameraDistance = (maxCameraDistance + minCameraDistance) / 2;
 
         ChangeCameraMode(currentCameraMode);
+
+        Cursor.visible = false;
+    }
+
+    private void Start()
+    {
+        PlayerAttackController.OnGunChargedAttackTriggered += PlayerAttackController_OnGunChargedAttackTriggered;
+        GameInput.Instance.OnCursorShowAction += GameInput_OnCursorShowAction;
+
+        ShopUI.Instance.OnShopOpen += OnAnyTabOpen;
+        ShopUI.Instance.OnShopClose += OnAnyTabClose;
+
+        CharacterUI.OnCharacterUIOpen += OnAnyTabOpen;
+        CharacterUI.OnCharacterUIClose += OnAnyTabClose;
+    }
+
+    private void GameInput_OnCursorShowAction(object sender, EventArgs e)
+    {
+        isShowingCursor = true;
+        Cursor.visible = true;
+    }
+
+    private void OnAnyTabClose(object sender, EventArgs e)
+    {
+        isAnyInterfaceOpened = false;
+    }
+
+    private void OnAnyTabOpen(object sender, EventArgs e)
+    {
+        isAnyInterfaceOpened = true;
+        isShowingCursor = true;
+        Cursor.visible = true;
+    }
+
+    private void PlayerAttackController_OnGunChargedAttackTriggered(object sender, EventArgs e)
+    {
+        switch (currentCameraMode)
+        {
+            case CameraModes.ThirdPerson:
+                ChangeCameraMode(CameraModes.Weapon);
+                break;
+            case CameraModes.Weapon:
+                ChangeCameraMode(CameraModes.ThirdPerson);
+                break;
+        }
     }
 
     private void Update()
     {
         if (GameStageManager.Instance.IsPause()) return;
+        if (isAnyInterfaceOpened) return;
         if (isCameraMovementLocked) return;
 
         CameraMovement();
         CameraScroll();
+        CameraAutoDistance();
+        TryHideClosestObjects();
+
+        if (isShowingCursor)
+            if (GameInput.Instance.GetBindingValue(GameInput.Binding.ShowCursor) != 1f)
+                Cursor.visible = false;
     }
 
     private void CameraMovement()
@@ -89,39 +148,60 @@ public class CameraController : MonoBehaviour
 
         cameraTransform.localEulerAngles = transformLocalEulerAngles;
 
-        var cameraPosition = GetDesiredCameraPosition();
+        var newCameraPosition = GetAvailableCameraPosition(
+            currentCameraDistance, out var newCameraDistance);
 
-        var raycastHits = Physics.RaycastAll(cameraPosition, cameraTransform.forward,
-            currentCameraDistance, cameraCollidableTerrain);
-
-        while (raycastHits.Length > 0)
+        if (newCameraDistance < currentCameraDistance)
         {
-            currentCameraDistance -= 0.1f;
+            if (previousCameraDistance == 0)
+                previousCameraDistance = currentCameraDistance;
 
-            cameraPosition = GetDesiredCameraPosition();
-
-            raycastHits = Physics.RaycastAll(cameraPosition, cameraTransform.forward,
-                currentCameraDistance, cameraCollidableTerrain);
+            currentCameraDistance = newCameraDistance;
         }
 
-
-        cameraTransform.position = cameraPosition;
+        cameraTransform.position = newCameraPosition;
     }
 
-    private Vector3 GetDesiredCameraPosition()
+    private Vector3 GetDesiredCameraPositionByDistance(float cameraDistance)
     {
         var currentPlayerPosition = playerVisualTransform.position;
         var transformLocalEulerAngles = cameraTransform.localEulerAngles;
 
         return new Vector3(
             currentPlayerPosition.x -
-            currentCameraDistance * Mathf.Sin(transformLocalEulerAngles.y * Mathf.PI / 180) *
+            cameraDistance * Mathf.Sin(transformLocalEulerAngles.y * Mathf.PI / 180) *
             Mathf.Cos(transformLocalEulerAngles.x * Mathf.PI / 180),
             currentPlayerPosition.y +
-            currentCameraDistance * Mathf.Sin(transformLocalEulerAngles.x * Mathf.PI / 180),
+            cameraDistance * Mathf.Sin(transformLocalEulerAngles.x * Mathf.PI / 180),
             currentPlayerPosition.z -
-            currentCameraDistance * Mathf.Cos(transformLocalEulerAngles.y * Mathf.PI / 180) *
+            cameraDistance * Mathf.Cos(transformLocalEulerAngles.y * Mathf.PI / 180) *
             Mathf.Cos(transformLocalEulerAngles.x * Mathf.PI / 180)) + additionalCameraOffset;
+    }
+
+    private Vector3 GetAvailableCameraPosition(float cameraDistance, out float newCameraDistance)
+    {
+        var desiredCameraPosition = GetDesiredCameraPositionByDistance(cameraDistance);
+        newCameraDistance = cameraDistance;
+
+        var raycastHits = Physics.RaycastAll(desiredCameraPosition, cameraTransform.forward,
+            currentCameraDistance, cameraCollidableTerrain);
+
+        var closestDistance = maxCameraDistance;
+        foreach (var raycastHit in raycastHits)
+        {
+            if (raycastHit.distance >= closestDistance || raycastHit.distance == 0) continue;
+
+            closestDistance = raycastHit.distance;
+        }
+
+        if (cameraDistance - closestDistance < cameraDistance && closestDistance != maxCameraDistance)
+        {
+            desiredCameraPosition = GetDesiredCameraPositionByDistance(cameraDistance - closestDistance - 0.01f);
+
+            newCameraDistance = cameraDistance - closestDistance;
+        }
+
+        return desiredCameraPosition;
     }
 
     private void CameraScroll()
@@ -133,6 +213,9 @@ public class CameraController : MonoBehaviour
             if (mouseScroll != 0)
             {
                 mouseScroll = mouseScroll > 0 ? 1 : -1;
+
+                if (previousCameraDistance != 0 && mouseScroll < 0)
+                    previousCameraDistance = 0;
 
                 var scrollValue =
                     Mathf.Clamp(
@@ -146,6 +229,29 @@ public class CameraController : MonoBehaviour
         }
     }
 
+    private void CameraAutoDistance()
+    {
+        if (previousCameraDistance == 0) return;
+        if (currentCameraMode != CameraModes.ThirdPerson) return;
+
+        var newCameraPosition = GetAvailableCameraPosition(
+            currentCameraDistance + smoothAutoCameraDistanceSpeed, out var newCameraDistance);
+
+        if (newCameraDistance > currentCameraDistance)
+        {
+            if (newCameraDistance >= previousCameraDistance)
+                previousCameraDistance = 0;
+
+            cameraTransform.position = newCameraPosition;
+            currentCameraDistance = newCameraDistance;
+        }
+    }
+
+    private void TryHideClosestObjects()
+    {
+        playerVisualTransform.gameObject.SetActive(currentCameraDistance > playerHideDistance);
+    }
+
     public void ChangeCameraMode(CameraModes newCameraMode)
     {
         currentCameraMode = newCameraMode;
@@ -153,9 +259,12 @@ public class CameraController : MonoBehaviour
         switch (currentCameraMode)
         {
             case CameraModes.ThirdPerson:
-                currentCameraDistance = (minCameraDistance + maxCameraDistance) / 2;
+                currentCameraDistance = previousCameraDistance == 0
+                    ? (maxCameraDistance + minCameraDistance) / 2
+                    : previousCameraDistance;
                 break;
             case CameraModes.Weapon:
+                previousCameraDistance = currentCameraDistance;
                 currentCameraDistance = 0;
                 break;
         }

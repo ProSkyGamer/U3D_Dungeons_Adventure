@@ -25,8 +25,12 @@ public class GameInput : MonoBehaviour
         OpenCharacterInfo,
         UpgradesStartDragging,
         DropWeapon,
-        MouseScroll
+        MouseScroll,
+        ShowCursor,
+        InventorySlotInteract
     }
+
+    public event EventHandler OnAnyBindingRebind;
 
     public event EventHandler OnAttackAction;
     public event EventHandler OnInteractAction;
@@ -38,6 +42,8 @@ public class GameInput : MonoBehaviour
     public event EventHandler OnChangeCameraModeAction;
     public event EventHandler OnDropWeaponAction;
     public event EventHandler OnUpgradesStartDragging;
+    public event EventHandler OnCursorShowAction;
+    public event EventHandler OnInventorySlotInteractAction;
 
     private GameInputActions gameInputActions;
 
@@ -66,11 +72,23 @@ public class GameInput : MonoBehaviour
         gameInputActions.Player.OpenCharacterInfo.performed += OpenCharacterInfo_OnPerformed;
         gameInputActions.Player.UpgradesStartDraging.performed += UpgradesStartDragging_OnPerformed;
         gameInputActions.Player.GamePause.performed += GamePause_OnPerformed;
+        gameInputActions.Player.ShowCursor.performed += ShowCursor_OnPerformed;
+        gameInputActions.Player.InventorySlotInteract.performed += InventorySlotInteract_OnPerformed;
+    }
+
+    private void InventorySlotInteract_OnPerformed(InputAction.CallbackContext obj)
+    {
+        TriggerBindingButton(Binding.InventorySlotInteract);
+    }
+
+    private void ShowCursor_OnPerformed(InputAction.CallbackContext obj)
+    {
+        TriggerBindingButton(Binding.ShowCursor);
     }
 
     private void GamePause_OnPerformed(InputAction.CallbackContext obj)
     {
-        OnPauseAction?.Invoke(this, EventArgs.Empty);
+        TriggerBindingButton(Binding.Pause);
     }
 
     private void UpgradesStartDragging_OnPerformed(InputAction.CallbackContext obj)
@@ -80,37 +98,37 @@ public class GameInput : MonoBehaviour
 
     private void OpenCharacterInfo_OnPerformed(InputAction.CallbackContext obj)
     {
-        OnOpenCharacterInfoAction?.Invoke(this, EventArgs.Empty);
+        TriggerBindingButton(Binding.OpenCharacterInfo);
     }
 
     private void DropCurrentWeapon_OnPerformed(InputAction.CallbackContext obj)
     {
-        OnDropWeaponAction?.Invoke(this, EventArgs.Empty);
+        TriggerBindingButton(Binding.DropWeapon);
     }
 
     private void ChangeCurrentWeapon_OnPerformed(InputAction.CallbackContext obj)
     {
-        OnChangeCurrentWeaponAction?.Invoke(this, EventArgs.Empty);
+        TriggerBindingButton(Binding.ChangeCurrentWeapon);
     }
 
     private void Interact_OnPerformed(InputAction.CallbackContext obj)
     {
-        OnInteractAction?.Invoke(this, EventArgs.Empty);
+        TriggerBindingButton(Binding.Interact);
     }
 
     private void Attack_OnPerformed(InputAction.CallbackContext obj)
     {
-        OnAttackAction?.Invoke(this, EventArgs.Empty);
+        TriggerBindingButton(Binding.Attack);
     }
 
     private void ChangeMovementMode_OnPerformed(InputAction.CallbackContext obj)
     {
-        OnChangeMovementModeAction?.Invoke(this, EventArgs.Empty);
+        TriggerBindingButton(Binding.ChangeMovementMode);
     }
 
     private void Sprint_OnPerformed(InputAction.CallbackContext obj)
     {
-        OnSprintAction?.Invoke(this, EventArgs.Empty);
+        TriggerBindingButton(Binding.Sprint);
     }
 
     private void CameraModeChange_OnPerformed(InputAction.CallbackContext obj)
@@ -129,6 +147,43 @@ public class GameInput : MonoBehaviour
         gameInputActions.Player.DropCurrentWeapon.performed -= DropCurrentWeapon_OnPerformed;
 
         gameInputActions.Dispose();
+    }
+
+    public void TriggerBindingButton(Binding triggeringBinding)
+    {
+        switch (triggeringBinding)
+        {
+            case Binding.Attack:
+                OnAttackAction?.Invoke(this, EventArgs.Empty);
+                break;
+            case Binding.Interact:
+                OnInteractAction?.Invoke(this, EventArgs.Empty);
+                break;
+            case Binding.Pause:
+                OnPauseAction?.Invoke(this, EventArgs.Empty);
+                break;
+            case Binding.Sprint:
+                OnSprintAction?.Invoke(this, EventArgs.Empty);
+                break;
+            case Binding.DropWeapon:
+                OnDropWeaponAction?.Invoke(this, EventArgs.Empty);
+                break;
+            case Binding.ChangeCurrentWeapon:
+                OnChangeCurrentWeaponAction?.Invoke(this, EventArgs.Empty);
+                break;
+            case Binding.ChangeMovementMode:
+                OnChangeMovementModeAction?.Invoke(this, EventArgs.Empty);
+                break;
+            case Binding.OpenCharacterInfo:
+                OnOpenCharacterInfoAction?.Invoke(this, EventArgs.Empty);
+                break;
+            case Binding.ShowCursor:
+                OnCursorShowAction?.Invoke(this, EventArgs.Empty);
+                break;
+            case Binding.InventorySlotInteract:
+                OnInventorySlotInteractAction?.Invoke(this, EventArgs.Empty);
+                break;
+        }
     }
 
     public Vector2 GetMovementVectorNormalized()
@@ -194,6 +249,8 @@ public class GameInput : MonoBehaviour
                 return gameInputActions.Player.UpgradesStartDraging.bindings[0].ToDisplayString();
             case Binding.Pause:
                 return gameInputActions.Player.GamePause.bindings[0].ToDisplayString();
+            case Binding.ShowCursor:
+                return gameInputActions.Player.ShowCursor.bindings[0].ToDisplayString();
         }
     }
 
@@ -202,7 +259,6 @@ public class GameInput : MonoBehaviour
         var inputValue = 0f;
         switch (binding)
         {
-            default:
             case Binding.MoveUp:
                 inputValue = gameInputActions.Player.Movement.ReadValue<Vector2>().x > 0
                     ? gameInputActions.Player.Movement.ReadValue<Vector2>().x
@@ -252,6 +308,9 @@ public class GameInput : MonoBehaviour
                 break;
             case Binding.Pause:
                 inputValue = gameInputActions.Player.GamePause.IsPressed() ? 1f : 0f;
+                break;
+            case Binding.ShowCursor:
+                inputValue = gameInputActions.Player.ShowCursor.IsPressed() ? 1f : 0f;
                 break;
         }
 
@@ -323,6 +382,7 @@ public class GameInput : MonoBehaviour
 
                 PlayerPrefs.SetString(PLAYER_PREFS_BINDINGS, gameInputActions.SaveBindingOverridesAsJson());
                 PlayerPrefs.Save();
+                OnAnyBindingRebind?.Invoke(this, EventArgs.Empty);
             })
             .Start();
     }

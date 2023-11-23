@@ -4,6 +4,9 @@ using UnityEngine.UI;
 
 public class CharacterUI : MonoBehaviour
 {
+    public static event EventHandler OnCharacterUIOpen;
+    public static event EventHandler OnCharacterUIClose;
+
     [SerializeField] private Button closeButton;
 
     [SerializeField] private Button statsTabButton;
@@ -20,6 +23,8 @@ public class CharacterUI : MonoBehaviour
 
     private bool isFirstUpdate = true;
 
+    private bool isSubscribed;
+
     private void Awake()
     {
         closeButton.onClick.AddListener(Hide);
@@ -32,7 +37,28 @@ public class CharacterUI : MonoBehaviour
 
     private void Start()
     {
+        ShopUI.Instance.OnShopOpen += OnOtherTabOpened;
+        ShopUI.Instance.OnShopClose += OnOtherTabClose;
+
+        PauseUI.OnSettingsButtonClick += OnOtherTabOpened;
+        SettingsUI.OnSettingsClose += OnOtherTabClose;
+
         GameInput.Instance.OnOpenCharacterInfoAction += GameInput_OnOpenCharacterInfoAction;
+        isSubscribed = true;
+    }
+
+    private void OnOtherTabOpened(object sender, EventArgs e)
+    {
+        GameInput.Instance.OnOpenCharacterInfoAction -= GameInput_OnOpenCharacterInfoAction;
+        isSubscribed = false;
+    }
+
+    private void OnOtherTabClose(object sender, EventArgs e)
+    {
+        if (isSubscribed) return;
+
+        GameInput.Instance.OnOpenCharacterInfoAction += GameInput_OnOpenCharacterInfoAction;
+        isSubscribed = true;
     }
 
     private void Update()
@@ -53,6 +79,7 @@ public class CharacterUI : MonoBehaviour
     {
         gameObject.SetActive(true);
 
+        OnCharacterUIOpen?.Invoke(this, EventArgs.Empty);
         OnStatsTabButtonClick?.Invoke(this, EventArgs.Empty);
 
         GameInput.Instance.OnPauseAction += GameInput_OnPauseAction;
@@ -68,5 +95,17 @@ public class CharacterUI : MonoBehaviour
     private void Hide()
     {
         gameObject.SetActive(false);
+
+        OnCharacterUIClose?.Invoke(this, EventArgs.Empty);
+    }
+
+    public static void ResetStaticData()
+    {
+        OnStatsTabButtonClick = null;
+        OnUpgradesTabButtonClick = null;
+        OnWeaponsTabButtonClick = null;
+        OnRelicsTabButtonClick = null;
+        OnCharacterUIOpen = null;
+        OnCharacterUIClose = null;
     }
 }
