@@ -54,10 +54,9 @@ public class AddInteractButtonUI : MonoBehaviour
         InteractUI.Instance.RemoveButtonInteractToScreen(this);
     }
 
-    private void OnDestroy()
+    public void ChangeButtonText(TextTranslationsSO textTranslationsSo)
     {
-        if (isHasInteractButtonOnScreen)
-            InteractUI.Instance.RemoveButtonInteractToScreen(this);
+        buttonTextTranslationsSo = textTranslationsSo;
     }
 
     private bool IsAnyItemInteractable()
@@ -67,5 +66,11 @@ public class AddInteractButtonUI : MonoBehaviour
                 return true;
 
         return false;
+    }
+
+    private void OnDestroy()
+    {
+        if (isHasInteractButtonOnScreen)
+            InteractUI.Instance.RemoveButtonInteractToScreen(this);
     }
 }

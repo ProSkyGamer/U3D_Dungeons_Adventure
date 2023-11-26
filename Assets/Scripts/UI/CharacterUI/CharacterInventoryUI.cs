@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class CharacterInventoryUI : MonoBehaviour
 {
-    public event EventHandler OnAnySlotInteractButtonPressed;
+    public static event EventHandler OnAnySlotInteractButtonPressed;
     public static event EventHandler OnStopItemDragging;
 
     public enum InventoryType
@@ -72,6 +72,12 @@ public class CharacterInventoryUI : MonoBehaviour
 
     private void CharacterInventoryUI_OnAnySlotInteractButtonPressed(object sender, EventArgs e)
     {
+        if (currentSlotInteractButtons != null)
+        {
+            Destroy(currentSlotInteractButtons.gameObject);
+            currentSlotInteractButtons = null;
+        }
+
         UpdateInventory();
     }
 
@@ -169,7 +175,6 @@ public class CharacterInventoryUI : MonoBehaviour
     {
         currentDraggingImage.gameObject.SetActive(false);
 
-
         var playerInventory = GetCurrentPlayerInventoryByType();
         for (var i = 0; i < allInventorySlots.Count; i++)
         {
@@ -181,8 +186,7 @@ public class CharacterInventoryUI : MonoBehaviour
                 continue;
             }
 
-            if (allInventorySlots[i].GetStoredItem() != inventoryObject)
-                allInventorySlots[i].StoreItem(inventoryObject);
+            allInventorySlots[i].StoreItem(inventoryObject);
         }
     }
 
@@ -218,5 +222,6 @@ public class CharacterInventoryUI : MonoBehaviour
     public static void ResetStaticData()
     {
         OnStopItemDragging = null;
+        OnAnySlotInteractButtonPressed = null;
     }
 }

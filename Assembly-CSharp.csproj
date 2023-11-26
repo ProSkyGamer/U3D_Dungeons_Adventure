@@ -65,13 +65,13 @@
      <Compile Include="Assets\Scripts\UI\ShopUI\TabSingleUI.cs" />
      <Compile Include="Assets\Scripts\ScriptableObjects\ShopItemSO\ShopItemSO.cs" />
      <Compile Include="Assets\Scripts\Inventory\InventoryObject.cs" />
-     <Compile Include="Assets\Scripts\Inventory\PlayerInventory.cs" />
      <Compile Include="Assets\Scripts\Player\PlayerHealth.cs" />
      <Compile Include="Assets\Scripts\UI\CharacterUI\WeaponsTabUI.cs" />
      <Compile Include="Assets\Scripts\Input\GameInput.cs" />
      <Compile Include="Assets\Scripts\Player\PlayerEffects.cs" />
      <Compile Include="Assets\Scripts\UI\Pause &amp; Settings\RebindKeymapSingleUI.cs" />
      <Compile Include="Assets\Scripts\Enemies\EnemyEffects.cs" />
+     <Compile Include="Assets\Scripts\Inventory\DroppedItemsController.cs" />
      <Compile Include="Assets\Scripts\UI\TempUI.cs" />
      <Compile Include="Assets\Scripts\Player\PlayerRelics.cs" />
      <Compile Include="Assets\Scripts\Player\CameraController.cs" />
@@ -88,6 +88,7 @@
      <Compile Include="Assets\Scripts\Enemies\EnemyStatsUI.cs" />
      <Compile Include="Assets\Scripts\Dungeon\ChestSettings.cs" />
      <Compile Include="Assets\Mini First Person Controller\Scripts\Components\GroundCheck.cs" />
+     <Compile Include="Assets\Scripts\DeleteObjectAfterTime.cs" />
      <Compile Include="Assets\Scripts\Interactions\Items To Interact\InteractableItem.cs" />
      <Compile Include="Assets\Scripts\Dungeon\DungeonRoom.cs" />
      <Compile Include="Assets\Scripts\Interactions\Items To Interact\LootChest.cs" />
@@ -97,6 +98,7 @@
      <Compile Include="Assets\Scripts\Enemies\EnemyHealth.cs" />
      <Compile Include="Assets\Scripts\Dungeon\FinalDungeonRoom.cs" />
      <Compile Include="Assets\Scripts\Dungeon\StartingDungeonRoom.cs" />
+     <Compile Include="Assets\Scripts\Interactions\Items To Interact\DroppedInventoryItemSingle.cs" />
      <Compile Include="Assets\Scripts\UI\Pause &amp; Settings\LanguagesTabUI.cs" />
      <Compile Include="Assets\Scripts\Player\PlayerAttackController.cs" />
      <Compile Include="Assets\Scripts\UI\Pause &amp; Settings\SettingsUI.cs" />
@@ -110,6 +112,7 @@
      <Compile Include="Assets\Scripts\Player\PlayerWeapons.cs" />
      <Compile Include="Assets\Scripts\UI\InteractUI.cs" />
      <Compile Include="Assets\Scripts\Inventory\InventorySlotInteractButtons.cs" />
+     <Compile Include="Assets\Scripts\Player\PlayerInventory.cs" />
      <Compile Include="Assets\Scripts\ResetStaticData.cs" />
      <Compile Include="Assets\Scripts\Inventory\GetAdditionalInventoryTextTranslationSO.cs" />
      <Compile Include="Assets\Scripts\UI\Translations\SceneLanguageController.cs" />
@@ -202,6 +205,7 @@
      <Folder Include="Assets\Scripts\ScriptableObjects\_TextTranslationsSO\Game\CharacterUI\Tabs\UpgradesTab" />
      <Folder Include="Library\PackageCache\com.unity.render-pipelines.universal@14.0.9\Textures\FilmGrain" />
      <Folder Include="Assets\Scripts\ScriptableObjects\_TextTranslationsSO\Game\_InventoryObjects\Other" />
+     <Folder Include="Assets\Scripts\ScriptableObjects\_TextTranslationsSO\Game\_InventoryObjects\InventoryInteract" />
      <Folder Include="Library\PackageCache\com.unity.burst@1.8.9" />
      <None Include="Library\PackageCache\com.unity.ide.visualstudio@2.0.21\package.json" />
      <None Include="Library\PackageCache\com.unity.render-pipelines.core@14.0.9\ValidationConfig.json" />

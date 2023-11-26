@@ -28,7 +28,17 @@ public class InventorySlotInteractButtons : MonoBehaviour
         dropItemText.text = TextTranslationController.GetTextFromTextTranslationSOByLanguage(
             TextTranslationController.GetCurrentLanguage(), dropItemTextTranslationsSo);
 
-        deleteItem.onClick.AddListener(inventoryObject.RemoveInventoryParent);
+        deleteItem.onClick.AddListener(() =>
+        {
+            inventoryObject.RemoveInventoryParent();
+            onClickAction();
+        });
+
+        dropItem.onClick.AddListener(() =>
+        {
+            inventoryObject.DropInventoryObjectToWorld(PlayerController.Instance.transform.position);
+            onClickAction();
+        });
 
         if (storedInventoryType == CharacterInventoryUI.InventoryType.PlayerWeaponInventory &&
             PlayerController.Instance.GetPlayerAttackInventory().GetCurrentInventoryObjectsCount() <= 1)
@@ -58,7 +68,6 @@ public class InventorySlotInteractButtons : MonoBehaviour
                     equipItem.onClick.AddListener(() =>
                     {
                         inventoryObject.SetInventoryParent(newInventory);
-                        Debug.Log("Equipped?");
                         onClickAction();
                     });
 
@@ -79,8 +88,7 @@ public class InventorySlotInteractButtons : MonoBehaviour
             {
                 unEquipItem.onClick.AddListener(() =>
                 {
-                    inventoryObject.RemoveInventoryParent();
-                    playerInventory.AddInventoryObject(inventoryObject);
+                    inventoryObject.SetInventoryParent(playerInventory);
                     onClickAction();
                 });
                 return;

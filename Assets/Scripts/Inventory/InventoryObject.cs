@@ -26,8 +26,20 @@ public class InventoryObject : ScriptableObject
         inventoryObjectParent?.RemoveInventoryObjectBySlot(
             inventoryObjectParent.GetSlotNumberByInventoryObject(this));
 
-        inventoryObjectParent = inventoryParent;
         inventoryParent.AddInventoryObjectToSlot(this, slotNumber);
+        inventoryObjectParent = inventoryParent;
+    }
+
+    public void DropInventoryObjectToWorld(Vector3 dropPosition)
+    {
+        dropPosition += new Vector3(0f, 0.5f, 0f);
+        DroppedItemsController.Instance.AddNewDroppedItem(this, dropPosition);
+    }
+
+    public void RemoveInventoryParent()
+    {
+        inventoryObjectParent?.RemoveInventoryObjectBySlot(inventoryObjectParent.GetSlotNumberByInventoryObject(this));
+        inventoryObjectParent = null;
     }
 
     public IInventoryParent GetInventoryObjectParent()
@@ -83,11 +95,5 @@ public class InventoryObject : ScriptableObject
     {
         gottenRelicSo = relicSo;
         return gottenRelicSo != null;
-    }
-
-    public void RemoveInventoryParent()
-    {
-        inventoryObjectParent?.RemoveInventoryObjectBySlot(inventoryObjectParent.GetSlotNumberByInventoryObject(this));
-        inventoryObjectParent = null;
     }
 }

@@ -200,7 +200,7 @@ public class PlayerWeapons : MonoBehaviour, IInventoryParent
 
     public void AddInventoryObjectToSlot(InventoryObject inventoryObject, int slotNumber)
     {
-        IsSlotNumberAvailable(slotNumber);
+        if (!IsSlotNumberAvailable(slotNumber)) return;
 
         currentOwnedWeapon[slotNumber] = inventoryObject;
     }

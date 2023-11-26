@@ -18,6 +18,8 @@ public class PlayerRelics : MonoBehaviour, IInventoryParent
 
     private void Awake()
     {
+        playerEffects = GetComponent<PlayerEffects>();
+
         if (allStoredRelics == null)
             allStoredRelics = new InventoryObject[maxRelicsSlotsCount];
         else
@@ -26,8 +28,6 @@ public class PlayerRelics : MonoBehaviour, IInventoryParent
                 {
                     addedRelic = storedRelic
                 });
-
-        playerEffects = GetComponent<PlayerEffects>();
     }
 
     private void Start()
@@ -38,13 +38,13 @@ public class PlayerRelics : MonoBehaviour, IInventoryParent
     private void PlayerEffects_OnPlayerRelicOutOfUsagesCount(object sender,
         PlayerEffects.OnPlayerRelicOutOfUsagesCountEventArgs e)
     {
-        for (var i = 0; i < allStoredRelics.Length; i++)
+        foreach (var storedRelic in allStoredRelics)
         {
-            allStoredRelics[i].TryGetRelicSo(out var relicSo);
+            storedRelic.TryGetRelicSo(out var relicSo);
             foreach (var relicBuff in relicSo.relicBuffs)
                 if (relicBuff.isHasLimit && relicBuff.relicBuffType == e.relicBuff.relicBuffType)
                 {
-                    RemoveInventoryObjectBySlot(i);
+                    storedRelic.RemoveInventoryParent();
                     return;
                 }
         }
@@ -65,7 +65,7 @@ public class PlayerRelics : MonoBehaviour, IInventoryParent
 
     public void AddInventoryObjectToSlot(InventoryObject inventoryObject, int slotNumber)
     {
-        IsSlotNumberAvailable(slotNumber);
+        if (!IsSlotNumberAvailable(slotNumber)) return;
 
         allStoredRelics[slotNumber] = inventoryObject;
 

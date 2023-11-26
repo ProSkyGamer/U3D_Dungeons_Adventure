@@ -79,7 +79,7 @@ public class ShopItemSingleUI : MonoBehaviour
                     var relicNewInventoryObject = ScriptableObject.CreateInstance<InventoryObject>();
                     relicNewInventoryObject.SetInventoryObject(currentShopItem.inventoryObjectToSold);
 
-                    PlayerController.Instance.GetPlayerInventory().AddInventoryObject(relicNewInventoryObject);
+                    relicNewInventoryObject.SetInventoryParent(PlayerController.Instance.GetPlayerInventory());
                     break;
                 case ShopItemSO.ItemType.RelicReset:
                     inventoryParent.GetInventoryObjectBySlot(inventorySlotNumber).TryGetRelicSo(out var relicSo);

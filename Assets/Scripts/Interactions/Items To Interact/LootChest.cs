@@ -43,8 +43,7 @@ public class LootChest : InteractableItem
             var weaponToDropNewObject = ScriptableObject.CreateInstance<InventoryObject>();
             weaponToDropNewObject.SetInventoryObject(weaponToDrop);
 
-            if (PlayerController.Instance.GetPlayerInventory().IsHasAnyAvailableSlot())
-                weaponToDropNewObject.SetInventoryParent(PlayerController.Instance.GetPlayerInventory());
+            weaponToDropNewObject.DropInventoryObjectToWorld(transform.position);
         }
 
         Debug.Log($"Added {coinsInChest} coins, {experienceForChest} experience,  {weaponToDrop.name} weapon");
