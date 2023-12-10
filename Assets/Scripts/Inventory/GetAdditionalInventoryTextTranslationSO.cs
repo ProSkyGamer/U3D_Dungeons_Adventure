@@ -28,14 +28,38 @@ public class GetAdditionalInventoryTextTranslationSo : MonoBehaviour
     [Header("Relic Buffs")]
     [SerializeField] private TextTranslationsSO noRelicBuffTextTranslationSo;
 
-    [SerializeField] private TextTranslationsSO relicDmgAbsorptionBuffTextTranslationSo;
-    [SerializeField] private TextTranslationsSO relicTakenDmgIncreaseBuffTextTranslationSo;
-    [SerializeField] private TextTranslationsSO relicNaDmgBuffTextTranslationSo;
-    [SerializeField] private TextTranslationsSO relicCaDmgBuffTextTranslationSo;
-    [SerializeField] private TextTranslationsSO relicExpBuffTextTranslationSo;
-    [SerializeField] private TextTranslationsSO relicDefBuffTextTranslationSo;
-    [SerializeField] private TextTranslationsSO relicHpBuffTextTranslationSo;
-    [SerializeField] private TextTranslationsSO relicRegenerationPerKillBuffTextTranslationSo;
+    [SerializeField] private TextTranslationsSO dmgAbsorptionEffectTextTranslationSo;
+    [SerializeField] private TextTranslationsSO takenDmgIncreaseEffectTextTranslationSo;
+    [SerializeField] private TextTranslationsSO naDmgIncreaseEffectTextTranslationSo;
+    [SerializeField] private TextTranslationsSO caDmgIncreaseEffectTextTranslationSo;
+    [SerializeField] private TextTranslationsSO gainedExpIncreaseEffectTextTranslationSo;
+    [SerializeField] private TextTranslationsSO atkIncreaseEffectTextTranslationSo;
+    [SerializeField] private TextTranslationsSO defIncreaseEffectTextTranslationSo;
+    [SerializeField] private TextTranslationsSO hpIncreaseEffectTextTranslationSo;
+    [SerializeField] private TextTranslationsSO critRateIncreaseEffectTextTranslationSo;
+    [SerializeField] private TextTranslationsSO onHitCritRateIncreaseEffectTextTranslationSo;
+    [SerializeField] private TextTranslationsSO critDmgIncreaseEffectTextTranslationSo;
+    [SerializeField] private TextTranslationsSO deathSavingEffectTextTranslationSo;
+    [SerializeField] private TextTranslationsSO movementSpeedIncreaseEffectTextTranslationSo;
+    [SerializeField] private TextTranslationsSO onEnemyDeathGainedCoinsIncreaseEffectTextTranslationSo;
+    [SerializeField] private TextTranslationsSO staminaConsumptionDecreaseEffectTextTranslationSo;
+    [SerializeField] private TextTranslationsSO skillPointsExpRequirementDecreaseEffectTextTranslationSo;
+    [SerializeField] private TextTranslationsSO playerInventorySlotsIncreaseEffectTextTranslationSo;
+    [SerializeField] private TextTranslationsSO weaponInventorySlotsIncreaseEffectTextTranslationSo;
+    [SerializeField] private TextTranslationsSO relicInventorySlotsIncreaseEffectTextTranslationSo;
+    [SerializeField] private TextTranslationsSO onHitEnemySpeedDecreaseEffectTextTranslationSo;
+    [SerializeField] private TextTranslationsSO onHitEnemyPoisonEffectTextTranslationSo;
+    [SerializeField] private TextTranslationsSO onHitEnemyStunEffectTextTranslationSo;
+    [SerializeField] private TextTranslationsSO regenerationPerKillEffectTextTranslationSo;
+
+    [Header("Effect Conditions")]
+    [SerializeField] private TextTranslationsSO effectConditionStringStart;
+
+    [SerializeField] private TextTranslationsSO effectConditionTypeHpMoreThen;
+    [SerializeField] private TextTranslationsSO effectConditionTypeHpLessThen;
+    [SerializeField] private TextTranslationsSO effectConditionTypeDefMoreThen;
+    [SerializeField] private TextTranslationsSO effectConditionTypeDefLessThen;
+    [SerializeField] private TextTranslationsSO effectConditionIfEndless;
 
     public static GetAdditionalInventoryTextTranslationSo Instance;
 
@@ -72,29 +96,101 @@ public class GetAdditionalInventoryTextTranslationSo : MonoBehaviour
         }
     }
 
-    public TextTranslationsSO GetRelicPassiveTextTranslationSoByInventoryObject(PlayerEffects.RelicBuff relicBuff)
+    public TextTranslationsSO GetPlayerEffectTextTranslationSoByEffect(PlayerEffects.AppliedEffect effect)
     {
-        switch (relicBuff.relicBuffType)
+        switch (effect.appliedEffectType)
         {
             default:
                 return noRelicBuffTextTranslationSo;
-            case PlayerEffects.RelicBuffTypes.TakenDmgAbsorption:
-                return relicDmgAbsorptionBuffTextTranslationSo;
-            case PlayerEffects.RelicBuffTypes.TakenDmgIncrease:
-                return relicTakenDmgIncreaseBuffTextTranslationSo;
-            case PlayerEffects.RelicBuffTypes.NaDmgBuff:
-                return relicNaDmgBuffTextTranslationSo;
-            case PlayerEffects.RelicBuffTypes.CaDmgBuff:
-                return relicCaDmgBuffTextTranslationSo;
-            case PlayerEffects.RelicBuffTypes.ExpBuff:
-                return relicExpBuffTextTranslationSo;
-            case PlayerEffects.RelicBuffTypes.DefBuff:
-                return relicDefBuffTextTranslationSo;
-            case PlayerEffects.RelicBuffTypes.HpBuff:
-                return relicHpBuffTextTranslationSo;
-            case PlayerEffects.RelicBuffTypes.HpRegeneratePerKill:
-                return relicRegenerationPerKillBuffTextTranslationSo;
+            case PlayerEffects.AllPlayerEffects.TakenDmgDecrease:
+                return dmgAbsorptionEffectTextTranslationSo;
+            case PlayerEffects.AllPlayerEffects.TakenDmgIncrease:
+                return takenDmgIncreaseEffectTextTranslationSo;
+            case PlayerEffects.AllPlayerEffects.NADmgIncrease:
+                return naDmgIncreaseEffectTextTranslationSo;
+            case PlayerEffects.AllPlayerEffects.CADmgIncrease:
+                return caDmgIncreaseEffectTextTranslationSo;
+            case PlayerEffects.AllPlayerEffects.GainedExpIncrease:
+                return gainedExpIncreaseEffectTextTranslationSo;
+            case PlayerEffects.AllPlayerEffects.DefIncrease:
+                return defIncreaseEffectTextTranslationSo;
+            case PlayerEffects.AllPlayerEffects.HpIncrease:
+                return hpIncreaseEffectTextTranslationSo;
+            case PlayerEffects.AllPlayerEffects.HpRegenerationPerKill:
+                return regenerationPerKillEffectTextTranslationSo;
+            case PlayerEffects.AllPlayerEffects.AtkIncrease:
+                return atkIncreaseEffectTextTranslationSo;
+            case PlayerEffects.AllPlayerEffects.CritRateIncrease:
+                return critRateIncreaseEffectTextTranslationSo;
+            case PlayerEffects.AllPlayerEffects.OnHitEnemyCritRateIncrease:
+                return onHitCritRateIncreaseEffectTextTranslationSo;
+            case PlayerEffects.AllPlayerEffects.CritDamageIncrease:
+                return critDmgIncreaseEffectTextTranslationSo;
+            case PlayerEffects.AllPlayerEffects.DeathSaving:
+                return deathSavingEffectTextTranslationSo;
+            case PlayerEffects.AllPlayerEffects.MovementSpeedIncrease:
+                return movementSpeedIncreaseEffectTextTranslationSo;
+            case PlayerEffects.AllPlayerEffects.SkillPointExpRequirementDecrease:
+                return skillPointsExpRequirementDecreaseEffectTextTranslationSo;
+            case PlayerEffects.AllPlayerEffects.PlayerInventorySlotsIncrease:
+                return playerInventorySlotsIncreaseEffectTextTranslationSo;
+            case PlayerEffects.AllPlayerEffects.WeaponInventorySlotsIncrease:
+                return weaponInventorySlotsIncreaseEffectTextTranslationSo;
+            case PlayerEffects.AllPlayerEffects.RelicInventorySlotsIncrease:
+                return relicInventorySlotsIncreaseEffectTextTranslationSo;
+            case PlayerEffects.AllPlayerEffects.OnHitEnemySpeedDecrease:
+                return onHitEnemySpeedDecreaseEffectTextTranslationSo;
+            case PlayerEffects.AllPlayerEffects.OnHitEnemyPoison:
+                return onHitEnemyPoisonEffectTextTranslationSo;
+            case PlayerEffects.AllPlayerEffects.OnHitEnemyStun:
+                return onHitEnemyStunEffectTextTranslationSo;
+            case PlayerEffects.AllPlayerEffects.GainedCoinsOnEnemyDeathIncrease:
+                return onEnemyDeathGainedCoinsIncreaseEffectTextTranslationSo;
+            case PlayerEffects.AllPlayerEffects.StaminaConsumptionDecrease:
+                return staminaConsumptionDecreaseEffectTextTranslationSo;
         }
+    }
+
+    public string GetEffectConditionTextTranslationByEffect(PlayerEffects.AppliedEffect effect)
+    {
+        var fullConditionString = "";
+
+        if (effect.effectCondition.conditionValue != 0f)
+        {
+            fullConditionString += TextTranslationController.GetTextFromTextTranslationSOByLanguage(
+                TextTranslationController.GetCurrentLanguage(), effectConditionStringStart);
+            switch (effect.effectCondition.conditionType)
+            {
+                case PlayerEffects.AppliedEffect.EffectCondition.ConditionType.CurrentHpHigherThen:
+                    fullConditionString += TextTranslationController.GetTextFromTextTranslationSOByLanguage(
+                        TextTranslationController.GetCurrentLanguage(), effectConditionTypeHpMoreThen);
+                    break;
+                case PlayerEffects.AppliedEffect.EffectCondition.ConditionType.CurrentHpLowerThen:
+                    fullConditionString += TextTranslationController.GetTextFromTextTranslationSOByLanguage(
+                        TextTranslationController.GetCurrentLanguage(), effectConditionTypeHpLessThen);
+                    break;
+                case PlayerEffects.AppliedEffect.EffectCondition.ConditionType.DefHigherThen:
+                    fullConditionString += TextTranslationController.GetTextFromTextTranslationSOByLanguage(
+                        TextTranslationController.GetCurrentLanguage(), effectConditionTypeDefMoreThen);
+                    break;
+                case PlayerEffects.AppliedEffect.EffectCondition.ConditionType.DefLowerThen:
+                    fullConditionString += TextTranslationController.GetTextFromTextTranslationSOByLanguage(
+                        TextTranslationController.GetCurrentLanguage(), effectConditionTypeDefLessThen);
+                    break;
+            }
+
+            fullConditionString += " {0}";
+            if (!effect.effectCondition.isConditionValueFlat)
+                fullConditionString += "%";
+
+            if (effect.effectCondition.isCountEndless)
+                fullConditionString += TextTranslationController.GetTextFromTextTranslationSOByLanguage(
+                    TextTranslationController.GetCurrentLanguage(), effectConditionIfEndless);
+
+            fullConditionString += "\n";
+        }
+
+        return fullConditionString;
     }
 
     public TextTranslationsSO GetWeaponAdditionalStatTypeTextTranslationSoByInventoryObject(
@@ -106,19 +202,19 @@ public class GetAdditionalInventoryTextTranslationSo : MonoBehaviour
         {
             default:
                 return noStatTypeTextTranslationSo;
-            case PlayerEffects.PlayerBuff.Buffs.AtkBuff:
+            case PlayerEffects.AllPlayerEffects.AtkIncrease:
                 return atkTypeTextTranslationSo;
-            case PlayerEffects.PlayerBuff.Buffs.HpBuff:
+            case PlayerEffects.AllPlayerEffects.HpIncrease:
                 return hpTypeTextTranslationSo;
-            case PlayerEffects.PlayerBuff.Buffs.DefBuff:
+            case PlayerEffects.AllPlayerEffects.DefIncrease:
                 return defTypeTextTranslationSo;
-            case PlayerEffects.PlayerBuff.Buffs.CritRateBuff:
+            case PlayerEffects.AllPlayerEffects.CritRateIncrease:
                 return critRateTypeTextTranslationSo;
-            case PlayerEffects.PlayerBuff.Buffs.CritDamageBuff:
+            case PlayerEffects.AllPlayerEffects.CritDamageIncrease:
                 return critDmgTextTypeTranslationSo;
-            case PlayerEffects.PlayerBuff.Buffs.NormalAttackDamageBonusBuff:
+            case PlayerEffects.AllPlayerEffects.NADmgIncrease:
                 return naDmgBonusTextTypeTranslationSo;
-            case PlayerEffects.PlayerBuff.Buffs.ChargedAttackDamageBonusBuff:
+            case PlayerEffects.AllPlayerEffects.CADmgIncrease:
                 return caDmgBonusTypeTextTranslationSo;
         }
     }

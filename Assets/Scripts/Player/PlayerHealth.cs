@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerHealth : MonoBehaviour
@@ -15,11 +16,26 @@ public class PlayerHealth : MonoBehaviour
     private int additionalDefenceNumberFormula;
     private int currentDefence;
 
-    private float currentTakenDmgAbsorption;
+    public class DeathSavingBuff
+    {
+        public float regenerateHp;
+        public int effectId;
+    }
+
+    private readonly List<DeathSavingBuff> deathSavingBuffs = new();
+
+    public class DmgAbsorptionBuff
+    {
+        public float dmgAbsorptionMultiplayer;
+        public int effectId;
+    }
+
+    private readonly List<DmgAbsorptionBuff> currentDamageAbsorptionBuffs = new();
 
     #endregion
 
     public static event EventHandler<OnCurrentPlayerHealthChangeEventArgs> OnCurrentPlayerHealthChange;
+    public static event EventHandler OnCurrentDefenceChange;
 
     public class OnCurrentPlayerHealthChangeEventArgs : EventArgs
     {
@@ -28,6 +44,7 @@ public class PlayerHealth : MonoBehaviour
     }
 
     public event EventHandler<PlayerEffects.RelicBuffEffectTriggeredEventArgs> OnHealthAbsorptionTriggered;
+    public event EventHandler<PlayerEffects.RelicBuffEffectTriggeredEventArgs> OnDeathSavingEffectTriggered;
 
     private bool isFirstUpdate = true;
 
@@ -60,23 +77,29 @@ public class PlayerHealth : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
+        var dmgAbsorptionMultiplayer = GetDamageAbsorptionMultiplayer(out var usedEffects);
         var takenDamage =
-            (int)(damage * (1 - (float)currentDefence / (additionalDefenceNumberFormula + currentDefence)) *
-                  (1 - currentTakenDmgAbsorption));
+            Mathf.Clamp(
+                (int)(damage * (1 - (float)currentDefence / (additionalDefenceNumberFormula + currentDefence)) *
+                      (1 - dmgAbsorptionMultiplayer)), 0, damage);
 
-        if (currentTakenDmgAbsorption != 0f)
+        if (dmgAbsorptionMultiplayer != 0f)
         {
-            var relicAbsorbedDamage =
+            var absorbedDamage =
                 (int)(damage * (1 - (float)currentDefence / (additionalDefenceNumberFormula + currentDefence))) -
                 takenDamage;
 
-            OnHealthAbsorptionTriggered?.Invoke(this, new PlayerEffects.RelicBuffEffectTriggeredEventArgs
+            foreach (var usedEffect in usedEffects)
             {
-                buffType = relicAbsorbedDamage > 0
-                    ? PlayerEffects.RelicBuffTypes.TakenDmgAbsorption
-                    : PlayerEffects.RelicBuffTypes.TakenDmgIncrease,
-                spentValue = relicAbsorbedDamage
-            });
+                var effectAbsorbedDamage = (int)(absorbedDamage * usedEffect.dmgAbsorptionMultiplayer);
+
+                OnHealthAbsorptionTriggered?.Invoke(this, new PlayerEffects.RelicBuffEffectTriggeredEventArgs
+                {
+                    spentValue = effectAbsorbedDamage,
+                    effectID = usedEffect.effectId
+                });
+                Debug.Log(usedEffect.effectId);
+            }
         }
 
         currentHealth = Mathf.Clamp(currentHealth - takenDamage, 0, maxHealth);
@@ -85,7 +108,20 @@ public class PlayerHealth : MonoBehaviour
             currentHealth = currentHealth, maxHealth = maxHealth
         });
 
-        if (currentHealth <= 0) Debug.Log("U'r dead!");
+        if (currentHealth <= 0)
+        {
+            if (deathSavingBuffs.Count > 0)
+            {
+                RegenerateHealth(deathSavingBuffs[0].regenerateHp);
+                OnDeathSavingEffectTriggered?.Invoke(this, new PlayerEffects.RelicBuffEffectTriggeredEventArgs
+                {
+                    spentValue = 1, effectID = deathSavingBuffs[0].effectId
+                });
+                return;
+            }
+
+            Debug.Log("U'r dead!");
+        }
     }
 
     public void RegenerateHealth(int healthToRegenerate)
@@ -121,16 +157,94 @@ public class PlayerHealth : MonoBehaviour
     {
         currentDefence += (int)(baseDefence * percentageBuff);
         currentDefence += flatBuff;
+
+        OnCurrentDefenceChange?.Invoke(this, EventArgs.Empty);
     }
 
-    public void ChangeTakenDamageAbsorptionBuff(float percentageBuff)
+    public void ChangeTakenDamageAbsorptionBuff(float percentageBuff, int buffId)
     {
-        currentTakenDmgAbsorption += percentageBuff;
+        if (percentageBuff > 0)
+        {
+            var absorptionDamageBuff = new DmgAbsorptionBuff
+            {
+                dmgAbsorptionMultiplayer = percentageBuff,
+                effectId = buffId
+            };
+            currentDamageAbsorptionBuffs.Add(absorptionDamageBuff);
+        }
+        else
+        {
+            foreach (var dmgAbsorptionBuff in currentDamageAbsorptionBuffs)
+            {
+                if (dmgAbsorptionBuff.effectId != buffId) continue;
+
+                currentDamageAbsorptionBuffs.Remove(dmgAbsorptionBuff);
+                break;
+            }
+        }
     }
 
     public void ChangeTakenDamageIncreaseDebuff(float percentageDebuff)
     {
-        currentTakenDmgAbsorption -= percentageDebuff;
+        if (percentageDebuff > 0)
+        {
+            var absorptionDamageBuff = new DmgAbsorptionBuff
+            {
+                dmgAbsorptionMultiplayer = percentageDebuff,
+                effectId = -1
+            };
+            currentDamageAbsorptionBuffs.Add(absorptionDamageBuff);
+        }
+        else
+        {
+            foreach (var dmgAbsorptionBuff in currentDamageAbsorptionBuffs)
+            {
+                if (dmgAbsorptionBuff.effectId != -1) continue;
+
+                currentDamageAbsorptionBuffs.Remove(dmgAbsorptionBuff);
+                break;
+            }
+        }
+    }
+
+    public void ChangeDeathSavingEffect(float hpRegeneration, int effectId)
+    {
+        if (hpRegeneration > 0)
+        {
+            var deathSavingBuff = new DeathSavingBuff
+            {
+                regenerateHp = hpRegeneration,
+                effectId = effectId
+            };
+            deathSavingBuffs.Add(deathSavingBuff);
+        }
+        else
+        {
+            foreach (var deathSavingBuff in deathSavingBuffs)
+            {
+                if (effectId != deathSavingBuff.effectId) continue;
+
+                deathSavingBuffs.Remove(deathSavingBuff);
+                break;
+            }
+        }
+    }
+
+    private float GetDamageAbsorptionMultiplayer(out List<DmgAbsorptionBuff> usedEffectsId)
+    {
+        usedEffectsId = new List<DmgAbsorptionBuff>();
+        var dmgAbsorptionMultiplayer = 0f;
+
+        foreach (var dmgAbsorptionBuff in currentDamageAbsorptionBuffs)
+        {
+            if (dmgAbsorptionMultiplayer >= 1 && dmgAbsorptionBuff.dmgAbsorptionMultiplayer > 0)
+                continue;
+
+            dmgAbsorptionMultiplayer += dmgAbsorptionBuff.dmgAbsorptionMultiplayer;
+            usedEffectsId.Add(dmgAbsorptionBuff);
+        }
+
+        return dmgAbsorptionMultiplayer;
     }
 
     #region GetVariablesData
@@ -148,6 +262,11 @@ public class PlayerHealth : MonoBehaviour
     public int GetCurrentMaxHp()
     {
         return maxHealth;
+    }
+
+    public int GetCurrentHealth()
+    {
+        return currentHealth;
     }
 
     public int GetCurrentDefence()

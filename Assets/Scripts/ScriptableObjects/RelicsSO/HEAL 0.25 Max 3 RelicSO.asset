@@ -12,9 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aeb8ecef7e6ff334d888e1b939e9a573, type: 3}
   m_Name: HEAL 0.25 Max 3 RelicSO
   m_EditorClassIdentifier: 
-  relicBuffs:
-  - relicBuffType: 7
-    relicBuffScale: 0.25
-    isHasLimit: 1
+  relicApplyingEffects:
+  - appliedEffectID: 0
+    appliedEffectType: 11
+    effectPercentageScale: 0.25
+    effectFlatScale: 0
+    isUsagesLimited: 1
     maxUsagesLimit: 3
-    currentUsages: 105
+    currentUsages: 0
+    effectLimit: 0
+    effectApplyingChance: 0
+    applyingEffectDuration: 0
+    isEffectEndless: 1
+    effectRemainingTime: 0

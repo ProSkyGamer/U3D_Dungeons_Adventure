@@ -8,6 +8,9 @@ public class DungeonRoomSettings : MonoBehaviour
 
     [SerializeField] private List<Transform> enemiesToSpawn = new();
 
+    [SerializeField] private Transform minimapRoomIcon;
+    [SerializeField] private Transform minimapRoomIconCleared;
+
     private readonly List<EnemyController> remainingEnemies = new();
 
 
@@ -36,5 +39,16 @@ public class DungeonRoomSettings : MonoBehaviour
 
         if (remainingEnemies.Count == 0)
             OnAllEnemiesDefeated?.Invoke(this, EventArgs.Empty);
+    }
+
+    public void SetRoomAsClear()
+    {
+        minimapRoomIcon.gameObject.SetActive(false);
+        minimapRoomIconCleared.gameObject.SetActive(true);
+    }
+
+    public bool IsHasAnyEnemiesToKill()
+    {
+        return enemiesToSpawn.Count > 0;
     }
 }

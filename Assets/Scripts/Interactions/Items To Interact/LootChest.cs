@@ -1,9 +1,13 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 // ReSharper disable once CheckNamespace
 public class LootChest : InteractableItem
 {
+    public event EventHandler OnChestOpen;
+
     [SerializeField] private int coinsInChest = 10;
     [SerializeField] private int experienceForChest = 10;
 
@@ -45,6 +49,8 @@ public class LootChest : InteractableItem
 
             weaponToDropNewObject.DropInventoryObjectToWorld(transform.position);
         }
+
+        OnChestOpen?.Invoke(this, EventArgs.Empty);
 
         Debug.Log($"Added {coinsInChest} coins, {experienceForChest} experience,  {weaponToDrop.name} weapon");
 

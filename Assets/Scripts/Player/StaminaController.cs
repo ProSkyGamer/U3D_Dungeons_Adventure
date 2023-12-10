@@ -14,11 +14,10 @@ public class StaminaController : MonoBehaviour
     public event EventHandler OnAllStaminaSpend;
 
     [SerializeField] private int maxStamina = 100;
-
+    private float staminaSpendMultiplayer = 1f;
     [SerializeField] private float staminaRecoveryPerSecond = 25f;
 
     private float currentStamina;
-
     private bool isRegeneratingStamina;
 
     private bool isFirstUpdate = true;
@@ -56,9 +55,14 @@ public class StaminaController : MonoBehaviour
         }
     }
 
+    public void ChangeStaminaSpendMultiplayer(float deltaValue)
+    {
+        staminaSpendMultiplayer += deltaValue;
+    }
+
     public void SpendStamina(float toSpend)
     {
-        currentStamina = Math.Clamp(currentStamina - toSpend, 0, maxStamina);
+        currentStamina = Math.Clamp(currentStamina - toSpend * staminaSpendMultiplayer, 0, maxStamina);
 
         OnStaminaChange?.Invoke(this, new OnStaminaChangeEventArgs
         {

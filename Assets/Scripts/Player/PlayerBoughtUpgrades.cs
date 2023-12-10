@@ -4,14 +4,14 @@ public static class PlayerBoughtUpgrades
 {
     private class BoughtUpgrades
     {
-        public PlayerEffects.PlayerBuff.Buffs buffType;
+        public PlayerEffects.AllPlayerEffects buffType;
         public float buffValue;
         public int boughtItemID;
     }
 
     private static readonly List<BoughtUpgrades> boughtUpgrades = new();
 
-    public static void AddBoughtUpgrade(PlayerEffects.PlayerBuff.Buffs buffType, float buffValue, int itemID)
+    public static void AddBoughtUpgrade(PlayerEffects.AllPlayerEffects buffType, float buffValue, int itemID)
     {
         var newBoughtUpgrade = new BoughtUpgrades
         {
@@ -20,7 +20,7 @@ public static class PlayerBoughtUpgrades
         boughtUpgrades.Add(newBoughtUpgrade);
     }
 
-    public static bool IsUpgradeAlreadyBought(PlayerEffects.PlayerBuff.Buffs buffType, float buffValue, int itemID)
+    public static bool IsUpgradeAlreadyBought(PlayerEffects.AllPlayerEffects buffType, float buffValue, int itemID)
     {
         foreach (var boughtUpgrade in boughtUpgrades)
         {

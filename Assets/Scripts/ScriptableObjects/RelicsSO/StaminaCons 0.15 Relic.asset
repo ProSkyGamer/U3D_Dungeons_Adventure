@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aeb8ecef7e6ff334d888e1b939e9a573, type: 3}
+  m_Name: StaminaCons 0.15 Relic
+  m_EditorClassIdentifier: 
+  relicApplyingEffects:
+  - appliedEffectID: 0
+    appliedEffectType: 15
+    effectPercentageScale: 0.15
+    effectFlatScale: 0
+    isUsagesLimited: 0
+    maxUsagesLimit: 0
+    currentUsages: 0
+    effectLimit: 0
+    effectApplyingChance: 0
+    applyingEffectDuration: 0
+    isEffectEndless: 1
+    effectRemainingTime: 0

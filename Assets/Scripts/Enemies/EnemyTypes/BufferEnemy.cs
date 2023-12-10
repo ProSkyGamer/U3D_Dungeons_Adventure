@@ -4,7 +4,7 @@ using UnityEngine;
 [RequireComponent(typeof(EnemyController))]
 public class BufferEnemy : MonoBehaviour
 {
-    [SerializeField] private EnemyEffects.Buffs applyingEffect = EnemyEffects.Buffs.DefBuff;
+    [SerializeField] private EnemyEffects.EnemiesEffects applyingEffect = EnemyEffects.EnemiesEffects.DefBuff;
 
 
     [SerializeField] private float buffScale = 0.2f;
@@ -18,12 +18,12 @@ public class BufferEnemy : MonoBehaviour
             {
                 buffedEnemies.Add(enemy);
 
-                enemy.ApplyBuff(applyingEffect, buffScale);
+                enemy.AddOrRemoveEffect(applyingEffect, buffScale);
             }
     }
 
     private void OnDestroy()
     {
-        foreach (var buffedEnemy in buffedEnemies) buffedEnemy.DispelBuff(applyingEffect, -buffScale);
+        foreach (var buffedEnemy in buffedEnemies) buffedEnemy.AddOrRemoveEffect(applyingEffect, buffScale, false);
     }
 }

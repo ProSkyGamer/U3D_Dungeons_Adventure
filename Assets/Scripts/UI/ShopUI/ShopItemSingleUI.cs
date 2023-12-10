@@ -82,12 +82,14 @@ public class ShopItemSingleUI : MonoBehaviour
                     relicNewInventoryObject.SetInventoryParent(PlayerController.Instance.GetPlayerInventory());
                     break;
                 case ShopItemSO.ItemType.RelicReset:
-                    inventoryParent.GetInventoryObjectBySlot(inventorySlotNumber).TryGetRelicSo(out var relicSo);
-                    foreach (var relicBuff in relicSo.relicBuffs)
+                    var resettingInventoryObject = inventoryParent.GetInventoryObjectBySlot(inventorySlotNumber);
+                    resettingInventoryObject.RepairObject();
+                    resettingInventoryObject.TryGetRelicSo(out var relicSo);
+                    foreach (var relicApplyingEffect in relicSo.relicApplyingEffects)
                     {
-                        if (!relicBuff.isHasLimit) continue;
+                        if (!relicApplyingEffect.isUsagesLimited) continue;
 
-                        relicBuff.currentUsages = 0;
+                        relicApplyingEffect.currentUsages = 0;
                     }
 
                     break;
@@ -132,11 +134,14 @@ public class ShopItemSingleUI : MonoBehaviour
         for (var i = 0; i < playerRelicsInventory.GetMaxSlotsCount(); i++)
             if (!playerRelicsInventory.IsSlotNumberAvailable(i))
                 if (playerRelicsInventory.GetInventoryObjectBySlot(i).TryGetRelicSo(out var relicSo))
-                    for (var j = 0; i < relicSo.relicBuffs.Count; i++)
+                    for (var j = 0; i < relicSo.relicApplyingEffects.Count; i++)
                     {
-                        if (relicSo.relicBuffs[j].relicBuffType != soldRelicSo.relicBuffs[i].relicBuffType ||
-                            relicSo.relicBuffs[j].relicBuffScale != soldRelicSo.relicBuffs[i].relicBuffScale ||
-                            relicSo.relicBuffs[j].maxUsagesLimit != soldRelicSo.relicBuffs[i].maxUsagesLimit)
+                        if (relicSo.relicApplyingEffects[j].appliedEffectType !=
+                            soldRelicSo.relicApplyingEffects[i].appliedEffectType ||
+                            relicSo.relicApplyingEffects[j].effectPercentageScale !=
+                            soldRelicSo.relicApplyingEffects[i].effectPercentageScale ||
+                            relicSo.relicApplyingEffects[j].maxUsagesLimit !=
+                            soldRelicSo.relicApplyingEffects[i].maxUsagesLimit)
                             continue;
 
                         inventoryParent = playerRelicsInventory;
@@ -149,11 +154,14 @@ public class ShopItemSingleUI : MonoBehaviour
         for (var i = 0; i < playerRelicsInventory.GetMaxSlotsCount(); i++)
             if (!playerRelicsInventory.IsSlotNumberAvailable(i))
                 if (playerRelicsInventory.GetInventoryObjectBySlot(i).TryGetRelicSo(out var relicSo))
-                    for (var j = 0; i < relicSo.relicBuffs.Count; i++)
+                    for (var j = 0; i < relicSo.relicApplyingEffects.Count; i++)
                     {
-                        if (relicSo.relicBuffs[j].relicBuffType != soldRelicSo.relicBuffs[i].relicBuffType ||
-                            relicSo.relicBuffs[j].relicBuffScale != soldRelicSo.relicBuffs[i].relicBuffScale ||
-                            relicSo.relicBuffs[j].maxUsagesLimit != soldRelicSo.relicBuffs[i].maxUsagesLimit)
+                        if (relicSo.relicApplyingEffects[j].appliedEffectType !=
+                            soldRelicSo.relicApplyingEffects[i].appliedEffectType ||
+                            relicSo.relicApplyingEffects[j].effectPercentageScale !=
+                            soldRelicSo.relicApplyingEffects[i].effectPercentageScale ||
+                            relicSo.relicApplyingEffects[j].maxUsagesLimit !=
+                            soldRelicSo.relicApplyingEffects[i].maxUsagesLimit)
                             continue;
 
                         inventoryParent = playerRelicsInventory;

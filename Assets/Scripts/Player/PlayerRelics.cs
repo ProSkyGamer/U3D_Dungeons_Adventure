@@ -41,13 +41,37 @@ public class PlayerRelics : MonoBehaviour, IInventoryParent
         foreach (var storedRelic in allStoredRelics)
         {
             storedRelic.TryGetRelicSo(out var relicSo);
-            foreach (var relicBuff in relicSo.relicBuffs)
-                if (relicBuff.isHasLimit && relicBuff.relicBuffType == e.relicBuff.relicBuffType)
+            foreach (var relicEffect in relicSo.relicApplyingEffects)
+                if (relicEffect.isUsagesLimited && relicEffect.appliedEffectType == e.relicBuff.appliedEffectType)
                 {
-                    storedRelic.RemoveInventoryParent();
+                    storedRelic.BreakObject();
+                    OnRelicsChange?.Invoke(this, new OnRelicChangeEventArgs
+                    {
+                        removedRelic = storedRelic
+                    });
                     return;
                 }
         }
+    }
+
+    public void ChangeInventorySize(int newSize)
+    {
+        if (maxRelicsSlotsCount == newSize) return;
+
+        maxRelicsSlotsCount = newSize;
+        var newStoredRelicsInventory = new InventoryObject[newSize];
+
+        for (var i = 0; i < newStoredRelicsInventory.Length; i++)
+        {
+            var storedRelic = allStoredRelics[i];
+            newStoredRelicsInventory[i] = storedRelic;
+        }
+
+        if (allStoredRelics.Length > newSize)
+            for (var i = newStoredRelicsInventory.Length; i < allStoredRelics.Length; i++)
+                allStoredRelics[i].DropInventoryObjectToWorld(transform.position);
+
+        allStoredRelics = newStoredRelicsInventory;
     }
 
     public void AddInventoryObject(InventoryObject inventoryObject)
@@ -56,6 +80,17 @@ public class PlayerRelics : MonoBehaviour, IInventoryParent
         if (storedSlot == -1) return;
 
         allStoredRelics[storedSlot] = inventoryObject;
+        inventoryObject.OnObjectRepaired += InventoryObject_OnObjectRepaired;
+
+        OnRelicsChange?.Invoke(this, new OnRelicChangeEventArgs
+        {
+            addedRelic = inventoryObject
+        });
+    }
+
+    private void InventoryObject_OnObjectRepaired(object sender, EventArgs e)
+    {
+        var inventoryObject = sender as InventoryObject;
 
         OnRelicsChange?.Invoke(this, new OnRelicChangeEventArgs
         {
@@ -68,6 +103,7 @@ public class PlayerRelics : MonoBehaviour, IInventoryParent
         if (!IsSlotNumberAvailable(slotNumber)) return;
 
         allStoredRelics[slotNumber] = inventoryObject;
+        inventoryObject.OnObjectRepaired += InventoryObject_OnObjectRepaired;
 
         OnRelicsChange?.Invoke(this, new OnRelicChangeEventArgs
         {

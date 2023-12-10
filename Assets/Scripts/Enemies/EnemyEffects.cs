@@ -1,44 +1,94 @@
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class EnemyEffects : MonoBehaviour
 {
-    public enum Buffs
+    public enum EnemiesEffects
     {
         DefBuff,
-        AtkBuff
+        AtkBuff,
+        SlowDebuff
     }
+
+    private class AppliedEnimiesEffects
+    {
+        public EnemiesEffects enemiesEffectType;
+        public bool isBuffEndless;
+        public float buffDuration;
+        public float buffValue;
+    }
+
+    private readonly List<AppliedEnimiesEffects> appliedBuffs = new();
 
     private EnemyAttackController enemyAttackController;
     private EnemyHealth enemyHealth;
+    private NavMeshAgent navMeshAgent;
+
+    private float baseSpeed;
 
     private void Awake()
     {
         enemyAttackController = GetComponent<EnemyAttackController>();
         enemyHealth = GetComponent<EnemyHealth>();
+        navMeshAgent = GetComponent<NavMeshAgent>();
+        baseSpeed = navMeshAgent.speed;
     }
 
-    public void ApplyBuff(Buffs buffToApply, float percentageScale)
+    private void Update()
     {
-        switch (buffToApply)
+        if (GameStageManager.Instance.IsPause()) return;
+
+        TickBuffTimers();
+    }
+
+    private void TickBuffTimers()
+    {
+        foreach (var buff in appliedBuffs)
+            if (!buff.isBuffEndless)
+            {
+                buff.buffDuration -= Time.deltaTime;
+                if (buff.buffDuration <= 0) AddOrRemoveEffect(buff.enemiesEffectType, buff.buffValue, false);
+            }
+    }
+
+    public void AddOrRemoveEffect(EnemiesEffects enemiesEffectToApply, float percentageScale, bool isAdding = true,
+        bool isBuffEndless = true, float buffDuration = 1f)
+    {
+        if (isAdding)
         {
-            case Buffs.AtkBuff:
+            var appliedBuff = new AppliedEnimiesEffects
+            {
+                enemiesEffectType = enemiesEffectToApply,
+                buffValue = percentageScale,
+                isBuffEndless = isBuffEndless,
+                buffDuration = buffDuration
+            };
+
+            appliedBuffs.Add(appliedBuff);
+        }
+        else
+        {
+            foreach (var appliedBuff in appliedBuffs)
+                if (appliedBuff.enemiesEffectType == enemiesEffectToApply && appliedBuff.buffValue == percentageScale)
+                {
+                    appliedBuffs.Remove(appliedBuff);
+                    break;
+                }
+
+            percentageScale = -percentageScale;
+        }
+
+        switch (enemiesEffectToApply)
+        {
+            case EnemiesEffects.AtkBuff:
                 enemyAttackController.ChangeAttackBuff(percentageScale);
                 break;
-            case Buffs.DefBuff:
+            case EnemiesEffects.DefBuff:
                 enemyHealth.ChangeDefenceBuff(percentageScale);
                 break;
-        }
-    }
-
-    public void DispelBuff(Buffs buffToApply, float percentageScale)
-    {
-        switch (buffToApply)
-        {
-            case Buffs.AtkBuff:
-                enemyAttackController.ChangeAttackBuff(-percentageScale);
-                break;
-            case Buffs.DefBuff:
-                enemyHealth.ChangeDefenceBuff(-percentageScale);
+            case EnemiesEffects.SlowDebuff:
+                navMeshAgent.speed -= baseSpeed * percentageScale;
                 break;
         }
     }

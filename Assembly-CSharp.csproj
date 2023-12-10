@@ -65,6 +65,7 @@
      <Compile Include="Assets\Scripts\UI\ShopUI\TabSingleUI.cs" />
      <Compile Include="Assets\Scripts\ScriptableObjects\ShopItemSO\ShopItemSO.cs" />
      <Compile Include="Assets\Scripts\Inventory\InventoryObject.cs" />
+     <Compile Include="Assets\Scripts\UI\Pause &amp; Settings\MinimapTabUI.cs" />
      <Compile Include="Assets\Scripts\Player\PlayerHealth.cs" />
      <Compile Include="Assets\Scripts\UI\CharacterUI\WeaponsTabUI.cs" />
      <Compile Include="Assets\Scripts\Input\GameInput.cs" />
@@ -72,7 +73,6 @@
      <Compile Include="Assets\Scripts\UI\Pause &amp; Settings\RebindKeymapSingleUI.cs" />
      <Compile Include="Assets\Scripts\Enemies\EnemyEffects.cs" />
      <Compile Include="Assets\Scripts\Inventory\DroppedItemsController.cs" />
-     <Compile Include="Assets\Scripts\UI\TempUI.cs" />
      <Compile Include="Assets\Scripts\Player\PlayerRelics.cs" />
      <Compile Include="Assets\Scripts\Player\CameraController.cs" />
      <Compile Include="Assets\Scripts\Interactions\InteractButtonSingleUI.cs" />
@@ -93,6 +93,7 @@
      <Compile Include="Assets\Scripts\Dungeon\DungeonRoom.cs" />
      <Compile Include="Assets\Scripts\Interactions\Items To Interact\LootChest.cs" />
      <Compile Include="Assets\Scripts\Dungeon\ProcedureDungeonGeneration.cs" />
+     <Compile Include="Assets\Scripts\UI\MainGameUI.cs" />
      <Compile Include="Assets\Scripts\Player\StaminaController.cs" />
      <Compile Include="Assets\Scripts\UI\ShopUI\ShopItemSingleUI.cs" />
      <Compile Include="Assets\Scripts\Enemies\EnemyHealth.cs" />
@@ -110,6 +111,7 @@
      <Compile Include="Assets\Scripts\Player\WeaponBullet.cs" />
      <Compile Include="Assets\Scripts\UI\CharacterUI\CharacterUI.cs" />
      <Compile Include="Assets\Scripts\Player\PlayerWeapons.cs" />
+     <Compile Include="Assets\Scripts\Dungeon\MinimapCameraController.cs" />
      <Compile Include="Assets\Scripts\UI\InteractUI.cs" />
      <Compile Include="Assets\Scripts\Inventory\InventorySlotInteractButtons.cs" />
      <Compile Include="Assets\Scripts\Player\PlayerInventory.cs" />
@@ -234,6 +236,7 @@
      <Folder Include="Library\PackageCache\com.unity.modules.unityanalytics@1.0.0" />
      <Folder Include="Library\PackageCache\com.unity.modules.physics@1.0.0" />
      <Folder Include="Library\PackageCache\com.unity.textmeshpro@3.0.6\Scripts" />
+     <Folder Include="Assets\Scripts\ScriptableObjects\_TextTranslationsSO\Game\_InventoryObjects\InventoryDescriptions\ChangebleInfo\RelicBuffTypes\Conditions" />
      <Folder Include="Library\PackageCache\com.unity.visualscripting@1.9.1\Runtime" />
      <Folder Include="Assets\Scripts\Inventory" />
      <Folder Include="Library\PackageCache\com.unity.modules.vr@1.0.0" />
@@ -326,6 +329,7 @@
      <Folder Include="Library\PackageCache\com.unity.modules.vehicles@1.0.0" />
      <None Include="Library\PackageCache\com.unity.modules.xr@1.0.0\package.json" />
      <Folder Include="Library\PackageCache\com.unity.textmeshpro@3.0.6\Tests" />
+     <Folder Include="Assets\Scripts\ScriptableObjects\_TextTranslationsSO\Game\SettingsUI\SettingsTabButtons\MinimapTab" />
      <None Include="Library\PackageCache\com.unity.textmeshpro@3.0.6\Editor Resources\Shaders\TMP_Properties.cginc" />
      <Folder Include="Library\PackageCache\com.unity.render-pipelines.core@14.0.9\Tests" />
      <Folder Include="Assets\Scenes" />

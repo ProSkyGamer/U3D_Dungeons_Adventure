@@ -30,16 +30,18 @@ public class PlayerController : MonoBehaviour
 
     [SerializeField] private int experienceForFirstLevel = 100;
     [SerializeField] private float experienceIncreaseForNextLevel = 0.2f;
-    private static int currentLevelXpNeeded;
-    private static int currentXp;
+    private int currentLevelXpNeeded;
+    private int currentXp;
     private float additionalExpMultiplayer;
 
-    private static int currentAvailableSkillPoint;
-    private static int currentCoins;
+    private int currentAvailableSkillPoint;
+    private int currentCoins;
+    private float coinsOnEnemyDeathMultiplayer = 1f;
 
     [SerializeField] private float walkSpeed = 1f;
     [SerializeField] private float runSpeed = 3f;
     [SerializeField] private float sprintSpeed = 5f;
+    private float speedModifier = 1f;
     [SerializeField] private float staminaSprintCostPerSecond = 7.5f;
     private bool isRunning = true;
     private bool isSprinting;
@@ -51,8 +53,13 @@ public class PlayerController : MonoBehaviour
 
     private readonly List<EnemyController> attackedNotDeadEnemies = new();
 
+    private class HpRegenerationAfterEnemyDeath
+    {
+        public float hpRegenerationAmount;
+        public int effectID;
+    }
 
-    private float hpRegenerationAmountAfterEnemyDeath;
+    private readonly List<HpRegenerationAfterEnemyDeath> hpRegenerationAfterEnemyDeathEffects = new();
 
     [SerializeField] private CameraController cameraController;
     private PlayerMovement playerMovement;
@@ -68,6 +75,11 @@ public class PlayerController : MonoBehaviour
 
     private void Awake()
     {
+        var str = "Text text {1} {0}";
+
+        var newstr = string.Format(str, 0, 1);
+        Debug.Log(newstr);
+
         if (Instance != null)
             Destroy(gameObject);
         else
@@ -196,6 +208,7 @@ public class PlayerController : MonoBehaviour
                     moveVector *= Time.deltaTime * walkSpeed;
             }
 
+            moveVector *= speedModifier;
             playerMovement.Move(moveVector);
 
             return;
@@ -231,9 +244,31 @@ public class PlayerController : MonoBehaviour
             playerHealth.TakeDamage(-healthChangeValue);
     }
 
-    public void AddRegeneratingHpAfterEnemyDeath(float hpPercentageValue)
+    public void AddRegeneratingHpAfterEnemyDeath(float hpPercentageValue, int effectID)
     {
-        hpRegenerationAmountAfterEnemyDeath += hpPercentageValue;
+        if (hpPercentageValue > 0)
+        {
+            var hpRegenerationOnEnemyDeath = new HpRegenerationAfterEnemyDeath
+            {
+                hpRegenerationAmount = hpPercentageValue, effectID = effectID
+            };
+            hpRegenerationAfterEnemyDeathEffects.Add(hpRegenerationOnEnemyDeath);
+        }
+        else
+        {
+            foreach (var hpRegeneration in hpRegenerationAfterEnemyDeathEffects)
+            {
+                if (hpRegeneration.effectID != effectID) continue;
+
+                hpRegenerationAfterEnemyDeathEffects.Remove(hpRegeneration);
+                break;
+            }
+        }
+    }
+
+    public void ChangeSpeedModifier(float deltaValue)
+    {
+        speedModifier += deltaValue;
     }
 
     public void ReceiveExperience(int experience)
@@ -265,6 +300,11 @@ public class PlayerController : MonoBehaviour
         OnCoinsValueChange?.Invoke(this, EventArgs.Empty);
     }
 
+    public void ChangeCoinsPerKillMultiplayer(float deltaValue)
+    {
+        coinsOnEnemyDeathMultiplayer += deltaValue;
+    }
+
     public void SpendCoins(int coins)
     {
         currentCoins -= coins;
@@ -279,21 +319,29 @@ public class PlayerController : MonoBehaviour
 
     #region Attack & Weapons
 
-    private void EnemyController_OnEnemyDeath(object sender, EventArgs e)
+    private void EnemyController_OnEnemyDeath(object sender, EnemyController.OnEnemyDeathEventArgs e)
     {
         var enemyController = sender as EnemyController;
 
         attackedNotDeadEnemies.Remove(enemyController);
+
+        ReceiveCoins((int)(e.coinsValue * coinsOnEnemyDeathMultiplayer));
+        ReceiveExperience(e.expValue);
+
         if (enemyController != null)
             enemyController.OnEnemyDeath -= EnemyController_OnEnemyDeath;
 
-        if (hpRegenerationAmountAfterEnemyDeath == 0f) return;
+        if (hpRegenerationAfterEnemyDeathEffects.Count == 0) return;
 
-        playerHealth.RegenerateHealth(hpRegenerationAmountAfterEnemyDeath);
-        OnPlayerRegenerateHpAfterEnemyDeath?.Invoke(this, new PlayerEffects.RelicBuffEffectTriggeredEventArgs
+        foreach (var hpRegeneration in hpRegenerationAfterEnemyDeathEffects)
         {
-            buffType = PlayerEffects.RelicBuffTypes.HpRegeneratePerKill, spentValue = 1
-        });
+            playerHealth.RegenerateHealth(hpRegeneration.hpRegenerationAmount);
+
+            OnPlayerRegenerateHpAfterEnemyDeath?.Invoke(this, new PlayerEffects.RelicBuffEffectTriggeredEventArgs
+            {
+                spentValue = 1, effectID = hpRegeneration.effectID
+            });
+        }
     }
 
     #endregion

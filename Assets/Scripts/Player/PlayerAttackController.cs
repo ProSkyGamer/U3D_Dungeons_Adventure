@@ -17,6 +17,16 @@ public class PlayerAttackController : MonoBehaviour
         public EnemyController hittedEnemy;
     }
 
+    private class SlowEnemyOnHit
+    {
+        public float slowDuration;
+        public float speedDecrease;
+        public float effectChance;
+        public int effectId;
+    }
+
+    private readonly List<SlowEnemyOnHit> slowEnemyOnHits = new();
+
     private int currentAttackCombo = -1;
 
     [SerializeField] private float comboAttackResetTime = 3f;
@@ -46,6 +56,16 @@ public class PlayerAttackController : MonoBehaviour
     [SerializeField] private float baseCritDamage = 0.5f;
     private float currentCritRate;
     private float currentCritDamage;
+
+    private class CritRateIncreaseOnHit
+    {
+        public float critRateIncreasePerHit;
+        public float currentCritRateIncrease;
+        public float maxCritRateIncrease;
+        public int effectId;
+    }
+
+    private readonly List<CritRateIncreaseOnHit> critRateIncreaseOnHitBuffs = new();
 
     #endregion
 
@@ -247,7 +267,21 @@ public class PlayerAttackController : MonoBehaviour
                 var enemiesToAttack = FindEnemiesToAttack();
 
                 foreach (var enemy in enemiesToAttack)
+                {
                     enemy.ReceiveDamage(normalAttackDamage, playerController);
+
+                    var enemyEffectsController = enemy.GetComponent<EnemyEffects>();
+                    foreach (var slowEnemyOnHit in slowEnemyOnHits)
+                    {
+                        var isApplyingEffect = Random.Range(0, 100) <= slowEnemyOnHit.effectChance * 100;
+
+                        if (!isApplyingEffect) return;
+
+                        enemyEffectsController.AddOrRemoveEffect(EnemyEffects.EnemiesEffects.SlowDebuff,
+                            slowEnemyOnHit.speedDecrease, true, false, slowEnemyOnHit.slowDuration);
+                    }
+                }
+
                 break;
             case WeaponSO.WeaponType.Gun:
                 var closestEnemyPosition = FindNearestEnemyPositionForRangeAttack();
@@ -292,6 +326,17 @@ public class PlayerAttackController : MonoBehaviour
     {
         var bullet = sender as WeaponBullet;
 
+        var enemyEffectsController = e.hittedEnemy.GetComponent<EnemyEffects>();
+        foreach (var slowEnemyOnHit in slowEnemyOnHits)
+        {
+            var isApplyingEffect = Random.Range(0, 100) <= slowEnemyOnHit.effectChance * 100;
+
+            if (!isApplyingEffect) return;
+
+            enemyEffectsController.AddOrRemoveEffect(EnemyEffects.EnemiesEffects.SlowDebuff,
+                slowEnemyOnHit.speedDecrease, true, false, slowEnemyOnHit.slowDuration);
+        }
+
         OnEnemyHitted?.Invoke(this, new OnEnemyHittedEventArgs
         {
             hittedEnemy = e.hittedEnemy
@@ -322,7 +367,22 @@ public class PlayerAttackController : MonoBehaviour
             case WeaponSO.WeaponType.Katana:
                 var enemiesToAttack = FindEnemiesToAttack();
                 staminaController.SpendStamina(currentChooseWeaponSo.chargedAttackStaminaCost);
-                foreach (var enemy in enemiesToAttack) enemy.ReceiveDamage(chargeAttackDamage, playerController);
+                foreach (var enemy in enemiesToAttack)
+                {
+                    enemy.ReceiveDamage(chargeAttackDamage, playerController);
+
+                    var enemyEffectsController = enemy.GetComponent<EnemyEffects>();
+                    foreach (var slowEnemyOnHit in slowEnemyOnHits)
+                    {
+                        var isApplyingEffect = Random.Range(0, 100) <= slowEnemyOnHit.effectChance * 100;
+
+                        if (!isApplyingEffect) return;
+
+                        enemyEffectsController.AddOrRemoveEffect(EnemyEffects.EnemiesEffects.SlowDebuff,
+                            slowEnemyOnHit.speedDecrease, true, false, slowEnemyOnHit.slowDuration);
+                    }
+                }
+
                 break;
             case WeaponSO.WeaponType.Gun:
                 isAiming = true;
@@ -345,10 +405,53 @@ public class PlayerAttackController : MonoBehaviour
         var isCrit = Random.Range(0, 1000) < critRate * 1000 ? 1 : 0;
         var critValue = 1 + critDamage * isCrit;
 
+        if (isCrit == 0)
+            foreach (var critRateIncreaseOnHit in critRateIncreaseOnHitBuffs)
+            {
+                if (critRateIncreaseOnHit.currentCritRateIncrease >=
+                    critRateIncreaseOnHit.maxCritRateIncrease) continue;
+
+                ChangeCritRateBuff(critRateIncreaseOnHit.critRateIncreasePerHit);
+                critRateIncreaseOnHit.currentCritRateIncrease += critRateIncreaseOnHit.critRateIncreasePerHit;
+            }
+        else
+            foreach (var critRateIncreaseOnHit in critRateIncreaseOnHitBuffs)
+            {
+                if (critRateIncreaseOnHit.currentCritRateIncrease <= 0) continue;
+
+                ChangeCritRateBuff(-critRateIncreaseOnHit.currentCritRateIncrease);
+                critRateIncreaseOnHit.currentCritRateIncrease = 0;
+            }
+
         return critValue;
     }
 
     #region Buffs
+
+    public void ChangeEnemySlowOnHit(float slowValue, float slowDuration, float effectChance, int effectId)
+    {
+        if (slowValue > 0)
+        {
+            var slowEnemyOnHit = new SlowEnemyOnHit
+            {
+                slowDuration = slowDuration,
+                speedDecrease = slowValue,
+                effectChance = effectChance,
+                effectId = effectId
+            };
+            slowEnemyOnHits.Add(slowEnemyOnHit);
+        }
+        else
+        {
+            foreach (var slowEnemyOnHit in slowEnemyOnHits)
+            {
+                if (slowEnemyOnHit.effectId != effectId) continue;
+
+                slowEnemyOnHits.Remove(slowEnemyOnHit);
+                break;
+            }
+        }
+    }
 
     public void ChangeAttackBuff(float percentageBuff = default, int flatBuff = default)
     {
@@ -374,6 +477,31 @@ public class PlayerAttackController : MonoBehaviour
     public void ChangeCritDamageBuff(float percentageBuff)
     {
         currentCritDamage += percentageBuff;
+    }
+
+    public void ChangeCritRateOnHitIncreaseBuff(float critRateOnHitIncreaseValue, float maxCritRateIncrease,
+        int effectId)
+    {
+        if (critRateOnHitIncreaseValue > 0)
+        {
+            var newCritRateIncreaseBuff = new CritRateIncreaseOnHit
+            {
+                critRateIncreasePerHit = critRateOnHitIncreaseValue,
+                maxCritRateIncrease = maxCritRateIncrease,
+                effectId = effectId
+            };
+            critRateIncreaseOnHitBuffs.Add(newCritRateIncreaseBuff);
+        }
+        else
+        {
+            foreach (var critRateIncreaseOnHit in critRateIncreaseOnHitBuffs)
+            {
+                if (critRateIncreaseOnHit.effectId != effectId) continue;
+
+                critRateIncreaseOnHitBuffs.Remove(critRateIncreaseOnHit);
+                break;
+            }
+        }
     }
 
     #endregion

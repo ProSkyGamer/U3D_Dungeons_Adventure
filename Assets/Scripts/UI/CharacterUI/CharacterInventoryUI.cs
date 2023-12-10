@@ -33,35 +33,11 @@ public class CharacterInventoryUI : MonoBehaviour
 
     private void Start()
     {
+        UpdateInventorySlotCount();
+
         OnAnySlotInteractButtonPressed += CharacterInventoryUI_OnAnySlotInteractButtonPressed;
         InventorySlotSingleUI.OnStartItemDragging += InventorySlotSingleUI_OnStartItemDragging;
 
-        var maxSlotCount = 0;
-        switch (inventoryType)
-        {
-            case InventoryType.PlayerInventory:
-                maxSlotCount = PlayerController.Instance.GetPlayerInventory().GetMaxSlotsCount();
-                break;
-            case InventoryType.PlayerWeaponInventory:
-                maxSlotCount = PlayerController.Instance.GetPlayerAttackInventory().GetMaxSlotsCount();
-                break;
-            case InventoryType.PlayerRelicsInventory:
-                maxSlotCount = PlayerController.Instance.GetPlayerRelicsInventory().GetMaxSlotsCount();
-                break;
-        }
-
-        for (var i = 0; i < maxSlotCount; i++)
-        {
-            var slotTransform = Instantiate(playerInventorySlotPrefab, playerInventorySlotsGrid);
-
-            var slotSingleUI = slotTransform.GetComponent<InventorySlotSingleUI>();
-            slotSingleUI.SetStarterData(i, inventoryType, isInventoryInteractable, isShowingObjectName, this);
-
-            allInventorySlots.Add(slotSingleUI);
-        }
-
-        playerInventorySlotPrefab.gameObject.SetActive(false);
-        currentDraggingImage.gameObject.SetActive(false);
 
         InventorySlotSingleUI.OnDisplaySlotDescription += InventorySlotSingleUI_OnDisplaySlotDescription;
         InventorySlotSingleUI.OnStopDisplaySlotDescription += InventorySlotSingleUI_OnStopDisplaySlotDescription;
@@ -171,8 +147,56 @@ public class CharacterInventoryUI : MonoBehaviour
         }
     }
 
+    private void UpdateInventorySlotCount()
+    {
+        var maxSlotCount = 0;
+        switch (inventoryType)
+        {
+            case InventoryType.PlayerInventory:
+                maxSlotCount = PlayerController.Instance.GetPlayerInventory().GetMaxSlotsCount();
+                break;
+            case InventoryType.PlayerWeaponInventory:
+                maxSlotCount = PlayerController.Instance.GetPlayerAttackInventory().GetMaxSlotsCount();
+                break;
+            case InventoryType.PlayerRelicsInventory:
+                maxSlotCount = PlayerController.Instance.GetPlayerRelicsInventory().GetMaxSlotsCount();
+                break;
+        }
+
+        if (allInventorySlots.Count == maxSlotCount) return;
+
+        if (allInventorySlots.Count < maxSlotCount)
+        {
+            playerInventorySlotPrefab.gameObject.SetActive(true);
+            currentDraggingImage.gameObject.SetActive(true);
+
+            for (var i = allInventorySlots.Count; i < maxSlotCount; i++)
+            {
+                var slotTransform = Instantiate(playerInventorySlotPrefab, playerInventorySlotsGrid);
+
+                var slotSingleUI = slotTransform.GetComponent<InventorySlotSingleUI>();
+                slotSingleUI.SetStarterData(i, inventoryType, isInventoryInteractable, isShowingObjectName, this);
+
+                allInventorySlots.Add(slotSingleUI);
+            }
+
+            playerInventorySlotPrefab.gameObject.SetActive(false);
+            currentDraggingImage.gameObject.SetActive(false);
+        }
+        else
+        {
+            for (var i = 0; i < allInventorySlots.Count - maxSlotCount; i++)
+            {
+                allInventorySlots.RemoveAt(i);
+                i--;
+            }
+        }
+    }
+
     public void UpdateInventory()
     {
+        UpdateInventorySlotCount();
+
         currentDraggingImage.gameObject.SetActive(false);
 
         var playerInventory = GetCurrentPlayerInventoryByType();

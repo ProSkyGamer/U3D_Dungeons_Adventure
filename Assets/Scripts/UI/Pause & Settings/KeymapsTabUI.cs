@@ -8,6 +8,7 @@ public class KeymapsTabUI : MonoBehaviour
         SettingsUI.OnKeymapsButtonClick += SettingsUI_OnKeymapsButtonClick;
 
         SettingsUI.OnLanguagesButtonClick += SettingsUI_OnOtherButtonClick;
+        SettingsUI.OnMinimapButtonClick += SettingsUI_OnOtherButtonClick;
     }
 
     private void SettingsUI_OnOtherButtonClick(object sender, EventArgs e)

@@ -216,6 +216,26 @@ public class PlayerWeapons : MonoBehaviour, IInventoryParent
         currentOwnedWeapon[slotNumber] = null;
     }
 
+    public void ChangeInventorySize(int newSize)
+    {
+        if (maxOwnedWeaponCount == newSize) return;
+
+        maxOwnedWeaponCount = newSize;
+        var newStoredRelicsInventory = new InventoryObject[newSize];
+
+        for (var i = 0; i < newStoredRelicsInventory.Length; i++)
+        {
+            var storedRelic = currentOwnedWeapon[i];
+            newStoredRelicsInventory[i] = storedRelic;
+        }
+
+        if (currentOwnedWeapon.Length > newSize)
+            for (var i = newStoredRelicsInventory.Length; i < currentOwnedWeapon.Length; i++)
+                currentOwnedWeapon[i].DropInventoryObjectToWorld(transform.position);
+
+        currentOwnedWeapon = newStoredRelicsInventory;
+    }
+
     private InventoryObject FindNearestInventoryObjectWeapon(int startingPoint = 0)
     {
         var i = startingPoint < currentOwnedWeapon.Length - 1 ? startingPoint + 1 : 0;

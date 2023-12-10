@@ -27,14 +27,34 @@ public class PlayerInventory : MonoBehaviour, IInventoryParent
         storedInventoryObjects[slotNumber] = inventoryObject;
     }
 
-    public InventoryObject GetInventoryObjectBySlot(int slotNumber)
-    {
-        return storedInventoryObjects[slotNumber];
-    }
-
     public void RemoveInventoryObjectBySlot(int slotNumber)
     {
         storedInventoryObjects[slotNumber] = null;
+    }
+
+    public void ChangeInventorySize(int newSize)
+    {
+        if (playerMaxSlots == newSize) return;
+
+        playerMaxSlots = newSize;
+        var newStoredRelicsInventory = new InventoryObject[newSize];
+
+        for (var i = 0; i < newStoredRelicsInventory.Length; i++)
+        {
+            var storedRelic = storedInventoryObjects[i];
+            newStoredRelicsInventory[i] = storedRelic;
+        }
+
+        if (storedInventoryObjects.Length > newSize)
+            for (var i = newStoredRelicsInventory.Length; i < storedInventoryObjects.Length; i++)
+                storedInventoryObjects[i].DropInventoryObjectToWorld(transform.position);
+
+        storedInventoryObjects = newStoredRelicsInventory;
+    }
+
+    public InventoryObject GetInventoryObjectBySlot(int slotNumber)
+    {
+        return storedInventoryObjects[slotNumber];
     }
 
     public bool IsHasAnyInventoryObject()

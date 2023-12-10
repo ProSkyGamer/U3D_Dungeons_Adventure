@@ -14,12 +14,13 @@ public class WeaponSO : ScriptableObject
     public WeaponType weaponType;
 
     public Transform weaponVisual;
+    public PlayerEffects.AllPlayerEffects additionalWeaponStatType = PlayerEffects.AllPlayerEffects.AtkIncrease;
+    public float additionalWeaponStatTypeScale = 0.1f;
+    public List<PlayerEffects.AppliedEffect> weaponPassiveTalent;
     [Range(1, 6)] public int comboAttack = 1;
     public List<float> comboAttackScales = new();
     public float chargedAttackDamageScale;
     public float chargedAttackStaminaCost = 25f;
-    public PlayerEffects.PlayerBuff.Buffs additionalWeaponStatType = PlayerEffects.PlayerBuff.Buffs.AtkBuff;
-    public float additionalWeaponStatTypeScale = 0.1f;
 
     public void SetWeaponsSo(WeaponSO weaponToSet)
     {
@@ -31,5 +32,6 @@ public class WeaponSO : ScriptableObject
         chargedAttackStaminaCost = weaponToSet.chargedAttackStaminaCost;
         additionalWeaponStatType = weaponToSet.additionalWeaponStatType;
         additionalWeaponStatTypeScale = weaponToSet.additionalWeaponStatTypeScale;
+        weaponPassiveTalent = weaponToSet.weaponPassiveTalent;
     }
 }

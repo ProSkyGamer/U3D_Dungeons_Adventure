@@ -30,14 +30,30 @@ public class ChestSettings : MonoBehaviour
                     transform.position, Quaternion.identity, transform);
 
                 lootChestTransform.TryGetComponent(out lootChest);
+
+                lootChest.OnChestOpen += LootChest_OnChestOpen;
+
+                if (dungeonRoomSettings.IsHasAnyEnemiesToKill())
+                    lootChest.LockChest();
             }
+    }
+
+    private void LootChest_OnChestOpen(object sender, EventArgs e)
+    {
+        dungeonRoomSettings.SetRoomAsClear();
     }
 
     private void DungeonRoomSettings_OnAllEnemiesDefeated(object sender, EventArgs e)
     {
         if (!isChestSpawnedAfterDefeatingAllEnemies)
+        {
             lootChest.UnlockChest();
+        }
         else
-            Instantiate(roomLootChest, transform.position, Quaternion.identity, transform);
+        {
+            var lootChestTransform = Instantiate(roomLootChest, transform.position, Quaternion.identity, transform);
+            lootChestTransform.TryGetComponent(out lootChest);
+            lootChest.OnChestOpen += LootChest_OnChestOpen;
+        }
     }
 }

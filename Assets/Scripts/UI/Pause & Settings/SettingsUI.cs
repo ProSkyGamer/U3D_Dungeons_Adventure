@@ -14,6 +14,9 @@ public class SettingsUI : MonoBehaviour
     [SerializeField] private Button languagesTabButton;
     public static event EventHandler OnLanguagesButtonClick;
 
+    [SerializeField] private Button minimapTabButton;
+    public static event EventHandler OnMinimapButtonClick;
+
     private bool isFirstUpdate = true;
 
     private void Awake()
@@ -22,6 +25,7 @@ public class SettingsUI : MonoBehaviour
 
         keymapsTabButton.onClick.AddListener(() => { OnKeymapsButtonClick?.Invoke(this, EventArgs.Empty); });
         languagesTabButton.onClick.AddListener(() => { OnLanguagesButtonClick?.Invoke(this, EventArgs.Empty); });
+        minimapTabButton.onClick.AddListener(() => { OnMinimapButtonClick?.Invoke(this, EventArgs.Empty); });
     }
 
     private void Start()
@@ -71,5 +75,6 @@ public class SettingsUI : MonoBehaviour
         OnSettingsClose = null;
         OnKeymapsButtonClick = null;
         OnLanguagesButtonClick = null;
+        OnMinimapButtonClick = null;
     }
 }

@@ -11,7 +11,7 @@ public class UpgradeSingleUI : MonoBehaviour
     [SerializeField] private TextTranslationSingleUI upgradeTypeTextTranslationSingle;
     [SerializeField] private TextMeshProUGUI upgradeValueText;
 
-    private PlayerEffects.PlayerBuff.Buffs buffType;
+    private PlayerEffects.AllPlayerEffects buffType;
     private float buffValue;
     private int itemUpgradeID;
     [SerializeField] private Transform lockedObjectTransform;
@@ -49,8 +49,8 @@ public class UpgradeSingleUI : MonoBehaviour
     private void BuyUpgrade()
     {
         PlayerController.Instance.SpendSkillPoints(1);
-        PlayerController.Instance.GetPlayerEffects().ApplyBuff(
-            buffType, 0, true, buffValue);
+        PlayerController.Instance.GetPlayerEffects().ApplyEffect(
+            buffType, 0, buffValue);
         isBought = true;
 
         PlayerBoughtUpgrades.AddBoughtUpgrade(buffType, buffValue, itemUpgradeID);
@@ -59,7 +59,7 @@ public class UpgradeSingleUI : MonoBehaviour
         UpdateVisual();
     }
 
-    public void SetUpgradeType(PlayerEffects.PlayerBuff.Buffs upgradeBuffType, float upgradeBuffValue,
+    public void SetUpgradeType(PlayerEffects.AllPlayerEffects upgradeBuffType, float upgradeBuffValue,
         TextTranslationsSO upgradeTypeTextTranslationSo, int id)
     {
         if (buffValue != 0f) return;
@@ -73,8 +73,8 @@ public class UpgradeSingleUI : MonoBehaviour
 
         if (!PlayerBoughtUpgrades.IsUpgradeAlreadyBought(buffType, buffValue, itemUpgradeID)) return;
 
-        PlayerController.Instance.GetPlayerEffects().ApplyBuff(
-            buffType, 0, true, buffValue);
+        PlayerController.Instance.GetPlayerEffects().ApplyEffect(
+            buffType, 0, buffValue);
         isBought = true;
 
         OnUpgradeBuy?.Invoke(this, EventArgs.Empty);

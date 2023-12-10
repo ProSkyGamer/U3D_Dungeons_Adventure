@@ -36,7 +36,7 @@ public class UpgradesTabUI : MonoBehaviour
     [Serializable]
     public class UpgradeButtons
     {
-        public PlayerEffects.PlayerBuff.Buffs buffType = PlayerEffects.PlayerBuff.Buffs.AtkBuff;
+        public PlayerEffects.AllPlayerEffects buffType = PlayerEffects.AllPlayerEffects.AtkIncrease;
         public float buffValue = 0.1f;
     }
 

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -13,6 +14,9 @@ public class InventoryItemDescription : MonoBehaviour
     [SerializeField] private TextMeshProUGUI inventoryObjectWeaponAdditionalStatTypeText;
     [SerializeField] private TextTranslationsSO inventoryObjectWeaponAdditionalStatTypeTextTranslationSo;
     [SerializeField] private TextMeshProUGUI inventoryObjectWeaponAdditionalStat;
+    [SerializeField] private TextTranslationsSO inventoryObjectWeaponPassiveTextTranslationSo;
+    [SerializeField] private TextMeshProUGUI inventoryObjectWeaponPassiveText;
+    [SerializeField] private TextMeshProUGUI inventoryObjectWeaponPassive;
     [SerializeField] private TextMeshProUGUI inventoryObjectWeaponScalesText;
     [SerializeField] private TextTranslationsSO inventoryObjectWeaponScalesTextTranslationSo;
     [SerializeField] private TextTranslationsSO inventoryObjectWeaponNormalAttackScalesTextTranslationsSo;
@@ -50,6 +54,9 @@ public class InventoryItemDescription : MonoBehaviour
             inventoryObjectWeaponScalesText.text =
                 TextTranslationController.GetTextFromTextTranslationSOByLanguage(
                     TextTranslationController.GetCurrentLanguage(), inventoryObjectWeaponScalesTextTranslationSo);
+            inventoryObjectWeaponPassiveText.text =
+                TextTranslationController.GetTextFromTextTranslationSOByLanguage(
+                    TextTranslationController.GetCurrentLanguage(), inventoryObjectWeaponPassiveTextTranslationSo);
 
             inventoryObjectWeaponType.ChangeTextTranslationSO(GetAdditionalInventoryTextTranslationSo.Instance
                 .GetWeaponTypeTextTranslationSoByInventoryObject(inventoryObject));
@@ -57,8 +64,10 @@ public class InventoryItemDescription : MonoBehaviour
                 TextTranslationController.GetCurrentLanguage(),
                 GetAdditionalInventoryTextTranslationSo.Instance
                     .GetWeaponAdditionalStatTypeTextTranslationSoByInventoryObject(inventoryObject));
-            inventoryObjectWeaponAdditionalStat.text = $"<align=left>{additionalStatNameText} " +
-                                                       $"<align=right> {weaponSo.additionalWeaponStatTypeScale * 100}%";
+            inventoryObjectWeaponAdditionalStat.text = $"<align=left> {additionalStatNameText} </align> " +
+                                                       $"<align=right> {weaponSo.additionalWeaponStatTypeScale * 100}% </align>";
+
+            inventoryObjectWeaponPassive.text = GetEffectsTextFromEffectList(weaponSo.weaponPassiveTalent, out var _);
 
             var singleNormalAttackWeaponScaleText = TextTranslationController.GetTextFromTextTranslationSOByLanguage(
                 TextTranslationController.GetCurrentLanguage(),
@@ -91,30 +100,51 @@ public class InventoryItemDescription : MonoBehaviour
                 TextTranslationController.GetTextFromTextTranslationSOByLanguage(
                     TextTranslationController.GetCurrentLanguage(), inventoryObjectRelicWhileEquippedTextTranslationSo);
 
-            var relicPassiveString = "";
-            inventoryObjectRelicUsagesLeft.gameObject.SetActive(false);
-            foreach (var relicBuff in relicSo.relicBuffs)
-            {
-                var relicBuffString = TextTranslationController.GetTextFromTextTranslationSOByLanguage(
-                    TextTranslationController.GetCurrentLanguage(),
-                    GetAdditionalInventoryTextTranslationSo.Instance.GetRelicPassiveTextTranslationSoByInventoryObject(
-                        relicBuff));
+            inventoryObjectRelicPassive.text =
+                GetEffectsTextFromEffectList(relicSo.relicApplyingEffects, out var effectLimitString);
+            if (effectLimitString == "")
+                inventoryObjectRelicUsagesLeft.gameObject.SetActive(false);
 
-                relicPassiveString += string.Format(relicBuffString, relicBuff.relicBuffScale * 100);
-                relicPassiveString += "\n";
-
-                if (relicBuff.isHasLimit)
-                {
-                    inventoryObjectRelicUsagesLeft.gameObject.SetActive(true);
-                    inventoryObjectRelicUsagesLeft.text = string.Format(
-                        TextTranslationController.GetTextFromTextTranslationSOByLanguage(
-                            TextTranslationController.GetCurrentLanguage(),
-                            inventoryObjectRelicUsagesLeftTextTranslationsSo),
-                        relicBuff.maxUsagesLimit - relicBuff.currentUsages);
-                }
-            }
-
-            inventoryObjectRelicPassive.text = relicPassiveString;
+            inventoryObjectRelicUsagesLeft.text = effectLimitString;
         }
+    }
+
+    private string GetEffectsTextFromEffectList(List<PlayerEffects.AppliedEffect> givenEffects,
+        out string fullEffectLimitString)
+    {
+        var fullEffectString = "";
+        fullEffectLimitString = "";
+
+        foreach (var effect in givenEffects)
+        {
+            var fullEffectConditionString =
+                GetAdditionalInventoryTextTranslationSo.Instance.GetEffectConditionTextTranslationByEffect(effect);
+
+            fullEffectString += string.Format(fullEffectConditionString,
+                effect.effectCondition is { isConditionValueFlat: true }
+                    ? effect.effectCondition.conditionValue
+                    : effect.effectCondition.conditionValue * 100,
+                effect.effectCondition is { isStepSizeFlat: true }
+                    ? effect.effectCondition.stepSize
+                    : effect.effectCondition.stepSize * 100);
+
+            var singleEffectString = TextTranslationController.GetTextFromTextTranslationSOByLanguage(
+                TextTranslationController.GetCurrentLanguage(),
+                GetAdditionalInventoryTextTranslationSo.Instance.GetPlayerEffectTextTranslationSoByEffect(
+                    effect));
+
+            fullEffectString += string.Format(singleEffectString, effect.effectPercentageScale * 100,
+                effect.effectApplyingChance * 100, effect.effectLimit, effect.applyingEffectDuration);
+            fullEffectString += "\n";
+
+            if (effect.isUsagesLimited)
+                fullEffectLimitString = string.Format(
+                    TextTranslationController.GetTextFromTextTranslationSOByLanguage(
+                        TextTranslationController.GetCurrentLanguage(),
+                        inventoryObjectRelicUsagesLeftTextTranslationsSo),
+                    effect.maxUsagesLimit - effect.currentUsages);
+        }
+
+        return fullEffectString;
     }
 }

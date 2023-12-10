@@ -1,13 +1,18 @@
+using System;
 using UnityEngine;
 
 [CreateAssetMenu]
 public class InventoryObject : ScriptableObject
 {
+    public event EventHandler OnObjectRepaired;
+
     [SerializeField] private Sprite inventoryObjectSprite;
+    [SerializeField] private Sprite brokenInventoryObjectSprite;
     [SerializeField] private TextTranslationsSO inventoryObjectNameTextTranslationSo;
 
     [SerializeField] private WeaponSO weaponSo;
     [SerializeField] private RelicSO relicSo;
+    [SerializeField] private bool isBroken;
     [SerializeField] private TextTranslationsSO objectDescriptionTextTranslationSo;
 
     private IInventoryParent inventoryObjectParent;
@@ -49,7 +54,7 @@ public class InventoryObject : ScriptableObject
 
     public Sprite GetInventoryObjectSprite()
     {
-        return inventoryObjectSprite;
+        return isBroken ? brokenInventoryObjectSprite : inventoryObjectSprite;
     }
 
     public TextTranslationsSO GetInventoryObjectNameTextTranslationSo()
@@ -57,16 +62,21 @@ public class InventoryObject : ScriptableObject
         return inventoryObjectNameTextTranslationSo;
     }
 
-    public TextTranslationsSO GetInventoryObjectDescriptionTextTranslationSo()
+    public void BreakObject()
     {
-        return objectDescriptionTextTranslationSo;
+        isBroken = true;
+    }
+
+    public void RepairObject()
+    {
+        isBroken = false;
+        OnObjectRepaired?.Invoke(this, EventArgs.Empty);
     }
 
     public void SetInventoryObject(InventoryObject inventoryObject)
     {
         inventoryObjectSprite = inventoryObject.GetInventoryObjectSprite();
         inventoryObjectNameTextTranslationSo = inventoryObject.GetInventoryObjectNameTextTranslationSo();
-        objectDescriptionTextTranslationSo = inventoryObject.GetInventoryObjectDescriptionTextTranslationSo();
 
         if (inventoryObject.TryGetWeaponSo(out var newWeaponSo))
         {
@@ -83,6 +93,11 @@ public class InventoryObject : ScriptableObject
             newRelic.SetRelicSo(newRelicSo);
             relicSo = newRelic;
         }
+    }
+
+    public bool IsBroken()
+    {
+        return isBroken;
     }
 
     public bool TryGetWeaponSo(out WeaponSO gottenWeaponSo)

@@ -15,6 +15,29 @@ MonoBehaviour:
   weaponType: 0
   weaponVisual: {fileID: 6815916627772204711, guid: 00c854ea2ee995b47b9ec889fc53ef0c,
     type: 3}
+  additionalWeaponStatType: 0
+  additionalWeaponStatTypeScale: 0.35
+  weaponPassiveTalent:
+  - appliedEffectID: 2
+    effectCurrentlyAppliedTimes: 1
+    currentUsages: 0
+    appliedEffectType: 20
+    effectPercentageScale: 0.1
+    effectFlatScale: 0
+    effectCondition:
+      conditionType: 2
+      conditionValue: 0
+      isConditionValueFlat: 0
+      isCountEndless: 0
+      stepSize: 0
+      isStepSizeFlat: 0
+    isUsagesLimited: 0
+    maxUsagesLimit: 0
+    effectLimit: 0
+    effectApplyingChance: 0.6
+    applyingEffectDuration: 3
+    isEffectEndless: 1
+    effectRemainingTime: 0
   comboAttack: 3
   comboAttackScales:
   - 0.5
@@ -22,5 +45,3 @@ MonoBehaviour:
   - 0.6
   chargedAttackDamageScale: 1
   chargedAttackStaminaCost: 25
-  additionalWeaponStatType: 0
-  additionalWeaponStatTypeScale: 0.35

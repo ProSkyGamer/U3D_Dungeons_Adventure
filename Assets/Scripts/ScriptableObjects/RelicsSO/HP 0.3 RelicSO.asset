@@ -12,9 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aeb8ecef7e6ff334d888e1b939e9a573, type: 3}
   m_Name: HP 0.3 RelicSO
   m_EditorClassIdentifier: 
-  relicBuffs:
-  - relicBuffType: 6
-    relicBuffScale: 0.3
-    isHasLimit: 0
+  relicApplyingEffects:
+  - appliedEffectID: 0
+    appliedEffectType: 1
+    effectPercentageScale: 0.3
+    effectFlatScale: 0
+    isUsagesLimited: 0
     maxUsagesLimit: 0
-    currentUsages: 105
+    currentUsages: 0
+    effectLimit: 0
+    effectApplyingChance: 0
+    applyingEffectDuration: 0
+    isEffectEndless: 1
+    effectRemainingTime: 0

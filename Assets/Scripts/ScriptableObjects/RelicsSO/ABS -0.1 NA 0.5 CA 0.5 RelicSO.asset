@@ -12,19 +12,40 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aeb8ecef7e6ff334d888e1b939e9a573, type: 3}
   m_Name: ABS -0.1 NA 0.5 CA 0.5 RelicSO
   m_EditorClassIdentifier: 
-  relicBuffs:
-  - relicBuffType: 1
-    relicBuffScale: 0.1
-    isHasLimit: 0
+  relicApplyingEffects:
+  - appliedEffectID: 3
+    appliedEffectType: 10
+    effectPercentageScale: 0.1
+    effectFlatScale: 0
+    isUsagesLimited: 0
     maxUsagesLimit: 0
-    currentUsages: 105
-  - relicBuffType: 2
-    relicBuffScale: 0.5
-    isHasLimit: 0
+    currentUsages: 0
+    effectLimit: 0
+    effectApplyingChance: 0
+    applyingEffectDuration: 0
+    isEffectEndless: 1
+    effectRemainingTime: 0
+  - appliedEffectID: 4
+    appliedEffectType: 6
+    effectPercentageScale: 0.5
+    effectFlatScale: 0
+    isUsagesLimited: 0
     maxUsagesLimit: 0
-    currentUsages: 105
-  - relicBuffType: 3
-    relicBuffScale: 0.5
-    isHasLimit: 0
+    currentUsages: 0
+    effectLimit: 0
+    effectApplyingChance: 0
+    applyingEffectDuration: 0
+    isEffectEndless: 1
+    effectRemainingTime: 0
+  - appliedEffectID: 5
+    appliedEffectType: 7
+    effectPercentageScale: 0.5
+    effectFlatScale: 0
+    isUsagesLimited: 0
     maxUsagesLimit: 0
-    currentUsages: 105
+    currentUsages: 0
+    effectLimit: 0
+    effectApplyingChance: 0
+    applyingEffectDuration: 0
+    isEffectEndless: 1
+    effectRemainingTime: 0

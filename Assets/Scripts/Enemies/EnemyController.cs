@@ -9,7 +9,13 @@ using UnityEngine.AI;
 [RequireComponent(typeof(EnemyEffects))]
 public class EnemyController : MonoBehaviour
 {
-    public event EventHandler OnEnemyDeath;
+    public event EventHandler<OnEnemyDeathEventArgs> OnEnemyDeath;
+
+    public class OnEnemyDeathEventArgs : EventArgs
+    {
+        public int coinsValue;
+        public int expValue;
+    }
 
     [SerializeField] private int coinsForKill = 1;
     [SerializeField] private int experienceForKill = 1;
@@ -79,13 +85,11 @@ public class EnemyController : MonoBehaviour
 
     private void EnemyHealth_OnEnemyDie(object sender, EventArgs e)
     {
-        foreach (var player in playerAttackedEnemy)
+        OnEnemyDeath?.Invoke(this, new OnEnemyDeathEventArgs
         {
-            player.ReceiveExperience(experienceForKill);
-            player.ReceiveCoins(coinsForKill);
-        }
-
-        OnEnemyDeath?.Invoke(this, EventArgs.Empty);
+            coinsValue = coinsForKill,
+            expValue = experienceForKill
+        });
 
         Destroy(gameObject);
     }
