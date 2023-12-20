@@ -4,10 +4,17 @@ Library\Bee\artifacts\mvdfrm\Unity.AI.Navigation.Updater.ref.dll_624D4C5EA49E89F
 Library\Bee\artifacts\mvdfrm\Unity.AI.Navigation.ref.dll_4DBD8B01BD2AE419.mvfrm
 Library\Bee\artifacts\mvdfrm\Unity.Burst.Editor.ref.dll_4F7B73E229D756B2.mvfrm
 Library\Bee\artifacts\mvdfrm\Unity.Burst.ref.dll_A9D47564F0C574EF.mvfrm
+Library\Bee\artifacts\mvdfrm\Unity.Collections.ref.dll_857DC386F81DA2F4.mvfrm
 Library\Bee\artifacts\mvdfrm\Unity.InputSystem.ForUI.ref.dll_E28700F6E181F737.mvfrm
 Library\Bee\artifacts\mvdfrm\Unity.InputSystem.ref.dll_1D3F17F22588E4A8.mvfrm
 Library\Bee\artifacts\mvdfrm\Unity.Mathematics.Editor.ref.dll_BC6BEDEBC6F8BA8C.mvfrm
 Library\Bee\artifacts\mvdfrm\Unity.Mathematics.ref.dll_09002A919DF91B75.mvfrm
+Library\Bee\artifacts\mvdfrm\Unity.Netcode.Components.ref.dll_F064B6B8E3F295A1.mvfrm
+Library\Bee\artifacts\mvdfrm\Unity.Netcode.Editor.PackageChecker.ref.dll_FD8115166B407FEB.mvfrm
+Library\Bee\artifacts\mvdfrm\Unity.Netcode.Editor.ref.dll_5907948BCA9EE448.mvfrm
+Library\Bee\artifacts\mvdfrm\Unity.Netcode.Runtime.ref.dll_DC88FEFD89E76D63.mvfrm
+Library\Bee\artifacts\mvdfrm\Unity.Networking.Editor.ref.dll_74CF68839DA43A86.mvfrm
+Library\Bee\artifacts\mvdfrm\Unity.Networking.Transport.ref.dll_47A2205D803C4396.mvfrm
 Library\Bee\artifacts\mvdfrm\Unity.PlasticSCM.Editor.ref.dll_038935ADFCD4A11D.mvfrm
 Library\Bee\artifacts\mvdfrm\Unity.RenderPipeline.Universal.ShaderLibrary.ref.dll_F7477446ADE85C14.mvfrm
 Library\Bee\artifacts\mvdfrm\Unity.RenderPipelines.Core.Editor.ref.dll_5F7FF7A966BF64B8.mvfrm
@@ -124,4 +131,5 @@ Library\Bee\artifacts\mvdfrm\Unity.Android.GradleProject.dll_B82B92D7FB3BD22B.mv
 Library\Bee\artifacts\mvdfrm\Unity.Android.Types.dll_A02FD21A48D8C3B2.mvfrm
 Library\Bee\artifacts\mvdfrm\UnityEditor.iOS.Extensions.Common.dll_C796CE18F9A54307.mvfrm
 Library\Bee\artifacts\mvdfrm\UnityEditor.iOS.Extensions.Xcode.dll_47DAFFF700027135.mvfrm
+Library\Bee\artifacts\mvdfrm\Unity.Collections.LowLevel.ILSupport.dll_2E40CE80E145E521.mvfrm
 Library\Bee\artifacts\mvdfrm\Unity.VisualScripting.Antlr3.Runtime.dll_DACAA631817C5F43.mvfrm

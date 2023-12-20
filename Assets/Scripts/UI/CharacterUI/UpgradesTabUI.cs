@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
 using TMPro;
+using Unity.Netcode;
 using UnityEngine;
 
-public class UpgradesTabUI : MonoBehaviour
+public class UpgradesTabUI : NetworkBehaviour
 {
     [SerializeField] private Transform allUpgradesField;
     [SerializeField] private float draggingSensitivity = 2f;
@@ -36,22 +37,13 @@ public class UpgradesTabUI : MonoBehaviour
     [Serializable]
     public class UpgradeButtons
     {
-        public PlayerEffects.AllPlayerEffects buffType = PlayerEffects.AllPlayerEffects.AtkIncrease;
+        public PlayerEffectsController.AllPlayerEffects buffType = PlayerEffectsController.AllPlayerEffects.AtkIncrease;
         public float buffValue = 0.1f;
     }
 
     private bool isDragging;
 
-    private void Awake()
-    {
-        InitializeUpgradeLine(firstAtkUpgradeSingleUI, allAtkUpgrades, atkTextTranslationsSo);
-        InitializeUpgradeLine(firstHpUpgradeSingleUI, allHpUpgrades, hpTextTranslationsSo);
-        InitializeUpgradeLine(firstDefUpgradeSingleUI, allDefUpgrades, defTextTranslationsSo);
-        InitializeUpgradeLine(firstCritRateUpgradeSingleUI, allCritRateUpgrades, critRateTextTranslationsSo);
-        InitializeUpgradeLine(firstCritDmgUpgradeSingleUI, allCritDmgUpgrades, critDmgTranslationsSo);
-
-        lineBetweenUpgradeTransform.gameObject.SetActive(false);
-    }
+    private bool isFirstUpdate;
 
     private void InitializeUpgradeLine(UpgradeSingleUI firstUpgrade, List<UpgradeButtons> allUpgrades,
         TextTranslationsSO lineTypeTextTranslationsSo)
@@ -82,6 +74,11 @@ public class UpgradesTabUI : MonoBehaviour
         firstUpgrade.SetUpgradeType(allUpgrades[0].buffType, allUpgrades[0].buffValue, lineTypeTextTranslationsSo, 0);
     }
 
+    public override void OnNetworkSpawn()
+    {
+        isFirstUpdate = true;
+    }
+
     private void Start()
     {
         GameInput.Instance.OnUpgradesStartDragging += GameInput_OnUpgradesStartDragging;
@@ -90,8 +87,6 @@ public class UpgradesTabUI : MonoBehaviour
         CharacterUI.OnStatsTabButtonClick += CharacterUI_OnOtherTabButtonClick;
         CharacterUI.OnWeaponsTabButtonClick += CharacterUI_OnOtherTabButtonClick;
         CharacterUI.OnRelicsTabButtonClick += CharacterUI_OnOtherTabButtonClick;
-
-        PlayerController.Instance.OnSkillPointsValueChange += PlayerController_OnSkillPointsValueChange;
     }
 
     private void PlayerController_OnSkillPointsValueChange(object sender, EventArgs e)
@@ -120,6 +115,21 @@ public class UpgradesTabUI : MonoBehaviour
 
     private void Update()
     {
+        if (isFirstUpdate)
+        {
+            isFirstUpdate = false;
+
+            InitializeUpgradeLine(firstAtkUpgradeSingleUI, allAtkUpgrades, atkTextTranslationsSo);
+            InitializeUpgradeLine(firstHpUpgradeSingleUI, allHpUpgrades, hpTextTranslationsSo);
+            InitializeUpgradeLine(firstDefUpgradeSingleUI, allDefUpgrades, defTextTranslationsSo);
+            InitializeUpgradeLine(firstCritRateUpgradeSingleUI, allCritRateUpgrades, critRateTextTranslationsSo);
+            InitializeUpgradeLine(firstCritDmgUpgradeSingleUI, allCritDmgUpgrades, critDmgTranslationsSo);
+
+            lineBetweenUpgradeTransform.gameObject.SetActive(false);
+
+            PlayerController.Instance.OnSkillPointsValueChange += PlayerController_OnSkillPointsValueChange;
+        }
+
         var currentUpgradesFieldSize = allUpgradesField.localScale;
         if (isDragging)
             if (GameInput.Instance.GetBindingValue(GameInput.Binding.UpgradesStartDragging) == 1f)

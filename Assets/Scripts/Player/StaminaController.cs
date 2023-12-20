@@ -1,9 +1,10 @@
 using System;
+using Unity.Netcode;
 using UnityEngine;
 
-public class StaminaController : MonoBehaviour
+public class StaminaController : NetworkBehaviour
 {
-    public static event EventHandler<OnStaminaChangeEventArgs> OnStaminaChange;
+    public event EventHandler<OnStaminaChangeEventArgs> OnStaminaChange;
 
     public class OnStaminaChangeEventArgs : EventArgs
     {
@@ -29,6 +30,7 @@ public class StaminaController : MonoBehaviour
 
     private void Update()
     {
+        if (!IsOwner) return;
         if (GameStageManager.Instance.IsPause()) return;
 
         if (isFirstUpdate)

@@ -1,8 +1,9 @@
 using System;
+using Unity.Netcode;
 using UnityEngine;
 
 [RequireComponent(typeof(PlayerWeaponsVisual))]
-public class PlayerWeapons : MonoBehaviour, IInventoryParent
+public class PlayerWeapons : NetworkBehaviour, IInventoryParent
 {
     public event EventHandler<OnCurrentWeaponChangeEventArgs> OnCurrentWeaponChange;
 
@@ -18,10 +19,12 @@ public class PlayerWeapons : MonoBehaviour, IInventoryParent
 
     private static InventoryObject currentChooseWeapon;
 
-    private bool isFirstUpdate = true;
+    private bool isFirstUpdate;
 
-    private void Awake()
+    public override void OnNetworkSpawn()
     {
+        base.OnNetworkSpawn();
+
         if (currentOwnedWeapon != null)
         {
             OnCurrentWeaponChange?.Invoke(this, new OnCurrentWeaponChangeEventArgs
@@ -33,42 +36,86 @@ public class PlayerWeapons : MonoBehaviour, IInventoryParent
 
         currentOwnedWeapon = new InventoryObject[maxOwnedWeaponCount];
 
+        if (!IsOwner) return;
+
         if (firstChosenWeapon == null) Debug.LogError("No First Weapon");
 
-        var firstChosenWeaponNewObject = ScriptableObject.CreateInstance<InventoryObject>();
-        firstChosenWeaponNewObject.SetInventoryObject(firstChosenWeapon);
+        var networkObject = GetComponent<NetworkObject>();
+        var networkObjectReference = new NetworkObjectReference(networkObject);
 
-        firstChosenWeaponNewObject.SetInventoryParent(this);
+        SetFirstWeaponServerRpc(networkObjectReference);
+
+        isFirstUpdate = true;
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void SetFirstWeaponServerRpc(NetworkObjectReference playerWeaponsNetworkObjectReference)
+    {
+        var firstChosenWeaponNewObjectTransform = Instantiate(firstChosenWeapon.transform);
+        var firstChosenWeaponNetworkObject = firstChosenWeaponNewObjectTransform.GetComponent<NetworkObject>();
+        firstChosenWeaponNetworkObject.Spawn();
+        var firstChosenWeaponInventoryObject = firstChosenWeaponNewObjectTransform.GetComponent<InventoryObject>();
+        firstChosenWeaponInventoryObject.SpawnInventoryObject();
+        firstChosenWeaponInventoryObject.SetInventoryParent(playerWeaponsNetworkObjectReference,
+            CharacterInventoryUI.InventoryType.PlayerWeaponInventory);
     }
 
     private void Start()
     {
+        if (!IsOwner) return;
+
         GameInput.Instance.OnChangeCurrentWeaponAction += GameInput_OnChangeCurrentWeaponAction;
         GameInput.Instance.OnDropWeaponAction += GameInput_OnDropWeaponAction;
     }
 
     private void GameInput_OnChangeCurrentWeaponAction(object sender, EventArgs e)
     {
+        OnChangeCurrentWeaponActionServerRpc();
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void OnChangeCurrentWeaponActionServerRpc()
+    {
         if (GetCurrentInventoryObjectsCount() <= 1) return;
 
-        var currentSelectedWeaponSlotNumber = GetSlotNumberByInventoryObject(currentChooseWeapon);
+        OnChangeCurrentWeaponActionClientRpc();
+    }
 
-        var nextChosenWeapon = FindNearestInventoryObjectWeapon(currentSelectedWeaponSlotNumber);
-
-        TryChangeWeapon(nextChosenWeapon);
+    [ClientRpc]
+    private void OnChangeCurrentWeaponActionClientRpc()
+    {
+        ChangeToNextChosenWeapon();
     }
 
     private void GameInput_OnDropWeaponAction(object sender, EventArgs e)
     {
+        OnDropWeaponActionServerRpc();
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void OnDropWeaponActionServerRpc()
+    {
         if (GetCurrentInventoryObjectsCount() <= 1) return;
 
+        var currentSelectedWeaponSlotNumber = GetSlotNumberByInventoryObject(currentChooseWeapon);
+        currentOwnedWeapon[currentSelectedWeaponSlotNumber].RemoveInventoryParent();
+
+        OnDropWeaponActionClientRpc();
+    }
+
+    [ClientRpc]
+    private void OnDropWeaponActionClientRpc()
+    {
+        ChangeToNextChosenWeapon();
+    }
+
+    private void ChangeToNextChosenWeapon()
+    {
         var currentSelectedWeaponSlotNumber = GetSlotNumberByInventoryObject(currentChooseWeapon);
 
         var nextChosenWeapon = FindNearestInventoryObjectWeapon(currentSelectedWeaponSlotNumber);
 
         TryChangeWeapon(nextChosenWeapon);
-
-        currentOwnedWeapon[currentSelectedWeaponSlotNumber].RemoveInventoryParent();
     }
 
     private void Update()
@@ -218,20 +265,35 @@ public class PlayerWeapons : MonoBehaviour, IInventoryParent
 
     public void ChangeInventorySize(int newSize)
     {
+        if (!IsServer) return;
+
+        ChangeInventorySizeServerRpc(newSize);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void ChangeInventorySizeServerRpc(int newSize)
+    {
         if (maxOwnedWeaponCount == newSize) return;
 
-        maxOwnedWeaponCount = newSize;
-        var newStoredRelicsInventory = new InventoryObject[newSize];
+        var newMaxOwnedWeaponCount = newSize;
+
+        if (currentOwnedWeapon.Length > newSize)
+            for (var i = newMaxOwnedWeaponCount; i < currentOwnedWeapon.Length; i++)
+                currentOwnedWeapon[i].DropInventoryObjectToWorld(transform.position);
+
+        ChangeInventorySizeClientRpc(newMaxOwnedWeaponCount);
+    }
+
+    [ClientRpc]
+    private void ChangeInventorySizeClientRpc(int newMaxOwnedWeaponCount)
+    {
+        var newStoredRelicsInventory = new InventoryObject[newMaxOwnedWeaponCount];
 
         for (var i = 0; i < newStoredRelicsInventory.Length; i++)
         {
             var storedRelic = currentOwnedWeapon[i];
             newStoredRelicsInventory[i] = storedRelic;
         }
-
-        if (currentOwnedWeapon.Length > newSize)
-            for (var i = newStoredRelicsInventory.Length; i < currentOwnedWeapon.Length; i++)
-                currentOwnedWeapon[i].DropInventoryObjectToWorld(transform.position);
 
         currentOwnedWeapon = newStoredRelicsInventory;
     }

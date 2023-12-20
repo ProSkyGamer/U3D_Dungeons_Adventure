@@ -1,12 +1,15 @@
 using System;
+using System.Collections.Generic;
 using TMPro;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class MainGameUI : MonoBehaviour
+public class MainGameUI : NetworkBehaviour
 {
-    [SerializeField] private TextMeshProUGUI healthText;
-    [SerializeField] private Image healthBarValue;
+    [SerializeField] private Transform healthBarPrefab;
+    [SerializeField] private Transform healthBarsLayoutGroup;
+    private readonly Dictionary<PlayerHealthController, HealthBarUI> allPlayersHealthBars = new();
     [SerializeField] private Image staminaBarValue;
     [SerializeField] private TextMeshProUGUI experienceText;
     [SerializeField] private Image experienceBarValue;
@@ -14,14 +17,20 @@ public class MainGameUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI skillPointsText;
     [SerializeField] private CharacterInventoryUI relicsInventory;
 
+    private bool isFirstUpdate;
+
     private void Start()
     {
-        PlayerHealth.OnCurrentPlayerHealthChange += PlayerHealth_OnCurrentPlayerHealthChange;
+        healthBarPrefab.gameObject.SetActive(false);
 
-        StaminaController.OnStaminaChange += StaminaController_OnStaminaChange;
+        AllConnectedPlayers.Instance.OnNewPlayerConnected += AllConnectedPlayers_OnNewPlayerConnected;
+        var allConnectedPlayerControllers = AllConnectedPlayers.Instance.GetAllPlayerControllers();
+        foreach (var connectPlayerController in allConnectedPlayerControllers)
+        {
+            var newPlayerHealthController = connectPlayerController.GetPlayerHealthController();
 
-        PlayerController.Instance.OnExperienceChange += PlayerController_OnExperienceChange;
-        PlayerController.Instance.OnSkillPointsValueChange += PlayerController_OnSkillPointsValueChange;
+            SubscribeToNewPlayerHealthController(newPlayerHealthController);
+        }
 
         GameStageManager.Instance.OnGamePause += GameStageManager_OnGamePause;
 
@@ -30,6 +39,30 @@ public class MainGameUI : MonoBehaviour
 
         CharacterUI.OnCharacterUIOpen += OnOtherTabOpen;
         CharacterUI.OnCharacterUIClose += OnOtherTabClose;
+    }
+
+    private void AllConnectedPlayers_OnNewPlayerConnected(object sender,
+        AllConnectedPlayers.OnNewPlayerConnectedEventArgs e)
+    {
+        var newPlayerHealthController = e.newConnectedPlayerController.GetPlayerHealthController();
+
+        SubscribeToNewPlayerHealthController(newPlayerHealthController);
+    }
+
+    private void SubscribeToNewPlayerHealthController(PlayerHealthController newPlayerHealthController)
+    {
+        var newPlayerHealthBar = Instantiate(healthBarPrefab, healthBarsLayoutGroup);
+        newPlayerHealthBar.gameObject.SetActive(true);
+        var newHealthBarUI = newPlayerHealthBar.GetComponent<HealthBarUI>();
+
+        allPlayersHealthBars.Add(newPlayerHealthController, newHealthBarUI);
+
+        newPlayerHealthController.OnCurrentPlayerHealthChange += PlayerHealth_OnCurrentPlayerHealthChange;
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        isFirstUpdate = true;
     }
 
     private void OnOtherTabClose(object sender, EventArgs e)
@@ -76,11 +109,27 @@ public class MainGameUI : MonoBehaviour
     }
 
     private void PlayerHealth_OnCurrentPlayerHealthChange(object sender,
-        PlayerHealth.OnCurrentPlayerHealthChangeEventArgs e)
+        PlayerHealthController.OnCurrentPlayerHealthChangeEventArgs e)
     {
-        healthText.text = $"{e.currentHealth} / {e.maxHealth}";
-        var fillAmount = e.currentHealth / (float)e.maxHealth;
-        healthBarValue.fillAmount = fillAmount;
+        var playerHealthController = sender as PlayerHealthController;
+        if (playerHealthController == null) return;
+
+        var healthBar = allPlayersHealthBars[playerHealthController];
+
+        healthBar.ChangeHealthBarValue(e.currentHealth, e.maxHealth);
+    }
+
+    private void Update()
+    {
+        if (isFirstUpdate)
+        {
+            isFirstUpdate = false;
+
+            PlayerController.Instance.GetPlayerStaminaController().OnStaminaChange += StaminaController_OnStaminaChange;
+
+            PlayerController.Instance.OnExperienceChange += PlayerController_OnExperienceChange;
+            PlayerController.Instance.OnSkillPointsValueChange += PlayerController_OnSkillPointsValueChange;
+        }
     }
 
     private void Show()

@@ -9,7 +9,5 @@ public static class ResetStaticData
         PauseUI.ResetStaticData();
         RebindKeymapSingleUI.ResetStaticData();
         SettingsUI.ResetStaticData();
-        PlayerAttackController.ResetStaticData();
-        PlayerHealth.ResetStaticData();
     }
 }

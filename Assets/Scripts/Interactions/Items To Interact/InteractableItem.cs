@@ -1,6 +1,7 @@
+using Unity.Netcode;
 using UnityEngine;
 
-public class InteractableItem : MonoBehaviour
+public class InteractableItem : NetworkBehaviour
 {
     [SerializeField] protected bool isCanInteract = true;
 

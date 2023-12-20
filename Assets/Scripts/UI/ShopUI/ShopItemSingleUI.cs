@@ -1,9 +1,10 @@
 using System;
 using TMPro;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ShopItemSingleUI : MonoBehaviour
+public class ShopItemSingleUI : NetworkBehaviour
 {
     [SerializeField] private Image shopItemImage;
     [SerializeField] private TextMeshProUGUI coinsCostText;
@@ -76,10 +77,14 @@ public class ShopItemSingleUI : MonoBehaviour
 
                     break;
                 case ShopItemSO.ItemType.Relic:
-                    var relicNewInventoryObject = ScriptableObject.CreateInstance<InventoryObject>();
-                    relicNewInventoryObject.SetInventoryObject(currentShopItem.inventoryObjectToSold);
-
-                    relicNewInventoryObject.SetInventoryParent(PlayerController.Instance.GetPlayerInventory());
+                    var playerNetworkObject = PlayerController.Instance.GetComponent<NetworkObject>();
+                    var playerNetworkObjectReference = new NetworkObjectReference(playerNetworkObject);
+                    var spawningInventoryObjectNetworkObject =
+                        currentShopItem.inventoryObjectToSold.GetComponent<NetworkObject>();
+                    var spawningInventoryObjectNetworkObjectReference =
+                        new NetworkObjectReference(spawningInventoryObjectNetworkObject);
+                    SpawnInventoryObjectServerRpc(playerNetworkObjectReference,
+                        spawningInventoryObjectNetworkObjectReference);
                     break;
                 case ShopItemSO.ItemType.RelicReset:
                     var resettingInventoryObject = inventoryParent.GetInventoryObjectBySlot(inventorySlotNumber);
@@ -97,6 +102,32 @@ public class ShopItemSingleUI : MonoBehaviour
 
             TryChangeItemVisual();
         }
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void SpawnInventoryObjectServerRpc(NetworkObjectReference playerInventoryNetworkObjectReference,
+        NetworkObjectReference spawningInventoryObjectNetworkObjectReference)
+    {
+        spawningInventoryObjectNetworkObjectReference.TryGet(out var spawningInventoryObjectNetworkObject);
+        var newInventoryObjectTransform = Instantiate(spawningInventoryObjectNetworkObject.transform);
+        var newInventoryObjectNetworkObject = newInventoryObjectTransform.GetComponent<NetworkObject>();
+        newInventoryObjectNetworkObject.Spawn();
+        var newInventoryObject = newInventoryObjectTransform.GetComponent<InventoryObject>();
+        newInventoryObject.SpawnInventoryObject();
+        var spawnedInventoryObjectNetworkObjectReference = new NetworkObjectReference(newInventoryObjectNetworkObject);
+
+        SpawnInventoryObjectClientRpc(playerInventoryNetworkObjectReference,
+            spawnedInventoryObjectNetworkObjectReference);
+    }
+
+    [ClientRpc]
+    private void SpawnInventoryObjectClientRpc(NetworkObjectReference playerInventoryNetworkObjectReference,
+        NetworkObjectReference spawnedInventoryObjectNetworkObjectReference)
+    {
+        spawnedInventoryObjectNetworkObjectReference.TryGet(out var firstWeaponNetworkObject);
+        var addedInventoryObject = firstWeaponNetworkObject.GetComponent<InventoryObject>();
+        addedInventoryObject.SetInventoryParent(playerInventoryNetworkObjectReference,
+            CharacterInventoryUI.InventoryType.PlayerRelicsInventory);
     }
 
     private void TryChangeItemVisual()

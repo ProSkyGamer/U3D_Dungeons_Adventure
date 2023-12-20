@@ -95,6 +95,7 @@ GameObject:
   - component: {fileID: 2617205398004337126}
   - component: {fileID: 7506195738016194868}
   - component: {fileID: 3490389493231803465}
+  - component: {fileID: 4854032186214961243}
   m_Layer: 0
   m_Name: Chest
   m_TagString: Untagged
@@ -171,6 +172,26 @@ MonoBehaviour:
   experienceForChest: 10
   weaponDropChance: 1
   availableItemsToDrop:
-  - {fileID: 11400000, guid: 07ce8239023607748bd1873a2e96f962, type: 2}
-  - {fileID: 11400000, guid: c99e52bdac8cd734ca3cd464f77f39ba, type: 2}
-  - {fileID: 11400000, guid: 62b9acf8d75953c4c9dc647926f53689, type: 2}
+  - {fileID: 7386946131207136613, guid: 7ec63cf8ac429de43bc9817145c2170c, type: 3}
+  - {fileID: 7386946131207136613, guid: 758c90a87ef5feb448ffabd9bf800e66, type: 3}
+  - {fileID: 7386946131207136613, guid: 461282904badf2447a390edc2db73b6b, type: 3}
+--- !u!114 &4854032186214961243
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1531042309266495797}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 951099334
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 1
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1

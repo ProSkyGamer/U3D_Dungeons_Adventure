@@ -34,6 +34,7 @@ public class MinimapCameraController : MonoBehaviour
     private void Update()
     {
         if (!isFollowing) return;
+        if (followingObject == null) return;
 
         var followingObjectPosition = followingObject.position;
         var newPosition = new Vector3(followingObjectPosition.x, transform.position.y, followingObjectPosition.z);
@@ -80,6 +81,11 @@ public class MinimapCameraController : MonoBehaviour
         }
 
         transform.position = newCameraPosition;
+    }
+
+    public void ChangeFollowingObject(Transform newFollowingObject)
+    {
+        followingObject = newFollowingObject;
     }
 
     public bool IsMinimapFixed()

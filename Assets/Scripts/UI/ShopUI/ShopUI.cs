@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
 using TMPro;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ShopUI : MonoBehaviour
+public class ShopUI : NetworkBehaviour
 {
     public static ShopUI Instance { get; private set; }
 
@@ -18,7 +19,7 @@ public class ShopUI : MonoBehaviour
 
     [SerializeField] private TextMeshProUGUI coinsValueText;
 
-    private bool isFirstUpdate = true;
+    private bool isFirstUpdate;
 
     private void Awake()
     {
@@ -32,9 +33,11 @@ public class ShopUI : MonoBehaviour
         tabPrefab.gameObject.SetActive(false);
     }
 
-    private void Start()
+    public override void OnNetworkSpawn()
     {
         PlayerController.Instance.OnCoinsValueChange += PlayerController_OnCoinsValueChange;
+
+        isFirstUpdate = true;
     }
 
     private void PlayerController_OnCoinsValueChange(object sender, EventArgs e)

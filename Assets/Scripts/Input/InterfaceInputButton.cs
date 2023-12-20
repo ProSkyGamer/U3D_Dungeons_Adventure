@@ -1,8 +1,9 @@
 using System;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class InterfaceInputButton : MonoBehaviour
+public class InterfaceInputButton : NetworkBehaviour
 {
     [SerializeField] private GameInput.Binding inputBinding = GameInput.Binding.Attack;
 
@@ -13,6 +14,8 @@ public class InterfaceInputButton : MonoBehaviour
     private Button interfaceBindingButton;
     private float hideAfterTime;
 
+    private bool isFirstUpdate;
+
     private void Awake()
     {
         pressedInputBindingButton.gameObject.SetActive(false);
@@ -20,27 +23,38 @@ public class InterfaceInputButton : MonoBehaviour
         interfaceBindingButton = GetComponent<Button>();
     }
 
+    public override void OnNetworkSpawn()
+    {
+        isFirstUpdate = true;
+    }
+
     private void Start()
     {
         bindingButtonTextTracker.ChangeTrackingBinding(inputBinding);
 
         interfaceBindingButton.onClick.AddListener(() => { GameInput.Instance.TriggerBindingButton(inputBinding); });
-
-        switch (inputBinding)
-        {
-            case GameInput.Binding.Attack:
-                GameInput.Instance.OnAttackAction += OnFollowingActionTriggered;
-                PlayerAttackController.OnChargeAttackStopCharging += OnFollowingActionStopped;
-                break;
-            case GameInput.Binding.Sprint:
-                GameInput.Instance.OnSprintAction += OnFollowingActionTriggered;
-                PlayerController.Instance.OnStopSprinting += OnFollowingActionStopped;
-                break;
-        }
     }
 
     private void Update()
     {
+        if (isFirstUpdate)
+        {
+            isFirstUpdate = false;
+
+            switch (inputBinding)
+            {
+                case GameInput.Binding.Attack:
+                    GameInput.Instance.OnAttackAction += OnFollowingActionTriggered;
+                    PlayerController.Instance.GetPlayerAttackController().OnChargeAttackStopCharging +=
+                        OnFollowingActionStopped;
+                    break;
+                case GameInput.Binding.Sprint:
+                    GameInput.Instance.OnSprintAction += OnFollowingActionTriggered;
+                    PlayerController.Instance.OnStopSprinting += OnFollowingActionStopped;
+                    break;
+            }
+        }
+
         if (hideAfterTime > 0)
         {
             hideAfterTime -= Time.deltaTime;

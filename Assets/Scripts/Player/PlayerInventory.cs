@@ -1,9 +1,10 @@
+using Unity.Netcode;
 using UnityEngine;
 
-public class PlayerInventory : MonoBehaviour, IInventoryParent
+public class PlayerInventory : NetworkBehaviour, IInventoryParent
 {
-    [SerializeField] private int playerMaxSlots = 9;
-    private static InventoryObject[] storedInventoryObjects;
+    [SerializeField] private int playerMaxSlots = 10;
+    private InventoryObject[] storedInventoryObjects;
 
     private void Awake()
     {
@@ -34,20 +35,35 @@ public class PlayerInventory : MonoBehaviour, IInventoryParent
 
     public void ChangeInventorySize(int newSize)
     {
+        if (!IsServer) return;
+
+        ChangeInventorySizeServerRpc(newSize);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void ChangeInventorySizeServerRpc(int newSize)
+    {
         if (playerMaxSlots == newSize) return;
 
-        playerMaxSlots = newSize;
-        var newStoredRelicsInventory = new InventoryObject[newSize];
+        var newPlayerMaxSlots = newSize;
+
+        if (storedInventoryObjects.Length > newSize)
+            for (var i = newPlayerMaxSlots; i < storedInventoryObjects.Length; i++)
+                storedInventoryObjects[i].DropInventoryObjectToWorld(transform.position);
+
+        ChangeInventorySizeClientRpc(newPlayerMaxSlots);
+    }
+
+    [ClientRpc]
+    private void ChangeInventorySizeClientRpc(int newPlayerMaxSlots)
+    {
+        var newStoredRelicsInventory = new InventoryObject[newPlayerMaxSlots];
 
         for (var i = 0; i < newStoredRelicsInventory.Length; i++)
         {
             var storedRelic = storedInventoryObjects[i];
             newStoredRelicsInventory[i] = storedRelic;
         }
-
-        if (storedInventoryObjects.Length > newSize)
-            for (var i = newStoredRelicsInventory.Length; i < storedInventoryObjects.Length; i++)
-                storedInventoryObjects[i].DropInventoryObjectToWorld(transform.position);
 
         storedInventoryObjects = newStoredRelicsInventory;
     }

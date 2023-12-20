@@ -1,5 +1,6 @@
 using System;
 using TMPro;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -41,7 +42,7 @@ public class InventorySlotInteractButtons : MonoBehaviour
         });
 
         if (storedInventoryType == CharacterInventoryUI.InventoryType.PlayerWeaponInventory &&
-            PlayerController.Instance.GetPlayerAttackInventory().GetCurrentInventoryObjectsCount() <= 1)
+            PlayerController.Instance.GetPlayerWeaponsInventory().GetCurrentInventoryObjectsCount() <= 1)
         {
             unEquipItem.interactable = false;
             equipItem.interactable = false;
@@ -49,6 +50,10 @@ public class InventorySlotInteractButtons : MonoBehaviour
             deleteItem.interactable = false;
         }
 
+        IInventoryParent inventoryReference = null;
+        var inventoryNetworkObjectReference =
+            new NetworkObjectReference(PlayerController.Instance.GetPlayerNetworkObject());
+        var inventoryType = CharacterInventoryUI.InventoryType.PlayerInventory;
         if (storedInventoryType == CharacterInventoryUI.InventoryType.PlayerInventory)
         {
             equipItemText.text = TextTranslationController.GetTextFromTextTranslationSOByLanguage(
@@ -56,18 +61,24 @@ public class InventorySlotInteractButtons : MonoBehaviour
 
             unEquipItem.gameObject.SetActive(false);
 
-            IInventoryParent newInventory = null;
-            if (inventoryObject.TryGetWeaponSo(out var _))
-                newInventory = PlayerController.Instance.GetPlayerAttackInventory();
-            else if (inventoryObject.TryGetRelicSo(out var _))
-                newInventory = PlayerController.Instance.GetPlayerRelicsInventory();
 
-            if (newInventory != null)
+            if (inventoryObject.TryGetWeaponSo(out var _))
             {
-                if (newInventory.IsHasAnyAvailableSlot())
+                inventoryType = CharacterInventoryUI.InventoryType.PlayerWeaponInventory;
+                inventoryReference = PlayerController.Instance.GetPlayerWeaponsInventory();
+            }
+            else if (inventoryObject.TryGetRelicSo(out var _))
+            {
+                inventoryType = CharacterInventoryUI.InventoryType.PlayerRelicsInventory;
+                inventoryReference = PlayerController.Instance.GetPlayerRelicsInventory();
+            }
+
+            if (inventoryReference != null)
+            {
+                if (inventoryReference.IsHasAnyAvailableSlot())
                     equipItem.onClick.AddListener(() =>
                     {
-                        inventoryObject.SetInventoryParent(newInventory);
+                        inventoryObject.SetInventoryParent(inventoryNetworkObjectReference, inventoryType);
                         onClickAction();
                     });
 
@@ -83,12 +94,12 @@ public class InventorySlotInteractButtons : MonoBehaviour
 
             equipItem.gameObject.SetActive(false);
 
-            var playerInventory = PlayerController.Instance.GetPlayerInventory();
-            if (playerInventory.IsHasAnyAvailableSlot())
+            inventoryReference = PlayerController.Instance.GetPlayerInventory();
+            if (inventoryReference.IsHasAnyAvailableSlot())
             {
                 unEquipItem.onClick.AddListener(() =>
                 {
-                    inventoryObject.SetInventoryParent(playerInventory);
+                    inventoryObject.SetInventoryParent(inventoryNetworkObjectReference, inventoryType);
                     onClickAction();
                 });
                 return;

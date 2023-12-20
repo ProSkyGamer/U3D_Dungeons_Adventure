@@ -1,8 +1,9 @@
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
 [RequireComponent(typeof(DungeonRoomSettings))]
-public class DungeonRoom : MonoBehaviour
+public class DungeonRoom : NetworkBehaviour
 {
     [SerializeField] private Vector2Int roomSize = new(3, 3);
     [SerializeField] private Transform roomHall;
@@ -88,6 +89,25 @@ public class DungeonRoom : MonoBehaviour
 
     public void UnlockAllExits()
     {
+        if (!IsServer) return;
+
+        var exits = new int[usedExits.Count];
+        for (var i = 0; i < usedExits.Count; i++) exits[i] = (int)usedExits[i];
+        UnlockAllExitsServerRpc(exits);
+    }
+
+    [ServerRpc]
+    private void UnlockAllExitsServerRpc(int[] exits)
+    {
+        UnlockAllExitsClientRpc(exits);
+    }
+
+    [ClientRpc]
+    private void UnlockAllExitsClientRpc(int[] exits)
+    {
+        usedExits.Clear();
+        foreach (var exit in exits) usedExits.Add((Exits)exit);
+
         foreach (var exit in usedExits)
             switch (exit)
             {
@@ -108,6 +128,25 @@ public class DungeonRoom : MonoBehaviour
 
     public void UnlockAllStartExits()
     {
+        if (!IsServer) return;
+
+        var exits = new int[usedExits.Count];
+        for (var i = 0; i < usedExits.Count; i++) exits[i] = (int)usedExits[i];
+        UnlockAllStartExitsServerRpc(exits);
+    }
+
+    [ServerRpc]
+    private void UnlockAllStartExitsServerRpc(int[] exits)
+    {
+        UnlockAllStartExitsClientRpc(exits);
+    }
+
+    [ClientRpc]
+    private void UnlockAllStartExitsClientRpc(int[] exits)
+    {
+        usedExits.Clear();
+        foreach (var exit in exits) usedExits.Add((Exits)exit);
+
         foreach (var exit in usedExits)
             switch (exit)
             {
@@ -128,7 +167,21 @@ public class DungeonRoom : MonoBehaviour
 
     private void LockExit(Exits exit)
     {
-        switch (exit)
+        if (!IsServer) return;
+
+        LockExitServerRpc((int)exit);
+    }
+
+    [ServerRpc]
+    private void LockExitServerRpc(int exitToLock)
+    {
+        LockExitClientRpc(exitToLock);
+    }
+
+    [ClientRpc]
+    private void LockExitClientRpc(int exitToLock)
+    {
+        switch ((Exits)exitToLock)
         {
             case Exits.Right:
                 rightExit.gameObject.SetActive(true);

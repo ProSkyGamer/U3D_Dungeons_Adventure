@@ -109,7 +109,7 @@ public class InventoryItemDescription : MonoBehaviour
         }
     }
 
-    private string GetEffectsTextFromEffectList(List<PlayerEffects.AppliedEffect> givenEffects,
+    private string GetEffectsTextFromEffectList(List<PlayerEffectsController.AppliedEffect> givenEffects,
         out string fullEffectLimitString)
     {
         var fullEffectString = "";

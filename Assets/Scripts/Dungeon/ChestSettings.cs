@@ -1,7 +1,8 @@
 using System;
+using Unity.Netcode;
 using UnityEngine;
 
-public class ChestSettings : MonoBehaviour
+public class ChestSettings : NetworkBehaviour
 {
     [SerializeField] private Transform roomLootChest;
     private LootChest lootChest;
@@ -12,25 +13,25 @@ public class ChestSettings : MonoBehaviour
     private void Awake()
     {
         dungeonRoomSettings = GetComponent<DungeonRoomSettings>();
-    }
 
-    private void Start()
-    {
         GameStageManager.Instance.OnGameStart += GameStageManager_OnGameStart;
-
         dungeonRoomSettings.OnAllEnemiesDefeated += DungeonRoomSettings_OnAllEnemiesDefeated;
     }
 
     private void GameStageManager_OnGameStart(object sender, EventArgs e)
     {
+        if (!IsServer) return;
+
         if (roomLootChest != null)
             if (!isChestSpawnedAfterDefeatingAllEnemies)
             {
                 var lootChestTransform = Instantiate(roomLootChest,
                     transform.position, Quaternion.identity, transform);
 
-                lootChestTransform.TryGetComponent(out lootChest);
+                var lootChestNetworkObject = lootChestTransform.GetComponent<NetworkObject>();
+                lootChestNetworkObject.Spawn();
 
+                lootChestTransform.TryGetComponent(out lootChest);
                 lootChest.OnChestOpen += LootChest_OnChestOpen;
 
                 if (dungeonRoomSettings.IsHasAnyEnemiesToKill())
@@ -52,6 +53,10 @@ public class ChestSettings : MonoBehaviour
         else
         {
             var lootChestTransform = Instantiate(roomLootChest, transform.position, Quaternion.identity, transform);
+
+            var lootChestNetworkObject = lootChestTransform.GetComponent<NetworkObject>();
+            lootChestNetworkObject.Spawn();
+
             lootChestTransform.TryGetComponent(out lootChest);
             lootChest.OnChestOpen += LootChest_OnChestOpen;
         }

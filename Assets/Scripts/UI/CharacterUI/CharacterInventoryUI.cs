@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CharacterInventoryUI : MonoBehaviour
+public class CharacterInventoryUI : NetworkBehaviour
 {
     public static event EventHandler OnAnySlotInteractButtonPressed;
     public static event EventHandler OnStopItemDragging;
@@ -31,9 +32,11 @@ public class CharacterInventoryUI : MonoBehaviour
 
     private readonly List<InventorySlotSingleUI> allInventorySlots = new();
 
-    private void Start()
+    private bool isFirstUpdate;
+
+    public override void OnNetworkSpawn()
     {
-        UpdateInventorySlotCount();
+        base.OnNetworkSpawn();
 
         OnAnySlotInteractButtonPressed += CharacterInventoryUI_OnAnySlotInteractButtonPressed;
         InventorySlotSingleUI.OnStartItemDragging += InventorySlotSingleUI_OnStartItemDragging;
@@ -120,6 +123,12 @@ public class CharacterInventoryUI : MonoBehaviour
 
     private void Update()
     {
+        if (isFirstUpdate)
+        {
+            isFirstUpdate = false;
+            UpdateInventorySlotCount();
+        }
+
         if (currentDraggingObject == null) return;
 
         currentDraggingImage.transform.position = GameInput.Instance.GetCurrentMousePosition();
@@ -134,9 +143,10 @@ public class CharacterInventoryUI : MonoBehaviour
 
             var newSlotNumber = selectedSlot.GetSlotNumber();
 
-            var inventoryToPlace = GetCurrentPlayerInventoryByType();
+            var inventoryToPlaceNetworkObjectReference =
+                new NetworkObjectReference(PlayerController.Instance.GetPlayerNetworkObject());
 
-            currentDraggingObject.SetInventoryParentBySlot(inventoryToPlace,
+            currentDraggingObject.SetInventoryParentBySlot(inventoryToPlaceNetworkObjectReference, (int)inventoryType,
                 newSlotNumber);
 
             currentDraggingImage.gameObject.SetActive(false);
@@ -156,7 +166,7 @@ public class CharacterInventoryUI : MonoBehaviour
                 maxSlotCount = PlayerController.Instance.GetPlayerInventory().GetMaxSlotsCount();
                 break;
             case InventoryType.PlayerWeaponInventory:
-                maxSlotCount = PlayerController.Instance.GetPlayerAttackInventory().GetMaxSlotsCount();
+                maxSlotCount = PlayerController.Instance.GetPlayerWeaponsInventory().GetMaxSlotsCount();
                 break;
             case InventoryType.PlayerRelicsInventory:
                 maxSlotCount = PlayerController.Instance.GetPlayerRelicsInventory().GetMaxSlotsCount();
@@ -223,7 +233,7 @@ public class CharacterInventoryUI : MonoBehaviour
             case InventoryType.PlayerInventory:
                 return PlayerController.Instance.GetPlayerInventory();
             case InventoryType.PlayerWeaponInventory:
-                return PlayerController.Instance.GetPlayerAttackInventory();
+                return PlayerController.Instance.GetPlayerWeaponsInventory();
             case InventoryType.PlayerRelicsInventory:
                 return PlayerController.Instance.GetPlayerRelicsInventory();
         }

@@ -96,62 +96,62 @@ public class GetAdditionalInventoryTextTranslationSo : MonoBehaviour
         }
     }
 
-    public TextTranslationsSO GetPlayerEffectTextTranslationSoByEffect(PlayerEffects.AppliedEffect effect)
+    public TextTranslationsSO GetPlayerEffectTextTranslationSoByEffect(PlayerEffectsController.AppliedEffect effect)
     {
         switch (effect.appliedEffectType)
         {
             default:
                 return noRelicBuffTextTranslationSo;
-            case PlayerEffects.AllPlayerEffects.TakenDmgDecrease:
+            case PlayerEffectsController.AllPlayerEffects.TakenDmgDecrease:
                 return dmgAbsorptionEffectTextTranslationSo;
-            case PlayerEffects.AllPlayerEffects.TakenDmgIncrease:
+            case PlayerEffectsController.AllPlayerEffects.TakenDmgIncrease:
                 return takenDmgIncreaseEffectTextTranslationSo;
-            case PlayerEffects.AllPlayerEffects.NADmgIncrease:
+            case PlayerEffectsController.AllPlayerEffects.NADmgIncrease:
                 return naDmgIncreaseEffectTextTranslationSo;
-            case PlayerEffects.AllPlayerEffects.CADmgIncrease:
+            case PlayerEffectsController.AllPlayerEffects.CADmgIncrease:
                 return caDmgIncreaseEffectTextTranslationSo;
-            case PlayerEffects.AllPlayerEffects.GainedExpIncrease:
+            case PlayerEffectsController.AllPlayerEffects.GainedExpIncrease:
                 return gainedExpIncreaseEffectTextTranslationSo;
-            case PlayerEffects.AllPlayerEffects.DefIncrease:
+            case PlayerEffectsController.AllPlayerEffects.DefIncrease:
                 return defIncreaseEffectTextTranslationSo;
-            case PlayerEffects.AllPlayerEffects.HpIncrease:
+            case PlayerEffectsController.AllPlayerEffects.HpIncrease:
                 return hpIncreaseEffectTextTranslationSo;
-            case PlayerEffects.AllPlayerEffects.HpRegenerationPerKill:
+            case PlayerEffectsController.AllPlayerEffects.HpRegenerationPerKill:
                 return regenerationPerKillEffectTextTranslationSo;
-            case PlayerEffects.AllPlayerEffects.AtkIncrease:
+            case PlayerEffectsController.AllPlayerEffects.AtkIncrease:
                 return atkIncreaseEffectTextTranslationSo;
-            case PlayerEffects.AllPlayerEffects.CritRateIncrease:
+            case PlayerEffectsController.AllPlayerEffects.CritRateIncrease:
                 return critRateIncreaseEffectTextTranslationSo;
-            case PlayerEffects.AllPlayerEffects.OnHitEnemyCritRateIncrease:
+            case PlayerEffectsController.AllPlayerEffects.OnHitEnemyCritRateIncrease:
                 return onHitCritRateIncreaseEffectTextTranslationSo;
-            case PlayerEffects.AllPlayerEffects.CritDamageIncrease:
+            case PlayerEffectsController.AllPlayerEffects.CritDamageIncrease:
                 return critDmgIncreaseEffectTextTranslationSo;
-            case PlayerEffects.AllPlayerEffects.DeathSaving:
+            case PlayerEffectsController.AllPlayerEffects.DeathSaving:
                 return deathSavingEffectTextTranslationSo;
-            case PlayerEffects.AllPlayerEffects.MovementSpeedIncrease:
+            case PlayerEffectsController.AllPlayerEffects.MovementSpeedIncrease:
                 return movementSpeedIncreaseEffectTextTranslationSo;
-            case PlayerEffects.AllPlayerEffects.SkillPointExpRequirementDecrease:
+            case PlayerEffectsController.AllPlayerEffects.SkillPointExpRequirementDecrease:
                 return skillPointsExpRequirementDecreaseEffectTextTranslationSo;
-            case PlayerEffects.AllPlayerEffects.PlayerInventorySlotsIncrease:
+            case PlayerEffectsController.AllPlayerEffects.PlayerInventorySlotsIncrease:
                 return playerInventorySlotsIncreaseEffectTextTranslationSo;
-            case PlayerEffects.AllPlayerEffects.WeaponInventorySlotsIncrease:
+            case PlayerEffectsController.AllPlayerEffects.WeaponInventorySlotsIncrease:
                 return weaponInventorySlotsIncreaseEffectTextTranslationSo;
-            case PlayerEffects.AllPlayerEffects.RelicInventorySlotsIncrease:
+            case PlayerEffectsController.AllPlayerEffects.RelicInventorySlotsIncrease:
                 return relicInventorySlotsIncreaseEffectTextTranslationSo;
-            case PlayerEffects.AllPlayerEffects.OnHitEnemySpeedDecrease:
+            case PlayerEffectsController.AllPlayerEffects.OnHitEnemySpeedDecrease:
                 return onHitEnemySpeedDecreaseEffectTextTranslationSo;
-            case PlayerEffects.AllPlayerEffects.OnHitEnemyPoison:
+            case PlayerEffectsController.AllPlayerEffects.OnHitEnemyPoison:
                 return onHitEnemyPoisonEffectTextTranslationSo;
-            case PlayerEffects.AllPlayerEffects.OnHitEnemyStun:
+            case PlayerEffectsController.AllPlayerEffects.OnHitEnemyStun:
                 return onHitEnemyStunEffectTextTranslationSo;
-            case PlayerEffects.AllPlayerEffects.GainedCoinsOnEnemyDeathIncrease:
+            case PlayerEffectsController.AllPlayerEffects.GainedCoinsOnEnemyDeathIncrease:
                 return onEnemyDeathGainedCoinsIncreaseEffectTextTranslationSo;
-            case PlayerEffects.AllPlayerEffects.StaminaConsumptionDecrease:
+            case PlayerEffectsController.AllPlayerEffects.StaminaConsumptionDecrease:
                 return staminaConsumptionDecreaseEffectTextTranslationSo;
         }
     }
 
-    public string GetEffectConditionTextTranslationByEffect(PlayerEffects.AppliedEffect effect)
+    public string GetEffectConditionTextTranslationByEffect(PlayerEffectsController.AppliedEffect effect)
     {
         var fullConditionString = "";
 
@@ -161,19 +161,19 @@ public class GetAdditionalInventoryTextTranslationSo : MonoBehaviour
                 TextTranslationController.GetCurrentLanguage(), effectConditionStringStart);
             switch (effect.effectCondition.conditionType)
             {
-                case PlayerEffects.AppliedEffect.EffectCondition.ConditionType.CurrentHpHigherThen:
+                case PlayerEffectsController.AppliedEffect.EffectCondition.ConditionType.CurrentHpHigherThen:
                     fullConditionString += TextTranslationController.GetTextFromTextTranslationSOByLanguage(
                         TextTranslationController.GetCurrentLanguage(), effectConditionTypeHpMoreThen);
                     break;
-                case PlayerEffects.AppliedEffect.EffectCondition.ConditionType.CurrentHpLowerThen:
+                case PlayerEffectsController.AppliedEffect.EffectCondition.ConditionType.CurrentHpLowerThen:
                     fullConditionString += TextTranslationController.GetTextFromTextTranslationSOByLanguage(
                         TextTranslationController.GetCurrentLanguage(), effectConditionTypeHpLessThen);
                     break;
-                case PlayerEffects.AppliedEffect.EffectCondition.ConditionType.DefHigherThen:
+                case PlayerEffectsController.AppliedEffect.EffectCondition.ConditionType.DefHigherThen:
                     fullConditionString += TextTranslationController.GetTextFromTextTranslationSOByLanguage(
                         TextTranslationController.GetCurrentLanguage(), effectConditionTypeDefMoreThen);
                     break;
-                case PlayerEffects.AppliedEffect.EffectCondition.ConditionType.DefLowerThen:
+                case PlayerEffectsController.AppliedEffect.EffectCondition.ConditionType.DefLowerThen:
                     fullConditionString += TextTranslationController.GetTextFromTextTranslationSOByLanguage(
                         TextTranslationController.GetCurrentLanguage(), effectConditionTypeDefLessThen);
                     break;
@@ -202,19 +202,19 @@ public class GetAdditionalInventoryTextTranslationSo : MonoBehaviour
         {
             default:
                 return noStatTypeTextTranslationSo;
-            case PlayerEffects.AllPlayerEffects.AtkIncrease:
+            case PlayerEffectsController.AllPlayerEffects.AtkIncrease:
                 return atkTypeTextTranslationSo;
-            case PlayerEffects.AllPlayerEffects.HpIncrease:
+            case PlayerEffectsController.AllPlayerEffects.HpIncrease:
                 return hpTypeTextTranslationSo;
-            case PlayerEffects.AllPlayerEffects.DefIncrease:
+            case PlayerEffectsController.AllPlayerEffects.DefIncrease:
                 return defTypeTextTranslationSo;
-            case PlayerEffects.AllPlayerEffects.CritRateIncrease:
+            case PlayerEffectsController.AllPlayerEffects.CritRateIncrease:
                 return critRateTypeTextTranslationSo;
-            case PlayerEffects.AllPlayerEffects.CritDamageIncrease:
+            case PlayerEffectsController.AllPlayerEffects.CritDamageIncrease:
                 return critDmgTextTypeTranslationSo;
-            case PlayerEffects.AllPlayerEffects.NADmgIncrease:
+            case PlayerEffectsController.AllPlayerEffects.NADmgIncrease:
                 return naDmgBonusTextTypeTranslationSo;
-            case PlayerEffects.AllPlayerEffects.CADmgIncrease:
+            case PlayerEffectsController.AllPlayerEffects.CADmgIncrease:
                 return caDmgBonusTypeTextTranslationSo;
         }
     }

@@ -1,8 +1,9 @@
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class EnemyEffects : MonoBehaviour
+public class EnemyEffects : NetworkBehaviour
 {
     public enum EnemiesEffects
     {
@@ -11,7 +12,7 @@ public class EnemyEffects : MonoBehaviour
         SlowDebuff
     }
 
-    private class AppliedEnimiesEffects
+    private class AppliedEnemiesEffects
     {
         public EnemiesEffects enemiesEffectType;
         public bool isBuffEndless;
@@ -19,7 +20,7 @@ public class EnemyEffects : MonoBehaviour
         public float buffValue;
     }
 
-    private readonly List<AppliedEnimiesEffects> appliedBuffs = new();
+    private readonly List<AppliedEnemiesEffects> appliedEffects = new();
 
     private EnemyAttackController enemyAttackController;
     private EnemyHealth enemyHealth;
@@ -37,27 +38,35 @@ public class EnemyEffects : MonoBehaviour
 
     private void Update()
     {
+        if (!IsServer) return;
         if (GameStageManager.Instance.IsPause()) return;
 
-        TickBuffTimers();
+        TickEffectsTimers();
     }
 
-    private void TickBuffTimers()
+    private void TickEffectsTimers()
     {
-        foreach (var buff in appliedBuffs)
-            if (!buff.isBuffEndless)
+        List<AppliedEnemiesEffects> effectsToRemove = new();
+        foreach (var appliedEffect in appliedEffects)
+            if (!appliedEffect.isBuffEndless)
             {
-                buff.buffDuration -= Time.deltaTime;
-                if (buff.buffDuration <= 0) AddOrRemoveEffect(buff.enemiesEffectType, buff.buffValue, false);
+                appliedEffect.buffDuration -= Time.deltaTime;
+                if (appliedEffect.buffDuration <= 0)
+                    effectsToRemove.Add(appliedEffect);
             }
+
+        foreach (var effectToRemove in effectsToRemove)
+            AddOrRemoveEffect(effectToRemove.enemiesEffectType, effectToRemove.buffValue, false);
     }
 
     public void AddOrRemoveEffect(EnemiesEffects enemiesEffectToApply, float percentageScale, bool isAdding = true,
         bool isBuffEndless = true, float buffDuration = 1f)
     {
+        if (!IsServer) return;
+
         if (isAdding)
         {
-            var appliedBuff = new AppliedEnimiesEffects
+            var appliedBuff = new AppliedEnemiesEffects
             {
                 enemiesEffectType = enemiesEffectToApply,
                 buffValue = percentageScale,
@@ -65,14 +74,14 @@ public class EnemyEffects : MonoBehaviour
                 buffDuration = buffDuration
             };
 
-            appliedBuffs.Add(appliedBuff);
+            appliedEffects.Add(appliedBuff);
         }
         else
         {
-            foreach (var appliedBuff in appliedBuffs)
+            foreach (var appliedBuff in appliedEffects)
                 if (appliedBuff.enemiesEffectType == enemiesEffectToApply && appliedBuff.buffValue == percentageScale)
                 {
-                    appliedBuffs.Remove(appliedBuff);
+                    appliedEffects.Remove(appliedBuff);
                     break;
                 }
 

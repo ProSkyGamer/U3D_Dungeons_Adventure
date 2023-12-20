@@ -1,13 +1,14 @@
 using System;
 using System.Collections.Generic;
 using Unity.Mathematics;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.AI;
 
 [RequireComponent(typeof(EnemyHealth))]
 [RequireComponent(typeof(EnemyAttackController))]
 [RequireComponent(typeof(EnemyEffects))]
-public class EnemyController : MonoBehaviour
+public class EnemyController : NetworkBehaviour
 {
     public event EventHandler<OnEnemyDeathEventArgs> OnEnemyDeath;
 
@@ -80,6 +81,12 @@ public class EnemyController : MonoBehaviour
 
     private void Start()
     {
+        if (!IsServer)
+        {
+            Destroy(navMeshAgent);
+            return;
+        }
+
         enemyHealth.OnEnemyDie += EnemyHealth_OnEnemyDie;
     }
 
@@ -96,6 +103,8 @@ public class EnemyController : MonoBehaviour
 
     private void Update()
     {
+        if (!IsServer) return;
+
         if (GameStageManager.Instance.IsPause()) currentFollowingPlayer = transform;
         if (!GameStageManager.Instance.IsPlaying()) return;
 

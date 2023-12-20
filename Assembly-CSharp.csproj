@@ -45,33 +45,17 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\2022.3.12f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.Properties.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\Scripts\UI\Pause &amp; Settings\PauseUI.cs" />
-     <Compile Include="Assets\Scripts\Enemies\EnemyTypes\BufferEnemy.cs" />
-     <Compile Include="Assets\Scripts\UI\Translations\TextTranslationSingleUI.cs" />
      <Compile Include="Assets\Mini First Person Controller\Scripts\Components\FirstPersonAudio.cs" />
      <Compile Include="Assets\Scripts\Inventory\InventoryItemDescription.cs" />
-     <Compile Include="Assets\Scripts\ScriptableObjects\WeaponSO\WeaponSO.cs" />
-     <Compile Include="Assets\Scripts\Input\InterfaceInputButton.cs" />
+     <Compile Include="Assets\Scripts\Multiplayer\AllConnectedPlayers.cs" />
      <Compile Include="Assets\Scripts\Dungeon\DungeonSettings.cs" />
-     <Compile Include="Assets\Scripts\Enemies\EnemyController.cs" />
-     <Compile Include="Assets\Scripts\Enemies\EnemyTypes\HealerEnemy.cs" />
      <Compile Include="Assets\Scripts\UI\CharacterUI\CharacterInventoryUI.cs" />
      <Compile Include="Assets\Scripts\UI\CharacterUI\UpgradeSingleUI.cs" />
      <Compile Include="Assets\Scripts\Interactions\Items To Interact\Merchant.cs" />
-     <Compile Include="Assets\Mini First Person Controller\Scripts\Components\Jump.cs" />
-     <Compile Include="Assets\Scripts\Player\PlayerBoughtUpgrades.cs" />
-     <Compile Include="Assets\Scripts\Enemies\EnemyAttackController.cs" />
-     <Compile Include="Assets\Scripts\Input\GameInputActions.cs" />
-     <Compile Include="Assets\Scripts\UI\ShopUI\TabSingleUI.cs" />
+     <Compile Include="Assets\Scripts\Player\PlayerEffectsController.cs" />
      <Compile Include="Assets\Scripts\ScriptableObjects\ShopItemSO\ShopItemSO.cs" />
      <Compile Include="Assets\Scripts\Inventory\InventoryObject.cs" />
-     <Compile Include="Assets\Scripts\UI\Pause &amp; Settings\MinimapTabUI.cs" />
-     <Compile Include="Assets\Scripts\Player\PlayerHealth.cs" />
      <Compile Include="Assets\Scripts\UI\CharacterUI\WeaponsTabUI.cs" />
-     <Compile Include="Assets\Scripts\Input\GameInput.cs" />
-     <Compile Include="Assets\Scripts\Player\PlayerEffects.cs" />
-     <Compile Include="Assets\Scripts\UI\Pause &amp; Settings\RebindKeymapSingleUI.cs" />
-     <Compile Include="Assets\Scripts\Enemies\EnemyEffects.cs" />
      <Compile Include="Assets\Scripts\Inventory\DroppedItemsController.cs" />
      <Compile Include="Assets\Scripts\Player\PlayerRelics.cs" />
      <Compile Include="Assets\Scripts\Player\CameraController.cs" />
@@ -82,49 +66,69 @@
      <Compile Include="Assets\Scripts\UI\Translations\TextTranslationController.cs" />
      <Compile Include="Assets\Scripts\Input\BindingButtonTextTracker.cs" />
      <Compile Include="Assets\Scripts\UI\Translations\ChangeLanguageDropdownUI.cs" />
-     <Compile Include="Assets\Mini First Person Controller\Scripts\Components\Crouch.cs" />
      <Compile Include="Assets\Scripts\UI\CharacterUI\RelicTabUI.cs" />
-     <Compile Include="Assets\Scripts\UI\Pause &amp; Settings\KeymapsTabUI.cs" />
      <Compile Include="Assets\Scripts\Enemies\EnemyStatsUI.cs" />
-     <Compile Include="Assets\Scripts\Dungeon\ChestSettings.cs" />
      <Compile Include="Assets\Mini First Person Controller\Scripts\Components\GroundCheck.cs" />
      <Compile Include="Assets\Scripts\DeleteObjectAfterTime.cs" />
-     <Compile Include="Assets\Scripts\Interactions\Items To Interact\InteractableItem.cs" />
-     <Compile Include="Assets\Scripts\Dungeon\DungeonRoom.cs" />
      <Compile Include="Assets\Scripts\Interactions\Items To Interact\LootChest.cs" />
-     <Compile Include="Assets\Scripts\Dungeon\ProcedureDungeonGeneration.cs" />
-     <Compile Include="Assets\Scripts\UI\MainGameUI.cs" />
-     <Compile Include="Assets\Scripts\Player\StaminaController.cs" />
-     <Compile Include="Assets\Scripts\UI\ShopUI\ShopItemSingleUI.cs" />
      <Compile Include="Assets\Scripts\Enemies\EnemyHealth.cs" />
-     <Compile Include="Assets\Scripts\Dungeon\FinalDungeonRoom.cs" />
      <Compile Include="Assets\Scripts\Dungeon\StartingDungeonRoom.cs" />
-     <Compile Include="Assets\Scripts\Interactions\Items To Interact\DroppedInventoryItemSingle.cs" />
      <Compile Include="Assets\Scripts\UI\Pause &amp; Settings\LanguagesTabUI.cs" />
      <Compile Include="Assets\Scripts\Player\PlayerAttackController.cs" />
      <Compile Include="Assets\Scripts\UI\Pause &amp; Settings\SettingsUI.cs" />
      <Compile Include="Assets\Scripts\UI\CharacterUI\StatsTabUI.cs" />
-     <Compile Include="Assets\Scripts\UI\CharacterUI\UpgradesTabUI.cs" />
      <Compile Include="Assets\Scripts\ScriptableObjects\_TextTranslationsSO\TextTranslationsSO.cs" />
+     <Compile Include="Assets\Scripts\Multiplayer\VeryTempUI.cs" />
+     <Compile Include="Assets\Scripts\UI\InteractUI.cs" />
+     <Compile Include="Assets\Scripts\Inventory\InventorySlotInteractButtons.cs" />
+     <Compile Include="Assets\Scripts\Multiplayer\ClientNetworkTransform.cs" />
+     <Compile Include="Assets\Scripts\UI\Translations\SceneLanguageController.cs" />
+     <Compile Include="Assets\Mini First Person Controller\Scripts\FirstPersonMovement.cs" />
+     <Compile Include="Assets\Scripts\Enemies\EnemyTypes\ShielderEnemy.cs" />
+     <Compile Include="Assets\Scripts\UI\Pause &amp; Settings\PauseUI.cs" />
+     <Compile Include="Assets\Scripts\Enemies\EnemyTypes\BufferEnemy.cs" />
+     <Compile Include="Assets\Scripts\UI\Translations\TextTranslationSingleUI.cs" />
+     <Compile Include="Assets\Scripts\ScriptableObjects\WeaponSO\WeaponSO.cs" />
+     <Compile Include="Assets\Scripts\Input\InterfaceInputButton.cs" />
+     <Compile Include="Assets\Scripts\Enemies\EnemyController.cs" />
+     <Compile Include="Assets\Scripts\Enemies\EnemyTypes\HealerEnemy.cs" />
+     <Compile Include="Assets\Mini First Person Controller\Scripts\Components\Jump.cs" />
+     <Compile Include="Assets\Scripts\Player\PlayerBoughtUpgrades.cs" />
+     <Compile Include="Assets\Scripts\Enemies\EnemyAttackController.cs" />
+     <Compile Include="Assets\Scripts\Input\GameInputActions.cs" />
+     <Compile Include="Assets\Scripts\UI\ShopUI\TabSingleUI.cs" />
+     <Compile Include="Assets\Scripts\UI\Pause &amp; Settings\MinimapTabUI.cs" />
+     <Compile Include="Assets\Scripts\Input\GameInput.cs" />
+     <Compile Include="Assets\Scripts\UI\Pause &amp; Settings\RebindKeymapSingleUI.cs" />
+     <Compile Include="Assets\Scripts\Enemies\EnemyEffects.cs" />
+     <Compile Include="Assets\Mini First Person Controller\Scripts\Components\Crouch.cs" />
+     <Compile Include="Assets\Scripts\UI\Pause &amp; Settings\KeymapsTabUI.cs" />
+     <Compile Include="Assets\Scripts\Dungeon\ChestSettings.cs" />
+     <Compile Include="Assets\Scripts\Interactions\Items To Interact\InteractableItem.cs" />
+     <Compile Include="Assets\Scripts\Dungeon\DungeonRoom.cs" />
+     <Compile Include="Assets\Scripts\Dungeon\ProcedureDungeonGeneration.cs" />
+     <Compile Include="Assets\Scripts\UI\MainGameUI.cs" />
+     <Compile Include="Assets\Scripts\Player\StaminaController.cs" />
+     <Compile Include="Assets\Scripts\UI\ShopUI\ShopItemSingleUI.cs" />
+     <Compile Include="Assets\Scripts\Dungeon\FinalDungeonRoom.cs" />
+     <Compile Include="Assets\Scripts\Interactions\Items To Interact\DroppedInventoryItemSingle.cs" />
+     <Compile Include="Assets\Scripts\UI\CharacterUI\UpgradesTabUI.cs" />
      <Compile Include="Assets\Mini First Person Controller\Scripts\Components\Zoom.cs" />
      <Compile Include="Assets\Scripts\UI\CharacterUI\InventorySlotSingleUI.cs" />
      <Compile Include="Assets\Scripts\Player\WeaponBullet.cs" />
      <Compile Include="Assets\Scripts\UI\CharacterUI\CharacterUI.cs" />
      <Compile Include="Assets\Scripts\Player\PlayerWeapons.cs" />
      <Compile Include="Assets\Scripts\Dungeon\MinimapCameraController.cs" />
-     <Compile Include="Assets\Scripts\UI\InteractUI.cs" />
-     <Compile Include="Assets\Scripts\Inventory\InventorySlotInteractButtons.cs" />
      <Compile Include="Assets\Scripts\Player\PlayerInventory.cs" />
      <Compile Include="Assets\Scripts\ResetStaticData.cs" />
      <Compile Include="Assets\Scripts\Inventory\GetAdditionalInventoryTextTranslationSO.cs" />
-     <Compile Include="Assets\Scripts\UI\Translations\SceneLanguageController.cs" />
      <Compile Include="Assets\Scripts\Player\PlayerMovement.cs" />
      <Compile Include="Assets\Scripts\Player\PlayerWeaponsVisual.cs" />
-     <Compile Include="Assets\Mini First Person Controller\Scripts\FirstPersonMovement.cs" />
      <Compile Include="Assets\Mini First Person Controller\Scripts\FirstPersonLook.cs" />
      <Compile Include="Assets\Scripts\UI\ShopUI\ShopUI.cs" />
      <Compile Include="Assets\Scripts\Interactions\AddInteractButtonUI.cs" />
-     <Compile Include="Assets\Scripts\Enemies\EnemyTypes\ShielderEnemy.cs" />
+     <Compile Include="Assets\Scripts\UI\HealthBarUI.cs" />
+     <Compile Include="Assets\Scripts\Player\PlayerHealthController.cs" />
      <Compile Include="Assets\Scripts\Dungeon\DungeonRoomSettings.cs" />
      <Compile Include="Assets\Scripts\GameStageManager.cs" />
      <Folder Include="Assets" />
@@ -147,6 +151,7 @@
      <None Include="Library\PackageCache\com.unity.inputsystem@1.7.0\package.json" />
      <None Include="Library\PackageCache\com.unity.modules.ai@1.0.0\package.json" />
      <Folder Include="Assets\Scripts\ScriptableObjects\_TextTranslationsSO\Game\ShopUI\ShopTabs" />
+     <None Include="Library\PackageCache\com.unity.collections@1.2.4\Unity.Collections.LowLevel.ILSupport\README.txt" />
      <Folder Include="Library\PackageCache\com.unity.modules.animation@1.0.0" />
      <None Include="Library\PackageCache\com.unity.inputsystem@1.7.0\ValidationConfig.json" />
      <Folder Include="Assets\Scripts\ScriptableObjects\RelicsSO" />
@@ -178,7 +183,9 @@
      <Folder Include="Assets\Mini First Person Controller\Audio\Jump" />
      <Folder Include="Library\PackageCache\com.unity.ext.nunit@1.0.6\net35\unity-custom" />
      <Folder Include="Assets\Scripts\Enemies" />
+     <Folder Include="Library\PackageCache\com.unity.collections@1.2.4\Unity.Collections.LowLevel.ILSupport" />
      <Folder Include="Assets\TextMesh Pro\Resources\Fonts &amp; Materials" />
+     <Folder Include="Library\PackageCache\com.unity.collections@1.2.4" />
      <Folder Include="Library\PackageCache\com.unity.visualscripting@1.9.1" />
      <Folder Include="Library\PackageCache\com.unity.ai.navigation@1.1.5\Gizmos" />
      <None Include="Library\PackageCache\com.unity.ide.visualstudio@2.0.21\ValidationConfig.json" />
@@ -199,6 +206,7 @@
      <Folder Include="Assets\Scripts\ScriptableObjects\_TextTranslationsSO\Game\_InventoryObjects\Relics" />
      <Folder Include="Assets\Scripts\ScriptableObjects\_TextTranslationsSO\Game\ShopUI" />
      <Folder Include="Library\PackageCache\com.unity.modules.cloth@1.0.0" />
+     <Folder Include="Library\PackageCache\com.unity.netcode.gameobjects@1.6.0" />
      <Folder Include="Assets\Scripts\ScriptableObjects\_TextTranslationsSO\Game\SettingsUI\SettingsTabButtons\KeymapsTab" />
      <Folder Include="Assets\Scripts\ScriptableObjects\_TextTranslationsSO\Game\ShopUI\ShopItems\Relics &amp; Reset" />
      <None Include="Library\PackageCache\com.unity.textmeshpro@3.0.6\PackageConversionData.json" />
@@ -221,10 +229,13 @@
      <None Include="Library\PackageCache\com.unity.textmeshpro@3.0.6\ValidationExceptions.json" />
      <Folder Include="Library\PackageCache\com.unity.modules.unitywebrequestassetbundle@1.0.0" />
      <None Include="Library\PackageCache\com.unity.shadergraph@14.0.9\package.json" />
+     <Folder Include="Library\PackageCache\com.unity.netcode.gameobjects@1.6.0\Tests" />
      <Folder Include="Assets\TextMesh Pro" />
+     <Folder Include="Library\PackageCache\com.unity.nuget.mono-cecil@1.11.4\Tests" />
      <Folder Include="Assets\Scripts\Inventory\InventoryItems\Weapons" />
      <None Include="Library\PackageCache\com.unity.modules.unityanalytics@1.0.0\package.json" />
      <Folder Include="Assets\Scripts\ScriptableObjects\_TextTranslationsSO\Game\InteractUI" />
+     <Folder Include="Library\PackageCache\com.unity.transport@1.3.4" />
      <Folder Include="Library\PackageCache\com.unity.modules.subsystems@1.0.0" />
      <None Include="Library\PackageCache\com.unity.ide.rider@3.0.25\package.json" />
      <None Include="Library\PackageCache\com.unity.searcher@4.9.2\package.json" />
@@ -234,20 +245,24 @@
      <Folder Include="Library\PackageCache\com.unity.shadergraph@14.0.9\Tests" />
      <None Include="Library\PackageCache\com.unity.test-framework@1.1.33\package.json" />
      <Folder Include="Library\PackageCache\com.unity.modules.unityanalytics@1.0.0" />
+     <Folder Include="Library\PackageCache\com.unity.netcode.gameobjects@1.6.0\TestHelpers" />
      <Folder Include="Library\PackageCache\com.unity.modules.physics@1.0.0" />
      <Folder Include="Library\PackageCache\com.unity.textmeshpro@3.0.6\Scripts" />
      <Folder Include="Assets\Scripts\ScriptableObjects\_TextTranslationsSO\Game\_InventoryObjects\InventoryDescriptions\ChangebleInfo\RelicBuffTypes\Conditions" />
      <Folder Include="Library\PackageCache\com.unity.visualscripting@1.9.1\Runtime" />
      <Folder Include="Assets\Scripts\Inventory" />
      <Folder Include="Library\PackageCache\com.unity.modules.vr@1.0.0" />
+     <None Include="Library\PackageCache\com.unity.nuget.mono-cecil@1.11.4\package.json" />
      <Folder Include="Assets\Mini First Person Controller\Scripts\Components" />
      <Folder Include="Library\PackageCache\com.unity.modules.physics2d@1.0.0" />
+     <None Include="Library\PackageCache\com.unity.transport@1.3.4\ValidationExceptions.json" />
      <Folder Include="Assets\Assets" />
      <Folder Include="Library\PackageCache\com.unity.inputsystem@1.7.0" />
      <Folder Include="Library\PackageCache\com.unity.ai.navigation@1.1.5" />
      <Folder Include="Library\PackageCache\com.unity.render-pipelines.universal@14.0.9" />
      <None Include="Library\PackageCache\com.unity.modules.particlesystem@1.0.0\package.json" />
      <Folder Include="Library\PackageCache\com.unity.modules.wind@1.0.0" />
+     <Folder Include="Library\PackageCache\com.unity.nuget.mono-cecil@1.11.4" />
      <Folder Include="Assets\Scripts\ScriptableObjects\_TextTranslationsSO\Game\TempUI" />
      <Folder Include="Assets\Mini First Person Controller" />
      <Folder Include="Library\PackageCache\com.unity.shadergraph@14.0.9" />
@@ -276,8 +291,10 @@
      <Folder Include="Library\PackageCache\com.unity.modules.tilemap@1.0.0" />
      <Folder Include="Assets\Scripts\ScriptableObjects\_TextTranslationsSO\Game\_InventoryObjects\InventoryDescriptions\ChangebleInfo\WeaponAdditionalStatsTypes" />
      <Folder Include="Assets\Scripts\ScriptableObjects\_TextTranslationsSO\Game\ShopUI\ShopItems\Exp &amp; Level" />
+     <Folder Include="Assets\Multiplayer" />
      <Folder Include="Library\PackageCache\com.unity.modules.ui@1.0.0" />
      <None Include="Assets\TextMesh Pro\Shaders\TMPro_Properties.cginc" />
+     <None Include="Library\PackageCache\com.unity.transport@1.3.4\package.json" />
      <Folder Include="Assets\Scripts\ScriptableObjects\ShopItemSO\Exp &amp; Level" />
      <Folder Include="Library\PackageCache\com.unity.render-pipelines.universal@14.0.9\Textures" />
      <Folder Include="Assets\Scripts\ScriptableObjects\_TextTranslationsSO\Game" />
@@ -295,6 +312,7 @@
      <Folder Include="Assets\Scripts\ScriptableObjects\_TextTranslationsSO\Game\CharacterUI\Tabs" />
      <None Include="Library\PackageCache\com.unity.modules.physics@1.0.0\package.json" />
      <Folder Include="Library\PackageCache\com.unity.collab-proxy@2.2.0" />
+     <None Include="Library\PackageCache\com.unity.netcode.gameobjects@1.6.0\ValidationExceptions.json" />
      <Folder Include="Library\PackageCache\com.unity.render-pipelines.universal@14.0.9\Textures\2D" />
      <Folder Include="Assets\Scripts\ScriptableObjects\_TextTranslationsSO\Game\PauseUI" />
      <None Include="Library\PackageCache\com.unity.render-pipelines.universal@14.0.9\ValidationExceptions.json" />
@@ -314,6 +332,7 @@
      <Folder Include="Assets\Scripts\ScriptableObjects\_TextTranslationsSO\Game\SettingsUI\SettingsTabButtons\LanguagesTab" />
      <None Include="Library\PackageCache\com.unity.modules.unitywebrequestaudio@1.0.0\package.json" />
      <Folder Include="Library\PackageCache\com.unity.searcher@4.9.2\Tests" />
+     <Folder Include="Library\PackageCache\com.unity.transport@1.3.4\Analyzers" />
      <Folder Include="Assets\Prefabs\Game" />
      <Folder Include="Assets\Scripts\ScriptableObjects\_TextTranslationsSO\Game\_InventoryObjects\InventoryDescriptions" />
      <Folder Include="Assets\Scripts\ScriptableObjects\_TextTranslationsSO\Game\_InventoryObjects" />
@@ -332,6 +351,7 @@
      <Folder Include="Assets\Scripts\ScriptableObjects\_TextTranslationsSO\Game\SettingsUI\SettingsTabButtons\MinimapTab" />
      <None Include="Library\PackageCache\com.unity.textmeshpro@3.0.6\Editor Resources\Shaders\TMP_Properties.cginc" />
      <Folder Include="Library\PackageCache\com.unity.render-pipelines.core@14.0.9\Tests" />
+     <Folder Include="Assets\Scripts\Multiplayer" />
      <Folder Include="Assets\Scenes" />
      <None Include="Library\PackageCache\com.unity.textmeshpro@3.0.6\Editor Resources\Shaders\TMP_SDF Internal Editor.shader" />
      <Folder Include="Library\PackageCache\com.unity.modules.umbra@1.0.0" />
@@ -345,6 +365,7 @@
      <Folder Include="Library\PackageCache\com.unity.modules.jsonserialize@1.0.0" />
      <None Include="Library\PackageCache\com.unity.visualscripting@1.9.1\ValidationConfig.json" />
      <Folder Include="Library\PackageCache\com.unity.render-pipelines.universal@14.0.9\Textures\BlueNoise256" />
+     <None Include="Library\PackageCache\com.unity.netcode.gameobjects@1.6.0\package.json" />
      <Folder Include="Library\PackageCache\com.unity.textmeshpro@3.0.6\Editor Resources\Shaders" />
      <Folder Include="Library\PackageCache\com.unity.modules.director@1.0.0" />
      <Folder Include="Library\PackageCache\com.unity.modules.audio@1.0.0" />
@@ -354,12 +375,14 @@
      <Folder Include="Assets\Prefabs" />
      <Folder Include="Library\PackageCache\com.unity.ide.visualstudio@2.0.21" />
      <Folder Include="Assets\Scripts\ScriptableObjects\WeaponSO" />
+     <None Include="Library\PackageCache\com.unity.collections@1.2.4\package.json" />
      <None Include="Library\PackageCache\com.unity.modules.androidjni@1.0.0\package.json" />
      <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF Overlay.shader" />
      <Folder Include="Library\PackageCache\com.unity.modules.video@1.0.0" />
      <Folder Include="Library\PackageCache\com.unity.modules.ai@1.0.0" />
      <None Include="Library\PackageCache\com.unity.textmeshpro@3.0.6\PackageConversionData_Assets.json" />
      <None Include="Assets\TextMesh Pro\Shaders\TMP_Bitmap-Mobile.shader" />
+     <Folder Include="Library\PackageCache\com.unity.transport@1.3.4\Tests" />
      <Folder Include="Library\PackageCache\com.unity.render-pipelines.universal@14.0.9\Textures\BlueNoise16\L" />
      <Folder Include="Assets\Scripts\ScriptableObjects\ShopItemSO" />
      <None Include="Library\PackageCache\com.unity.mathematics@1.2.6\ValidationExceptions.json" />
@@ -369,6 +392,7 @@
      <None Include="Library\PackageCache\com.unity.modules.animation@1.0.0\package.json" />
      <Folder Include="Assets\TextMesh Pro\Documentation" />
      <Folder Include="Assets\Scripts\ScriptableObjects\_TextTranslationsSO\Game\ShopUI\ShopItems" />
+     <None Include="Library\PackageCache\com.unity.collections@1.2.4\ValidationExceptions.json" />
      <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile.shader" />
      <Folder Include="Assets\Prefabs\Game\Enemies" />
      <None Include="Library\PackageCache\com.unity.burst@1.8.9\Unity.Burst.Unsafe.xml" />
@@ -639,8 +663,14 @@
      <Reference Include="UnityEditor.UnityConnectModule">
      <HintPath>C:\Program Files\Unity\Hub\Editor\2022.3.12f1\Editor\Data\Managed\UnityEngine\UnityEditor.UnityConnectModule.dll</HintPath>
      </Reference>
+     <Reference Include="Unity.Collections.LowLevel.ILSupport">
+     <HintPath>D:\Unity\3D Dungeons Adventure\Library\PackageCache\com.unity.collections@1.2.4\Unity.Collections.LowLevel.ILSupport\Unity.Collections.LowLevel.ILSupport.dll</HintPath>
+     </Reference>
      <Reference Include="Unity.VisualScripting.Antlr3.Runtime">
      <HintPath>D:\Unity\3D Dungeons Adventure\Library\PackageCache\com.unity.visualscripting@1.9.1\Runtime\VisualScripting.Flow\Dependencies\NCalc\Unity.VisualScripting.Antlr3.Runtime.dll</HintPath>
+     </Reference>
+     <Reference Include="Mono.Cecil">
+     <HintPath>D:\Unity\3D Dungeons Adventure\Library\PackageCache\com.unity.nuget.mono-cecil@1.11.4\Mono.Cecil.dll</HintPath>
      </Reference>
      <Reference Include="UnityEditor.iOS.Extensions.Xcode">
      <HintPath>C:\Program Files\Unity\Hub\Editor\2022.3.12f1\Editor\Data\PlaybackEngines\iOSSupport\UnityEditor.iOS.Extensions.Xcode.dll</HintPath>
@@ -1077,9 +1107,9 @@
       <Project>{9f80fcd6-63a2-badd-422d-c3774e2bd2b1}</Project>
       <Name>Unity.VisualScripting.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="UnityEngine.UI.csproj">
-      <Project>{fdeab1af-7767-260e-f70c-8b59015d8064}</Project>
-      <Name>UnityEngine.UI</Name>
+    <ProjectReference Include="Unity.Networking.Transport.csproj">
+      <Project>{50938abc-c5e7-0e38-d504-ddefa6708c83}</Project>
+      <Name>Unity.Networking.Transport</Name>
     </ProjectReference>
     <ProjectReference Include="Unity.VisualScripting.Core.Editor.csproj">
       <Project>{3e537584-8b24-7e26-154e-08cb9284dff7}</Project>
@@ -1088,6 +1118,10 @@
     <ProjectReference Include="Unity.Rider.Editor.csproj">
       <Project>{7876c473-1abe-7147-d30d-c8da29b59ee4}</Project>
       <Name>Unity.Rider.Editor</Name>
+    </ProjectReference>
+    <ProjectReference Include="UnityEngine.UI.csproj">
+      <Project>{fdeab1af-7767-260e-f70c-8b59015d8064}</Project>
+      <Name>UnityEngine.UI</Name>
     </ProjectReference>
     <ProjectReference Include="Unity.RenderPipelines.Core.Editor.csproj">
       <Project>{6ee8cd52-bc97-dff8-8c94-3dd3459d3ad1}</Project>
@@ -1109,6 +1143,10 @@
       <Project>{916c672d-194b-b4c0-c7de-1a57822709c3}</Project>
       <Name>Unity.RenderPipeline.Universal.ShaderLibrary</Name>
     </ProjectReference>
+    <ProjectReference Include="Unity.Netcode.Components.csproj">
+      <Project>{eea70734-2527-6ddb-85ae-71aff9dcd2d8}</Project>
+      <Name>Unity.Netcode.Components</Name>
+    </ProjectReference>
     <ProjectReference Include="Unity.Timeline.csproj">
       <Project>{d916f6d3-86d7-5647-4c21-e5626f00141f}</Project>
       <Name>Unity.Timeline</Name>
@@ -1125,13 +1163,29 @@
       <Project>{df837502-b5f5-b808-e29a-6221b2452457}</Project>
       <Name>Unity.VisualScripting.SettingsProvider.Editor</Name>
     </ProjectReference>
+    <ProjectReference Include="Unity.Netcode.Editor.csproj">
+      <Project>{b94d5a57-b6e0-88d8-ad35-04403e029758}</Project>
+      <Name>Unity.Netcode.Editor</Name>
+    </ProjectReference>
     <ProjectReference Include="Unity.RenderPipelines.Core.ShaderLibrary.csproj">
       <Project>{c4664179-2fbf-9a4e-b19f-44d26ec7d97b}</Project>
       <Name>Unity.RenderPipelines.Core.ShaderLibrary</Name>
     </ProjectReference>
+    <ProjectReference Include="Unity.Collections.csproj">
+      <Project>{84f0cac7-e056-392e-2327-e0579bdbac03}</Project>
+      <Name>Unity.Collections</Name>
+    </ProjectReference>
+    <ProjectReference Include="Unity.Netcode.Runtime.csproj">
+      <Project>{6f13f08c-593b-2541-2226-fc3f17675d99}</Project>
+      <Name>Unity.Netcode.Runtime</Name>
+    </ProjectReference>
     <ProjectReference Include="Unity.AI.Navigation.Updater.csproj">
       <Project>{8cbd71ef-a1ac-a14e-8f31-4da15ed554e8}</Project>
       <Name>Unity.AI.Navigation.Updater</Name>
+    </ProjectReference>
+    <ProjectReference Include="Unity.Netcode.Editor.PackageChecker.csproj">
+      <Project>{eb56cd00-5523-2ce9-e6a6-36eac9a0ed28}</Project>
+      <Name>Unity.Netcode.Editor.PackageChecker</Name>
     </ProjectReference>
     <ProjectReference Include="Unity.VisualScripting.State.Editor.csproj">
       <Project>{b3d19988-a4b4-538d-f6e3-dbabe15a31ce}</Project>
@@ -1149,13 +1203,13 @@
       <Project>{24db7323-c4a9-5c39-4235-8c7e81749428}</Project>
       <Name>Unity.TextMeshPro</Name>
     </ProjectReference>
+    <ProjectReference Include="Unity.Networking.Editor.csproj">
+      <Project>{616ba5fa-baae-cd88-920c-af0ef1f97db2}</Project>
+      <Name>Unity.Networking.Editor</Name>
+    </ProjectReference>
     <ProjectReference Include="Unity.TextMeshPro.Editor.csproj">
       <Project>{5d3b035d-f792-1257-e5c6-1fe8ad88ade7}</Project>
       <Name>Unity.TextMeshPro.Editor</Name>
-    </ProjectReference>
-    <ProjectReference Include="Unity.Searcher.Editor.csproj">
-      <Project>{4cbdbe93-a3ab-abfd-03af-875578f2dfa1}</Project>
-      <Name>Unity.Searcher.Editor</Name>
     </ProjectReference>
     <ProjectReference Include="Unity.RenderPipelines.Universal.Shaders.csproj">
       <Project>{908c1adc-5c80-b2e3-982a-7693825dcc96}</Project>
@@ -1164,6 +1218,10 @@
     <ProjectReference Include="Unity.AI.Navigation.Editor.csproj">
       <Project>{33082f67-d121-ce8f-7af2-9842247e2517}</Project>
       <Name>Unity.AI.Navigation.Editor</Name>
+    </ProjectReference>
+    <ProjectReference Include="Unity.Searcher.Editor.csproj">
+      <Project>{4cbdbe93-a3ab-abfd-03af-875578f2dfa1}</Project>
+      <Name>Unity.Searcher.Editor</Name>
     </ProjectReference>
     <ProjectReference Include="Unity.VisualScripting.State.csproj">
       <Project>{df1062cd-8a85-a63b-7f32-fca46928d594}</Project>

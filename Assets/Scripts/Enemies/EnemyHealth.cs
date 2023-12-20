@@ -1,7 +1,8 @@
 using System;
+using Unity.Netcode;
 using UnityEngine;
 
-public class EnemyHealth : MonoBehaviour
+public class EnemyHealth : NetworkBehaviour
 {
     [SerializeField] private int maxHealth = 75;
     private int currentHealth;
@@ -38,6 +39,8 @@ public class EnemyHealth : MonoBehaviour
 
     private void Start()
     {
+        if (!IsServer) return;
+
         DungeonSettings.OnDungeonDifficultyChange += DungeonDifficulty_OnDungeonDifficultyChange;
     }
 
@@ -50,9 +53,18 @@ public class EnemyHealth : MonoBehaviour
 
         var healthPercentage = (float)currentHealth / maxHealth;
 
-        maxHealth = (int)(maxHealth * currentHpDifficultyMultiplayer * currentHpPlayersCountMultiplayer);
+        var newMaxHealth = (int)(maxHealth * currentHpDifficultyMultiplayer * currentHpPlayersCountMultiplayer);
 
-        currentHealth = (int)(maxHealth * healthPercentage);
+        var newCurrentHealth = currentHealth = (int)(maxHealth * healthPercentage);
+
+        OnDungeonDifficultyChangeClientRpc(newCurrentHealth, newMaxHealth);
+    }
+
+    [ClientRpc]
+    private void OnDungeonDifficultyChangeClientRpc(int newCurrentHealth, int newMaxHealth)
+    {
+        currentHealth = newCurrentHealth;
+        maxHealth = newMaxHealth;
 
         OnEnemyHealthChange?.Invoke(this, new OnEnemyHealthChangeEventArgs
         {
@@ -74,59 +86,121 @@ public class EnemyHealth : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
+        if (!IsServer) return;
+
+        TakeDamageServerRpc(damage);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void TakeDamageServerRpc(int damage)
+    {
         var takenDamage =
             (int)(damage * (1 - (float)currentDefence / (additionalDefenceNumberFormula + currentDefence)));
+        var newCurrentShieldDurability = currentShieldDurability;
 
         if (currentShieldDurability > 0)
         {
-            if (currentShieldDurability >= takenDamage)
-            {
-                currentShieldDurability -= takenDamage;
-                return;
-            }
+            newCurrentShieldDurability = Mathf.Clamp(currentShieldDurability - takenDamage, 0, currentShieldDurability);
 
             takenDamage -= currentShieldDurability;
-            currentShieldDurability = 0;
         }
 
-        currentHealth = Mathf.Clamp(currentHealth - takenDamage, 0, maxHealth);
+        var newCurrentHealth = Mathf.Clamp(currentHealth - takenDamage, 0, maxHealth);
+
+        if (currentHealth <= 0)
+            OnEnemyDie?.Invoke(this, EventArgs.Empty);
+        else
+            TakeDamageClientRpc(newCurrentHealth, newCurrentShieldDurability, takenDamage);
+    }
+
+    [ClientRpc]
+    private void TakeDamageClientRpc(int newCurrentHealth, int newCurrentShieldDurability, int takenDamage)
+    {
+        currentHealth = newCurrentHealth;
+        currentShieldDurability = newCurrentShieldDurability;
+
         OnEnemyHealthChange?.Invoke(this, new OnEnemyHealthChangeEventArgs
         {
             currentHealth = currentHealth, maxHealth = maxHealth, lostHealth = takenDamage, obtainedHealth = 0
         });
-
-        if (currentHealth <= 0)
-            OnEnemyDie?.Invoke(this, EventArgs.Empty);
     }
 
     public void RegenerateHealth(int healthToRegenerate)
     {
-        currentHealth = Mathf.Clamp(currentHealth + healthToRegenerate, 0, maxHealth);
-        OnEnemyHealthChange?.Invoke(this, new OnEnemyHealthChangeEventArgs
-        {
-            currentHealth = currentHealth, maxHealth = maxHealth, lostHealth = 0, obtainedHealth = healthToRegenerate
-        });
+        if (!IsServer) return;
+
+        RegenerateHealthServerRpc(healthToRegenerate, false);
     }
 
     public void RegenerateHealth(float healthPercentageToRegenerate)
     {
-        var healthToRegenerate = (int)(maxHealth * healthPercentageToRegenerate);
+        if (!IsServer) return;
 
-        currentHealth = Mathf.Clamp(currentHealth + healthToRegenerate, 0, maxHealth);
+        RegenerateHealthServerRpc(healthPercentageToRegenerate, true);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void RegenerateHealthServerRpc(float healthToRegenerate, bool isValuePercentage)
+    {
+        if (isValuePercentage)
+            healthToRegenerate *= maxHealth;
+
+        var newCurrentHealth = Mathf.Clamp(currentHealth + (int)healthToRegenerate, 0, maxHealth);
+
+        RegenerateHealthClientRpc(newCurrentHealth, (int)healthToRegenerate);
+    }
+
+    [ClientRpc]
+    private void RegenerateHealthClientRpc(int newCurrentHealth, int regeneratedHealth)
+    {
+        currentHealth = newCurrentHealth;
+
         OnEnemyHealthChange?.Invoke(this, new OnEnemyHealthChangeEventArgs
         {
-            currentHealth = currentHealth, maxHealth = maxHealth, lostHealth = 0, obtainedHealth = healthToRegenerate
+            currentHealth = currentHealth, maxHealth = maxHealth, lostHealth = 0, obtainedHealth = regeneratedHealth
         });
     }
 
     public void ApplyShield(int shieldDurability)
     {
-        currentShieldDurability += shieldDurability;
+        if (!IsServer) return;
+
+        ApplyShieldServerRpc(shieldDurability);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void ApplyShieldServerRpc(int shieldDurability)
+    {
+        var newCurrentShieldDurability = currentShieldDurability + shieldDurability;
+
+        ApplyShieldClientRpc(newCurrentShieldDurability);
+    }
+
+    [ClientRpc]
+    private void ApplyShieldClientRpc(int newCurrentShieldDurability)
+    {
+        currentShieldDurability = newCurrentShieldDurability;
     }
 
     public void ChangeDefenceBuff(float percentageBuff)
     {
-        currentDefence += (int)(baseDefence * percentageBuff);
+        if (!IsServer) return;
+
+        ChangeDefenceBuffServerRpc(percentageBuff);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void ChangeDefenceBuffServerRpc(float percentageBuff)
+    {
+        var newCurrentDefence = (int)(currentDefence + baseDefence * percentageBuff);
+
+        ChangeDefenceBuffClientRpc(newCurrentDefence);
+    }
+
+    [ClientRpc]
+    private void ChangeDefenceBuffClientRpc(int newCurrentDefence)
+    {
+        currentDefence = newCurrentDefence;
     }
 
     public int GetCurrentShieldDurability()

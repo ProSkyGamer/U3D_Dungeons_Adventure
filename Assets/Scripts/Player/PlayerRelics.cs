@@ -1,7 +1,8 @@
 using System;
+using Unity.Netcode;
 using UnityEngine;
 
-public class PlayerRelics : MonoBehaviour, IInventoryParent
+public class PlayerRelics : NetworkBehaviour, IInventoryParent
 {
     public event EventHandler<OnRelicChangeEventArgs> OnRelicsChange;
 
@@ -14,15 +15,15 @@ public class PlayerRelics : MonoBehaviour, IInventoryParent
     [SerializeField] private int maxRelicsSlotsCount = 3;
     private static InventoryObject[] allStoredRelics;
 
-    private PlayerEffects playerEffects;
+    private PlayerEffectsController playerEffectsController;
 
     private void Awake()
     {
-        playerEffects = GetComponent<PlayerEffects>();
+        playerEffectsController = GetComponent<PlayerEffectsController>();
 
         if (allStoredRelics == null)
             allStoredRelics = new InventoryObject[maxRelicsSlotsCount];
-        else
+        else if (IsServer)
             foreach (var storedRelic in allStoredRelics)
                 OnRelicsChange?.Invoke(this, new OnRelicChangeEventArgs
                 {
@@ -32,11 +33,13 @@ public class PlayerRelics : MonoBehaviour, IInventoryParent
 
     private void Start()
     {
-        playerEffects.OnPlayerRelicOutOfUsagesCount += PlayerEffects_OnPlayerRelicOutOfUsagesCount;
+        if (IsServer)
+            playerEffectsController.OnPlayerRelicOutOfUsagesCount +=
+                PlayerEffectsControllerOnPlayerRelicOutOfUsagesCount;
     }
 
-    private void PlayerEffects_OnPlayerRelicOutOfUsagesCount(object sender,
-        PlayerEffects.OnPlayerRelicOutOfUsagesCountEventArgs e)
+    private void PlayerEffectsControllerOnPlayerRelicOutOfUsagesCount(object sender,
+        PlayerEffectsController.OnPlayerRelicOutOfUsagesCountEventArgs e)
     {
         foreach (var storedRelic in allStoredRelics)
         {
@@ -56,20 +59,35 @@ public class PlayerRelics : MonoBehaviour, IInventoryParent
 
     public void ChangeInventorySize(int newSize)
     {
+        if (!IsServer) return;
+
+        ChangeInventorySizeServerRpc(newSize);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void ChangeInventorySizeServerRpc(int newSize)
+    {
         if (maxRelicsSlotsCount == newSize) return;
 
-        maxRelicsSlotsCount = newSize;
-        var newStoredRelicsInventory = new InventoryObject[newSize];
+        var newMaxRelicsSlotsCount = newSize;
+
+        if (allStoredRelics.Length > newSize)
+            for (var i = newMaxRelicsSlotsCount; i < allStoredRelics.Length; i++)
+                allStoredRelics[i].DropInventoryObjectToWorld(transform.position);
+
+        ChangeInventorySizeClientRpc(newMaxRelicsSlotsCount);
+    }
+
+    [ClientRpc]
+    private void ChangeInventorySizeClientRpc(int newMaxRelicsSlotsCount)
+    {
+        var newStoredRelicsInventory = new InventoryObject[newMaxRelicsSlotsCount];
 
         for (var i = 0; i < newStoredRelicsInventory.Length; i++)
         {
             var storedRelic = allStoredRelics[i];
             newStoredRelicsInventory[i] = storedRelic;
         }
-
-        if (allStoredRelics.Length > newSize)
-            for (var i = newStoredRelicsInventory.Length; i < allStoredRelics.Length; i++)
-                allStoredRelics[i].DropInventoryObjectToWorld(transform.position);
 
         allStoredRelics = newStoredRelicsInventory;
     }

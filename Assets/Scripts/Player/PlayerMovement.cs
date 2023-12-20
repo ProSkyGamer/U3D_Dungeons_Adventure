@@ -1,9 +1,9 @@
+using Unity.Netcode;
 using UnityEngine;
 
-public class PlayerMovement : MonoBehaviour
+public class PlayerMovement : NetworkBehaviour
 {
-    [SerializeField] private Transform cameraTransform;
-
+    private Transform cameraTransform;
     private Transform playerTransform;
 
     private void Awake()
@@ -11,8 +11,15 @@ public class PlayerMovement : MonoBehaviour
         playerTransform = transform;
     }
 
+    private void Start()
+    {
+        cameraTransform = CameraController.Instance.transform;
+    }
+
     public void Move(Vector2 toMove)
     {
+        if (!IsOwner) return;
+
         if (cameraTransform.localEulerAngles.y != playerTransform.localEulerAngles.y)
         {
             transform.rotation = cameraTransform.rotation;

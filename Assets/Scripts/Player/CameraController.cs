@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
+    public static CameraController Instance;
+
     public enum CameraModes
     {
         ThirdPerson,
@@ -39,8 +41,15 @@ public class CameraController : MonoBehaviour
 
     private Transform cameraTransform;
 
+    private bool isSubscribedToChangeCameraMode;
+
     private void Awake()
     {
+        if (Instance != null)
+            Destroy(gameObject);
+        else
+            Instance = this;
+
         cameraTransform = transform;
 
         currentCameraDistance = (maxCameraDistance + minCameraDistance) / 2;
@@ -52,7 +61,6 @@ public class CameraController : MonoBehaviour
 
     private void Start()
     {
-        PlayerAttackController.OnGunChargedAttackTriggered += PlayerAttackController_OnGunChargedAttackTriggered;
         GameInput.Instance.OnCursorShowAction += GameInput_OnCursorShowAction;
 
         ShopUI.Instance.OnShopOpen += OnAnyTabOpen;
@@ -98,6 +106,7 @@ public class CameraController : MonoBehaviour
         if (GameStageManager.Instance.IsPause()) return;
         if (isAnyInterfaceOpened) return;
         if (isCameraMovementLocked) return;
+        if (playerVisualTransform == null) return;
 
         CameraMovement();
         CameraScroll();
@@ -268,6 +277,18 @@ public class CameraController : MonoBehaviour
                 currentCameraDistance = 0;
                 break;
         }
+    }
+
+    public void ChangeFollowingObject(Transform followingObject)
+    {
+        if (!isSubscribedToChangeCameraMode)
+        {
+            PlayerController.Instance.GetPlayerAttackController().OnGunChargedAttackTriggered +=
+                PlayerAttackController_OnGunChargedAttackTriggered;
+            isSubscribedToChangeCameraMode = true;
+        }
+
+        playerVisualTransform = followingObject;
     }
 
     public CameraModes GetCurrentCameraMode()

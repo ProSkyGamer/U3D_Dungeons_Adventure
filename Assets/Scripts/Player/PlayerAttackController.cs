@@ -1,15 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
 [SuppressMessage("ReSharper", "CompareOfFloatsByEqualityOperator")]
-public class PlayerAttackController : MonoBehaviour
+public class PlayerAttackController : NetworkBehaviour
 {
-    public static event EventHandler OnChargeAttackStopCharging;
-    public static event EventHandler OnGunChargedAttackTriggered;
+    public event EventHandler OnChargeAttackStopCharging;
+    public event EventHandler OnGunChargedAttackTriggered;
     public event EventHandler<OnEnemyHittedEventArgs> OnEnemyHitted;
 
     public class OnEnemyHittedEventArgs : EventArgs
@@ -90,8 +91,12 @@ public class PlayerAttackController : MonoBehaviour
         comboAttackResetTimer = comboAttackResetTime;
     }
 
+    #region SubscribedEvents
+
     private void Start()
     {
+        if (!IsOwner) return;
+
         GameInput.Instance.OnAttackAction += GameInput_OnAttackAction;
 
         GameInput.Instance.OnCursorShowAction += GameInput_OnCursorShowAction;
@@ -126,6 +131,8 @@ public class PlayerAttackController : MonoBehaviour
         isTryingToChargedAttack = true;
     }
 
+    #endregion
+
     private void Update()
     {
         if (GameStageManager.Instance.IsPause()) return;
@@ -139,30 +146,13 @@ public class PlayerAttackController : MonoBehaviour
             isCursorShown = false;
         }
 
-
         TryChargedAttack();
 
         if (isAiming)
             if (GameInput.Instance.GetBindingValue(GameInput.Binding.Attack) != 1f)
-            {
-                isAiming = false;
-                var currentWeaponSo = playerWeapons.GetCurrentWeaponSo();
+                GunFinishAiming();
 
-                var bulletAngle = transform.localEulerAngles.y - 90;
-                var chargeAttackDamage = CalculateDamage(currentAttack,
-                    currentWeaponSo.chargedAttackDamageScale,
-                    chargedAttackDamageBonus, currentCritRate, currentCritDamage);
-
-                staminaController.SpendStamina(currentWeaponSo.chargedAttackStaminaCost);
-
-                var bulletTransform = Instantiate(bulletPrefab, bulletSpawnTransform.position, Quaternion.identity);
-                var weaponBullet = bulletTransform.GetComponent<WeaponBullet>();
-                weaponBullet.InitializeBullet(bulletAngle, bulletLifetime, chargeAttackDamage,
-                    playerController, enemiesLayer);
-                weaponBullet.OnEnemyHitted += WeaponBullet_OnEnemyHitted;
-
-                OnGunChargedAttackTriggered?.Invoke(this, EventArgs.Empty);
-            }
+        if (!IsServer) return;
 
         if (currentAttackCombo != -1)
         {
@@ -199,6 +189,34 @@ public class PlayerAttackController : MonoBehaviour
         {
             chargedAttackPressTimer = chargedAttackPressTime;
         }
+    }
+
+    private void GunFinishAiming()
+    {
+        isAiming = false;
+        GunFinishAimingServerRpc();
+
+        OnGunChargedAttackTriggered?.Invoke(this, EventArgs.Empty);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void GunFinishAimingServerRpc()
+    {
+        var currentWeaponSo = playerWeapons.GetCurrentWeaponSo();
+
+        var bulletAngle = transform.localEulerAngles.y - 90;
+        var chargeAttackDamage = CalculateDamage(currentAttack,
+            currentWeaponSo.chargedAttackDamageScale,
+            chargedAttackDamageBonus, currentCritRate, currentCritDamage);
+
+        staminaController.SpendStamina(currentWeaponSo.chargedAttackStaminaCost);
+
+        var bulletTransform = Instantiate(bulletPrefab, bulletSpawnTransform.position, Quaternion.identity);
+        var weaponBullet = bulletTransform.GetComponent<WeaponBullet>();
+        weaponBullet.GetComponent<NetworkObject>().Spawn();
+        weaponBullet.InitializeBullet(bulletAngle, bulletLifetime, chargeAttackDamage,
+            playerController, enemiesLayer);
+        weaponBullet.OnEnemyHitted += WeaponBullet_OnEnemyHitted;
     }
 
     private List<EnemyController> FindEnemiesToAttack()
@@ -250,6 +268,12 @@ public class PlayerAttackController : MonoBehaviour
 
     private void NormalAttack()
     {
+        NormalAttackServerRpc();
+    }
+
+    [ServerRpc]
+    private void NormalAttackServerRpc()
+    {
         var currentChooseWeaponSo = playerWeapons.GetCurrentWeaponSo();
         if (currentChooseWeaponSo == null) return;
 
@@ -264,62 +288,70 @@ public class PlayerAttackController : MonoBehaviour
         switch (currentChooseWeaponSo.weaponType)
         {
             case WeaponSO.WeaponType.Katana:
-                var enemiesToAttack = FindEnemiesToAttack();
-
-                foreach (var enemy in enemiesToAttack)
-                {
-                    enemy.ReceiveDamage(normalAttackDamage, playerController);
-
-                    var enemyEffectsController = enemy.GetComponent<EnemyEffects>();
-                    foreach (var slowEnemyOnHit in slowEnemyOnHits)
-                    {
-                        var isApplyingEffect = Random.Range(0, 100) <= slowEnemyOnHit.effectChance * 100;
-
-                        if (!isApplyingEffect) return;
-
-                        enemyEffectsController.AddOrRemoveEffect(EnemyEffects.EnemiesEffects.SlowDebuff,
-                            slowEnemyOnHit.speedDecrease, true, false, slowEnemyOnHit.slowDuration);
-                    }
-                }
-
+                KatanaNormalAttack(normalAttackDamage);
                 break;
             case WeaponSO.WeaponType.Gun:
-                var closestEnemyPosition = FindNearestEnemyPositionForRangeAttack();
-
-                var bulletAngle = 0f;
-                var bulletSpawnPosition = bulletSpawnTransform.position;
-                if (closestEnemyPosition != bulletSpawnPosition)
-                {
-                    if (closestEnemyPosition.x == bulletSpawnPosition.x)
-                        bulletAngle = bulletSpawnPosition.z - closestEnemyPosition.z < 0
-                            ? -transform.localEulerAngles.z
-                            : -transform.localEulerAngles.z + 180;
-                    else if (closestEnemyPosition.z == bulletSpawnPosition.z)
-                        bulletAngle = bulletSpawnPosition.x - closestEnemyPosition.x < 0
-                            ? -transform.localEulerAngles.z + 90
-                            : -transform.localEulerAngles.z + 270;
-                    else
-                        bulletAngle =
-                            -Mathf.Atan2(closestEnemyPosition.z - bulletSpawnPosition.z,
-                                closestEnemyPosition.x - bulletSpawnPosition.x) * 180 / Mathf.PI;
-                }
-                else
-                {
-                    bulletAngle = transform.localEulerAngles.y - 90;
-                }
-
-                Debug.Log($"{closestEnemyPosition} {bulletSpawnTransform.position} {bulletAngle}");
-
-                var bulletTransform = Instantiate(bulletPrefab, bulletSpawnTransform.position, Quaternion.identity);
-                var weaponBullet = bulletTransform.GetComponent<WeaponBullet>();
-                weaponBullet.InitializeBullet(bulletAngle, bulletLifetime, normalAttackDamage,
-                    playerController, enemiesLayer);
-                weaponBullet.OnEnemyHitted += WeaponBullet_OnEnemyHitted;
-
+                GunNormalAttack(normalAttackDamage);
                 break;
         }
 
         comboAttackResetTimer = comboAttackResetTime;
+    }
+
+    private void KatanaNormalAttack(int normalAttackDamage)
+    {
+        var enemiesToAttack = FindEnemiesToAttack();
+
+        foreach (var enemy in enemiesToAttack)
+        {
+            enemy.ReceiveDamage(normalAttackDamage, playerController);
+
+            var enemyEffectsController = enemy.GetComponent<EnemyEffects>();
+            foreach (var slowEnemyOnHit in slowEnemyOnHits)
+            {
+                var isApplyingEffect = Random.Range(0, 100) <= slowEnemyOnHit.effectChance * 100;
+
+                if (!isApplyingEffect) return;
+
+                enemyEffectsController.AddOrRemoveEffect(EnemyEffects.EnemiesEffects.SlowDebuff,
+                    slowEnemyOnHit.speedDecrease, true, false, slowEnemyOnHit.slowDuration);
+            }
+        }
+    }
+
+    private void GunNormalAttack(int normalAttackDamage)
+    {
+        var closestEnemyPosition = FindNearestEnemyPositionForRangeAttack();
+
+        var bulletAngle = 0f;
+        var bulletSpawnPosition = bulletSpawnTransform.position;
+        if (closestEnemyPosition != bulletSpawnPosition)
+        {
+            if (closestEnemyPosition.x == bulletSpawnPosition.x)
+                bulletAngle = bulletSpawnPosition.z - closestEnemyPosition.z < 0
+                    ? -transform.localEulerAngles.z
+                    : -transform.localEulerAngles.z + 180;
+            else if (closestEnemyPosition.z == bulletSpawnPosition.z)
+                bulletAngle = bulletSpawnPosition.x - closestEnemyPosition.x < 0
+                    ? -transform.localEulerAngles.z + 90
+                    : -transform.localEulerAngles.z + 270;
+            else
+                bulletAngle =
+                    -Mathf.Atan2(closestEnemyPosition.z - bulletSpawnPosition.z,
+                        closestEnemyPosition.x - bulletSpawnPosition.x) * 180 / Mathf.PI;
+        }
+        else
+        {
+            bulletAngle = transform.localEulerAngles.y - 90;
+        }
+
+        Debug.Log($"{closestEnemyPosition} {bulletSpawnTransform.position} {bulletAngle}");
+
+        var bulletTransform = Instantiate(bulletPrefab, bulletSpawnTransform.position, Quaternion.identity);
+        var weaponBullet = bulletTransform.GetComponent<WeaponBullet>();
+        weaponBullet.InitializeBullet(bulletAngle, bulletLifetime, normalAttackDamage,
+            playerController, enemiesLayer);
+        weaponBullet.OnEnemyHitted += WeaponBullet_OnEnemyHitted;
     }
 
     private void WeaponBullet_OnEnemyHitted(object sender, WeaponBullet.OnEnemyHittedEventArgs e)
@@ -347,11 +379,25 @@ public class PlayerAttackController : MonoBehaviour
 
     private void ResetNormalAttackCombo()
     {
+        if (!IsServer) return;
+
+        ResetNormalAttackComboClientRpc();
+    }
+
+    [ClientRpc]
+    private void ResetNormalAttackComboClientRpc()
+    {
         comboAttackResetTimer = comboAttackResetTime;
         currentAttackCombo = -1;
     }
 
     private void ChargeAttack()
+    {
+        ChargeAttackServerRpc();
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void ChargeAttackServerRpc()
     {
         var currentChooseWeaponSo = playerWeapons.GetCurrentWeaponSo();
         if (currentChooseWeaponSo == null) return;
@@ -430,6 +476,12 @@ public class PlayerAttackController : MonoBehaviour
 
     public void ChangeEnemySlowOnHit(float slowValue, float slowDuration, float effectChance, int effectId)
     {
+        ChangeEnemySlowOnHitServerRpc(slowValue, slowDuration, effectChance, effectId);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void ChangeEnemySlowOnHitServerRpc(float slowValue, float slowDuration, float effectChance, int effectId)
+    {
         if (slowValue > 0)
         {
             var slowEnemyOnHit = new SlowEnemyOnHit
@@ -455,31 +507,107 @@ public class PlayerAttackController : MonoBehaviour
 
     public void ChangeAttackBuff(float percentageBuff = default, int flatBuff = default)
     {
-        currentAttack += (int)(baseAttack * percentageBuff);
-        currentAttack += flatBuff;
+        ChangeAttackBuffServerRpc(percentageBuff, flatBuff);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void ChangeAttackBuffServerRpc(float percentageBuff, int flatBuff)
+    {
+        var newCurrentAttack = (int)(currentAttack + baseAttack * percentageBuff + flatBuff);
+
+        ChangeAttackBuffClientRpc(newCurrentAttack);
+    }
+
+    [ClientRpc]
+    private void ChangeAttackBuffClientRpc(int newCurrentAttack)
+    {
+        currentAttack = newCurrentAttack;
     }
 
     public void ChangeNormalAttackBuff(float percentageBuff)
     {
-        normalAttackDamageBonus += percentageBuff;
+        ChangeNormalAttackBuffServerRpc(percentageBuff);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void ChangeNormalAttackBuffServerRpc(float percentageBuff)
+    {
+        var newNormalAttackBonus = normalAttackDamageBonus + percentageBuff;
+
+        ChangeNormalAttackBuffClientRpc(newNormalAttackBonus);
+    }
+
+    [ClientRpc]
+    private void ChangeNormalAttackBuffClientRpc(float newNormalAttackBonus)
+    {
+        normalAttackDamageBonus = newNormalAttackBonus;
     }
 
     public void ChangeChargedAttackBuff(float percentageBuff)
     {
-        chargedAttackDamageBonus += percentageBuff;
+        ChangeChargedAttackBuffServerRpc(percentageBuff);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void ChangeChargedAttackBuffServerRpc(float percentageBuff)
+    {
+        var newChargedAttackBonus = chargedAttackDamageBonus + percentageBuff;
+
+        ChangeChargedAttackBuffClientRpc(newChargedAttackBonus);
+    }
+
+    [ClientRpc]
+    private void ChangeChargedAttackBuffClientRpc(float newChargedAttackBonus)
+    {
+        chargedAttackDamageBonus = newChargedAttackBonus;
     }
 
     public void ChangeCritRateBuff(float percentageBuff)
     {
-        currentCritRate += percentageBuff;
+        ChangeCritRateBuffServerRpc(percentageBuff);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void ChangeCritRateBuffServerRpc(float percentageBuff)
+    {
+        var newCritRate = currentCritRate + percentageBuff;
+
+        ChangeCritRateBuffClientRpc(newCritRate);
+    }
+
+    [ClientRpc]
+    private void ChangeCritRateBuffClientRpc(float newCritRate)
+    {
+        currentCritRate = newCritRate;
     }
 
     public void ChangeCritDamageBuff(float percentageBuff)
     {
-        currentCritDamage += percentageBuff;
+        ChangeCritDamageBuffServerRpc(percentageBuff);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void ChangeCritDamageBuffServerRpc(float percentageBuff)
+    {
+        var newCritDamage = currentCritDamage + percentageBuff;
+
+        ChangeCritDamageBuffClientRpc(newCritDamage);
+    }
+
+    [ClientRpc]
+    private void ChangeCritDamageBuffClientRpc(float newCritDamage)
+    {
+        currentCritDamage = newCritDamage;
     }
 
     public void ChangeCritRateOnHitIncreaseBuff(float critRateOnHitIncreaseValue, float maxCritRateIncrease,
+        int effectId)
+    {
+        ChangeCritRateOnHitIncreaseBuffServerRpc(critRateOnHitIncreaseValue, maxCritRateIncrease, effectId);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void ChangeCritRateOnHitIncreaseBuffServerRpc(float critRateOnHitIncreaseValue, float maxCritRateIncrease,
         int effectId)
     {
         if (critRateOnHitIncreaseValue > 0)
@@ -539,10 +667,4 @@ public class PlayerAttackController : MonoBehaviour
     }
 
     #endregion
-
-    public static void ResetStaticData()
-    {
-        OnGunChargedAttackTriggered = null;
-        OnChargeAttackStopCharging = null;
-    }
 }

@@ -1,6 +1,7 @@
+using Unity.Netcode;
 using UnityEngine;
 
-public class EnemyAttackController : MonoBehaviour
+public class EnemyAttackController : NetworkBehaviour
 {
     [SerializeField] private LayerMask playerLayer;
 
@@ -18,6 +19,8 @@ public class EnemyAttackController : MonoBehaviour
 
     private void Start()
     {
+        if (!IsServer) return;
+
         DungeonSettings.OnDungeonDifficultyChange += DungeonDifficulty_OnDungeonDifficultyChange;
     }
 
@@ -28,9 +31,18 @@ public class EnemyAttackController : MonoBehaviour
             DungeonSettings.GetEnemiesAtkMultiplayerByDungeonDifficulty(e.newDungeonDifficulty);
         var currentAtkPlayersCountMultiplayer = DungeonSettings.GetEnemiesAtkMultiplayerByPlayersCount();
 
-        baseAttack = (int)(baseAttack * currentAtkDifficultyMultiplayer * currentAtkPlayersCountMultiplayer);
+        var newBaseAttack = (int)(baseAttack * currentAtkDifficultyMultiplayer * currentAtkPlayersCountMultiplayer);
 
-        currentAttack = (int)(baseAttack * currentAttackPercentageBuff);
+        var newCurrentAttack = (int)(baseAttack * currentAttackPercentageBuff);
+
+        OnDungeonDifficultyChangeClientRpc(newBaseAttack, newCurrentAttack);
+    }
+
+    [ClientRpc]
+    private void OnDungeonDifficultyChangeClientRpc(int newBaseAttack, int newCurrentAttack)
+    {
+        baseAttack = newBaseAttack;
+        currentAttack = newCurrentAttack;
     }
 
     public void Attack()
@@ -46,7 +58,23 @@ public class EnemyAttackController : MonoBehaviour
 
     public void ChangeAttackBuff(float percentageBuff)
     {
-        currentAttack += (int)(baseAttack * percentageBuff);
+        if (!IsServer) return;
+
+        ChangeAttackBuffServerRpc(percentageBuff);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void ChangeAttackBuffServerRpc(float percentageBuff)
+    {
+        var newCurrentAttack = (int)(currentAttack + baseAttack * percentageBuff);
         currentAttackPercentageBuff += percentageBuff;
+
+        ChangeAttackBuffClientRpc(newCurrentAttack);
+    }
+
+    [ClientRpc]
+    private void ChangeAttackBuffClientRpc(int newCurrentAttack)
+    {
+        currentAttack = newCurrentAttack;
     }
 }

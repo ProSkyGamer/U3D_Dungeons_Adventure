@@ -1,3 +1,5 @@
+using Unity.Netcode;
+
 public class DroppedInventoryItemSingle : InteractableItem
 {
     private InventoryObject currentDroppedObject;
@@ -8,8 +10,15 @@ public class DroppedInventoryItemSingle : InteractableItem
 
         base.OnInteract(player);
 
-        currentDroppedObject.SetInventoryParent(player.GetPlayerInventory());
+        currentDroppedObject.SetInventoryParent(new NetworkObjectReference(player.GetPlayerNetworkObject()),
+            CharacterInventoryUI.InventoryType.PlayerInventory);
 
+        OnInteractServerRpc();
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void OnInteractServerRpc()
+    {
         Destroy(gameObject);
     }
 

@@ -1,16 +1,17 @@
 using System;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
 [RequireComponent(typeof(PlayerMovement))]
 [RequireComponent(typeof(PlayerAttackController))]
-[RequireComponent(typeof(PlayerHealth))]
+[RequireComponent(typeof(PlayerHealthController))]
 [RequireComponent(typeof(StaminaController))]
-[RequireComponent(typeof(PlayerEffects))]
+[RequireComponent(typeof(PlayerEffectsController))]
 [RequireComponent(typeof(PlayerInventory))]
 [RequireComponent(typeof(PlayerRelics))]
 [RequireComponent(typeof(PlayerWeapons))]
-public class PlayerController : MonoBehaviour
+public class PlayerController : NetworkBehaviour
 {
     public static PlayerController Instance { get; private set; }
 
@@ -23,16 +24,17 @@ public class PlayerController : MonoBehaviour
     }
 
     public event EventHandler OnStopSprinting;
-
     public event EventHandler OnCoinsValueChange;
     public event EventHandler OnSkillPointsValueChange;
-    public event EventHandler<PlayerEffects.RelicBuffEffectTriggeredEventArgs> OnPlayerRegenerateHpAfterEnemyDeath;
+
+    public event EventHandler<PlayerEffectsController.RelicBuffEffectTriggeredEventArgs>
+        OnPlayerRegenerateHpAfterEnemyDeath;
 
     [SerializeField] private int experienceForFirstLevel = 100;
     [SerializeField] private float experienceIncreaseForNextLevel = 0.2f;
-    private int currentLevelXpNeeded;
-    private int currentXp;
-    private float additionalExpMultiplayer;
+    private int currentLevelExperienceNeeded;
+    private int currentExperience;
+    private float additionalExperienceMultiplayer;
 
     private int currentAvailableSkillPoint;
     private int currentCoins;
@@ -61,56 +63,61 @@ public class PlayerController : MonoBehaviour
 
     private readonly List<HpRegenerationAfterEnemyDeath> hpRegenerationAfterEnemyDeathEffects = new();
 
-    [SerializeField] private CameraController cameraController;
+    [SerializeField] private Transform playerVisual;
     private PlayerMovement playerMovement;
     private PlayerAttackController playerAttackController;
-    private PlayerHealth playerHealth;
+    private PlayerHealthController playerHealthController;
     private StaminaController staminaController;
-    private PlayerEffects playerEffects;
+    private PlayerEffectsController playerEffectsController;
     private PlayerInventory playerInventory;
     private PlayerRelics playerRelics;
     private PlayerWeapons playerWeapons;
+    private CameraController cameraController;
+    private NetworkObject networkObject;
 
-    private bool isFirstUpdate = true;
+    private bool isFirstUpdate;
 
-    private void Awake()
+    public override void OnNetworkSpawn()
     {
-        var str = "Text text {1} {0}";
-
-        var newstr = string.Format(str, 0, 1);
-        Debug.Log(newstr);
-
-        if (Instance != null)
-            Destroy(gameObject);
-        else
-            Instance = this;
+        base.OnNetworkSpawn();
 
         playerMovement = GetComponent<PlayerMovement>();
         playerAttackController = GetComponent<PlayerAttackController>();
-        playerHealth = GetComponent<PlayerHealth>();
+        playerHealthController = GetComponent<PlayerHealthController>();
         staminaController = GetComponent<StaminaController>();
-        playerEffects = GetComponent<PlayerEffects>();
+        playerEffectsController = GetComponent<PlayerEffectsController>();
         playerInventory = GetComponent<PlayerInventory>();
         playerRelics = GetComponent<PlayerRelics>();
         playerWeapons = GetComponent<PlayerWeapons>();
+        cameraController = CameraController.Instance;
+        networkObject = GetComponent<NetworkObject>();
+
+        if (currentLevelExperienceNeeded == 0)
+            currentLevelExperienceNeeded = experienceForFirstLevel;
 
         timerForConstantSprint = timeForConstantSprint;
         waitingForStaminaRegenerationTimer = waitingForStaminaRegenerationTime;
 
-        if (currentLevelXpNeeded != 0) return;
-        currentLevelXpNeeded = experienceForFirstLevel;
-    }
+        isFirstUpdate = true;
 
-    private void Start()
-    {
+        if (!IsOwner) return;
+
+        if (Instance != null && Instance != this)
+            Destroy(gameObject);
+        else
+            Instance = this;
+
+        CameraController.Instance.ChangeFollowingObject(playerVisual);
+        MinimapCameraController.Instance.ChangeFollowingObject(transform);
+
         GameInput.Instance.OnChangeCameraModeAction += GameInput_OnChangeCameraModeAction;
         GameInput.Instance.OnSprintAction += GameInput_OnSprintAction;
         GameInput.Instance.OnChangeMovementModeAction += GameInput_OnChangeMovementMode;
 
         staminaController.OnAllStaminaSpend += StaminaController_OnAllStaminaSpend;
-
-        playerAttackController.OnEnemyHitted += PlayerAttackController_OnEnemyHitted;
     }
+
+    #region SubscribedEvents
 
     private void PlayerAttackController_OnEnemyHitted(object sender, PlayerAttackController.OnEnemyHittedEventArgs e)
     {
@@ -120,8 +127,6 @@ public class PlayerController : MonoBehaviour
             e.hittedEnemy.OnEnemyDeath += EnemyController_OnEnemyDeath;
         }
     }
-
-    #region SubscribedEvents
 
     private void StaminaController_OnAllStaminaSpend(object sender, EventArgs e)
     {
@@ -155,7 +160,6 @@ public class PlayerController : MonoBehaviour
 
     #endregion
 
-
     #region Update & Connected
 
     private void Update()
@@ -166,12 +170,22 @@ public class PlayerController : MonoBehaviour
         {
             isFirstUpdate = false;
 
+            if (IsServer)
+            {
+                playerAttackController.OnEnemyHitted += PlayerAttackController_OnEnemyHitted;
+                AllConnectedPlayers.Instance.AddConnectedPlayerController(this);
+            }
+
+            if (!IsOwner) return;
+
             OnExperienceChange?.Invoke(this, new OnExperienceChangeEventArgs
             {
-                currentXp = currentXp, maxXp = currentLevelXpNeeded
+                currentXp = currentExperience, maxXp = currentLevelExperienceNeeded
             });
             OnSkillPointsValueChange?.Invoke(this, EventArgs.Empty);
         }
+
+        if (!IsOwner) return;
 
         TryMove();
         TryStartStaminaRegeneration();
@@ -238,13 +252,21 @@ public class PlayerController : MonoBehaviour
 
     public void ChangeHealth(int healthChangeValue)
     {
+        if (!IsServer) return;
+
         if (healthChangeValue > 0)
-            playerHealth.RegenerateHealth(healthChangeValue);
+            playerHealthController.RegenerateHealth(healthChangeValue);
         else
-            playerHealth.TakeDamage(-healthChangeValue);
+            playerHealthController.TakeDamage(-healthChangeValue);
     }
 
     public void AddRegeneratingHpAfterEnemyDeath(float hpPercentageValue, int effectID)
+    {
+        AddRegeneratingHpAfterEnemyDeathServerRpc(hpPercentageValue, effectID);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void AddRegeneratingHpAfterEnemyDeathServerRpc(float hpPercentageValue, int effectID)
     {
         if (hpPercentageValue > 0)
         {
@@ -268,52 +290,179 @@ public class PlayerController : MonoBehaviour
 
     public void ChangeSpeedModifier(float deltaValue)
     {
-        speedModifier += deltaValue;
+        if (!IsServer) return;
+
+        ChangeSpeedModifierServerRpc(deltaValue);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void ChangeSpeedModifierServerRpc(float deltaValue)
+    {
+        var newSpeedModifier = speedModifier + deltaValue;
+
+        ChangeSpeedModifierClientRpc(newSpeedModifier);
+    }
+
+    [ClientRpc]
+    private void ChangeSpeedModifierClientRpc(float newSpeedModifier)
+    {
+        speedModifier = newSpeedModifier;
     }
 
     public void ReceiveExperience(int experience)
     {
-        currentXp += (int)(experience * (1 + additionalExpMultiplayer));
+        if (!IsServer) return;
 
-        while (currentXp >= currentLevelXpNeeded)
+        ReceiveExperienceServerRpc(experience);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void ReceiveExperienceServerRpc(int experience)
+    {
+        var newCurrentExperience = (int)(currentExperience + experience * (1 + additionalExperienceMultiplayer));
+        var newCurrentLevelExperienceNeeded = currentLevelExperienceNeeded;
+        var newCurrentAvailableSkillPoints = currentAvailableSkillPoint;
+
+        while (newCurrentExperience >= newCurrentLevelExperienceNeeded)
         {
-            currentXp -= currentLevelXpNeeded;
-            currentLevelXpNeeded += (int)(currentLevelXpNeeded * experienceIncreaseForNextLevel);
-            currentAvailableSkillPoint += 1;
-            OnSkillPointsValueChange?.Invoke(this, EventArgs.Empty);
+            newCurrentExperience -= newCurrentLevelExperienceNeeded;
+            newCurrentLevelExperienceNeeded += (int)(newCurrentLevelExperienceNeeded * experienceIncreaseForNextLevel);
+            newCurrentAvailableSkillPoints += 1;
         }
 
+        ReceiveExperienceClientRpc(newCurrentExperience, newCurrentLevelExperienceNeeded,
+            newCurrentAvailableSkillPoints);
+    }
+
+    [ClientRpc]
+    private void ReceiveExperienceClientRpc(int newCurrentExperience, int newCurrentLevelExperienceNeeded,
+        int newCurrentAvailableSkillPoints)
+    {
+        currentExperience = newCurrentExperience;
+        currentLevelExperienceNeeded = newCurrentLevelExperienceNeeded;
+        currentAvailableSkillPoint = newCurrentAvailableSkillPoints;
+
+        if (!IsOwner) return;
+
+        OnSkillPointsValueChange?.Invoke(this, EventArgs.Empty);
         OnExperienceChange?.Invoke(this, new OnExperienceChangeEventArgs
         {
-            currentXp = currentXp, maxXp = currentLevelXpNeeded
+            currentXp = currentExperience, maxXp = currentLevelExperienceNeeded
         });
     }
 
     public void ChangeExpAdditionalMultiplayer(float additionalValue)
     {
-        additionalExpMultiplayer += additionalValue;
+        if (!IsServer) return;
+
+        ChangeExpAdditionalMultiplayerServerRpc(additionalValue);
     }
 
-    public void ReceiveCoins(int coins)
+    [ServerRpc(RequireOwnership = false)]
+    private void ChangeExpAdditionalMultiplayerServerRpc(float additionalValue)
     {
-        currentCoins += coins;
+        var newAdditionalExperienceMultiplier = additionalExperienceMultiplayer + additionalValue;
+
+        ChangeExpAdditionalMultiplayerClientRpc(newAdditionalExperienceMultiplier);
+    }
+
+    [ClientRpc]
+    private void ChangeExpAdditionalMultiplayerClientRpc(float newAdditionalExperienceMultiplier)
+    {
+        additionalExperienceMultiplayer = newAdditionalExperienceMultiplier;
+    }
+
+    public void ReceiveCoins(int deltaCoins)
+    {
+        if (!IsServer) return;
+
+        ReceiveCoinsServerRpc(deltaCoins);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void ReceiveCoinsServerRpc(int deltaCoins)
+    {
+        var newCurrentCoinsValue = currentCoins = deltaCoins;
+
+        ReceiveCoinsClientRpc(newCurrentCoinsValue);
+    }
+
+    [ClientRpc]
+    private void ReceiveCoinsClientRpc(int newCurrentCoinsValue)
+    {
+        currentCoins = newCurrentCoinsValue;
+
+        if (!IsOwner) return;
+
         OnCoinsValueChange?.Invoke(this, EventArgs.Empty);
     }
 
     public void ChangeCoinsPerKillMultiplayer(float deltaValue)
     {
-        coinsOnEnemyDeathMultiplayer += deltaValue;
+        if (!IsServer) return;
+
+        ChangeCoinsPerKillMultiplayerServerRpc(deltaValue);
     }
 
-    public void SpendCoins(int coins)
+    [ServerRpc(RequireOwnership = false)]
+    private void ChangeCoinsPerKillMultiplayerServerRpc(float deltaValue)
     {
-        currentCoins -= coins;
+        var newCoinsOnEnemyDeathMultiplayer = coinsOnEnemyDeathMultiplayer + deltaValue;
+
+        ChangeCoinsPerKillMultiplayerClientRpc(newCoinsOnEnemyDeathMultiplayer);
+    }
+
+    [ClientRpc]
+    private void ChangeCoinsPerKillMultiplayerClientRpc(float newCoinsOnEnemyDeathMultiplayer)
+    {
+        coinsOnEnemyDeathMultiplayer = newCoinsOnEnemyDeathMultiplayer;
+    }
+
+    public void SpendCoins(int deltaCoins)
+    {
+        if (!IsServer) return;
+
+        SpendCoinsServerRpc(deltaCoins);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void SpendCoinsServerRpc(int deltaCoins)
+    {
+        var newCurrentCoinsValue = currentCoins - deltaCoins;
+
+        SpendCoinsClientRpc(newCurrentCoinsValue);
+    }
+
+    [ClientRpc]
+    private void SpendCoinsClientRpc(int newCurrentCoinsValue)
+    {
+        currentCoins = newCurrentCoinsValue;
+
+        if (!IsOwner) return;
+
         OnCoinsValueChange?.Invoke(this, EventArgs.Empty);
     }
 
-    public void SpendSkillPoints(int toSpend)
+    public void SpendSkillPoints(int deltaValue)
     {
-        currentAvailableSkillPoint -= toSpend;
+        SpendSkillPointServerRpc(deltaValue);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void SpendSkillPointServerRpc(int deltaValue)
+    {
+        var newCurrentAvailableSkillPoint = currentAvailableSkillPoint - deltaValue;
+
+        SpendSkillPointClientRpc(newCurrentAvailableSkillPoint);
+    }
+
+    [ClientRpc]
+    private void SpendSkillPointClientRpc(int newCurrentAvailableSkillPoint)
+    {
+        currentAvailableSkillPoint = newCurrentAvailableSkillPoint;
+
+        if (!IsOwner) return;
+
         OnSkillPointsValueChange?.Invoke(this, EventArgs.Empty);
     }
 
@@ -335,12 +484,13 @@ public class PlayerController : MonoBehaviour
 
         foreach (var hpRegeneration in hpRegenerationAfterEnemyDeathEffects)
         {
-            playerHealth.RegenerateHealth(hpRegeneration.hpRegenerationAmount);
+            playerHealthController.RegenerateHealth(hpRegeneration.hpRegenerationAmount);
 
-            OnPlayerRegenerateHpAfterEnemyDeath?.Invoke(this, new PlayerEffects.RelicBuffEffectTriggeredEventArgs
-            {
-                spentValue = 1, effectID = hpRegeneration.effectID
-            });
+            OnPlayerRegenerateHpAfterEnemyDeath?.Invoke(this,
+                new PlayerEffectsController.RelicBuffEffectTriggeredEventArgs
+                {
+                    spentValue = 1, effectID = hpRegeneration.effectID
+                });
         }
     }
 
@@ -365,7 +515,7 @@ public class PlayerController : MonoBehaviour
 
     public int GetExperienceForCurrentLevel()
     {
-        return currentLevelXpNeeded;
+        return currentLevelExperienceNeeded;
     }
 
     public int GetCurrentSkillPointsValue()
@@ -375,7 +525,7 @@ public class PlayerController : MonoBehaviour
 
     public int GetBaseHp()
     {
-        return playerHealth.GetBaseHp();
+        return playerHealthController.GetBaseHp();
     }
 
     public int GetBaseAttack()
@@ -385,12 +535,12 @@ public class PlayerController : MonoBehaviour
 
     public int GetBaseDefence()
     {
-        return playerHealth.GetBaseDefence();
+        return playerHealthController.GetBaseDefence();
     }
 
     public int GetCurrentMaxHp()
     {
-        return playerHealth.GetCurrentMaxHp();
+        return playerHealthController.GetCurrentMaxHp();
     }
 
     public int GetCurrentAttack()
@@ -400,7 +550,7 @@ public class PlayerController : MonoBehaviour
 
     public int GetCurrentDefence()
     {
-        return playerHealth.GetCurrentDefence();
+        return playerHealthController.GetCurrentDefence();
     }
 
     public int GetCurrentCritRate()
@@ -425,7 +575,7 @@ public class PlayerController : MonoBehaviour
 
     public int GetCurrentAdditionalHp()
     {
-        return playerHealth.GetCurrentMaxHp() - playerHealth.GetBaseHp();
+        return playerHealthController.GetCurrentMaxHp() - playerHealthController.GetBaseHp();
     }
 
     public int GetCurrentAdditionalAttack()
@@ -435,12 +585,12 @@ public class PlayerController : MonoBehaviour
 
     public int GetCurrentAdditionalDefence()
     {
-        return playerHealth.GetCurrentDefence() - playerHealth.GetBaseDefence();
+        return playerHealthController.GetCurrentDefence() - playerHealthController.GetBaseDefence();
     }
 
-    public PlayerEffects GetPlayerEffects()
+    public PlayerEffectsController GetPlayerEffects()
     {
-        return playerEffects;
+        return playerEffectsController;
     }
 
     public IInventoryParent GetPlayerInventory()
@@ -448,7 +598,7 @@ public class PlayerController : MonoBehaviour
         return playerInventory;
     }
 
-    public IInventoryParent GetPlayerAttackInventory()
+    public IInventoryParent GetPlayerWeaponsInventory()
     {
         return playerWeapons;
     }
@@ -456,6 +606,26 @@ public class PlayerController : MonoBehaviour
     public IInventoryParent GetPlayerRelicsInventory()
     {
         return playerRelics;
+    }
+
+    public NetworkObject GetPlayerNetworkObject()
+    {
+        return networkObject;
+    }
+
+    public PlayerAttackController GetPlayerAttackController()
+    {
+        return playerAttackController;
+    }
+
+    public StaminaController GetPlayerStaminaController()
+    {
+        return staminaController;
+    }
+
+    public PlayerHealthController GetPlayerHealthController()
+    {
+        return playerHealthController;
     }
 
     #endregion

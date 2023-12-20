@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -28,9 +29,8 @@ public class LootChest : InteractableItem
 
     public override void OnInteract(PlayerController player)
     {
-        InventoryObject weaponToDrop = null;
-
         base.OnInteract(player);
+        isCanInteract = false;
 
         if (coinsInChest != 0)
             player.ReceiveCoins(coinsInChest);
@@ -38,23 +38,33 @@ public class LootChest : InteractableItem
         if (experienceForChest != 0)
             player.ReceiveExperience(experienceForChest);
 
+        OpenChestServerRpc();
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void OpenChestServerRpc()
+    {
+        InventoryObject itemToDrop = null;
+
         if (availableItemsToDrop.Count != 0 &&
             Random.Range(0, 100) < weaponDropChance * 100)
         {
-            var weaponToDropIndex = Random.Range(0, availableItemsToDrop.Count);
-            weaponToDrop = availableItemsToDrop[weaponToDropIndex];
+            var itemToDropIndex = Random.Range(0, availableItemsToDrop.Count);
+            itemToDrop = availableItemsToDrop[itemToDropIndex];
 
-            var weaponToDropNewObject = ScriptableObject.CreateInstance<InventoryObject>();
-            weaponToDropNewObject.SetInventoryObject(weaponToDrop);
+            var itemToDropNewObjectTransform = Instantiate(itemToDrop.transform);
+            var itemToDropNetworkObject = itemToDropNewObjectTransform.GetComponent<NetworkObject>();
+            itemToDropNetworkObject.Spawn();
+            var itemToDropInventoryObject = itemToDropNewObjectTransform.GetComponent<InventoryObject>();
+            itemToDropInventoryObject.SpawnInventoryObject();
 
-            weaponToDropNewObject.DropInventoryObjectToWorld(transform.position);
+            itemToDropInventoryObject.DropInventoryObjectToWorld(transform.position);
         }
 
         OnChestOpen?.Invoke(this, EventArgs.Empty);
 
-        Debug.Log($"Added {coinsInChest} coins, {experienceForChest} experience,  {weaponToDrop.name} weapon");
+        Debug.Log($"Added {coinsInChest} coins, {experienceForChest} experience,  {itemToDrop.name} weapon");
 
-        isCanInteract = false;
         Destroy(gameObject);
     }
 

@@ -1,12 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using Unity.Netcode;
 using UnityEngine;
 using static DungeonRoom;
 using Random = UnityEngine.Random;
 
-public class ProcedureDungeonGeneration : MonoBehaviour
+public class ProcedureDungeonGeneration : NetworkBehaviour
 {
+    public static event EventHandler OnDungeonGenerationFinished;
+
     [SerializeField] private Vector2Int maxDungeonSize = new(5, 8);
     [SerializeField] private int maxDungeonsRoomsCount = 10;
 
@@ -31,8 +34,21 @@ public class ProcedureDungeonGeneration : MonoBehaviour
         new List<bool>(1)
     };
 
-    private void Awake()
+    private bool isFirstUpdate;
+
+    public override void OnNetworkSpawn()
     {
+        base.OnNetworkSpawn();
+
+        if (!IsServer) return;
+
+        isFirstUpdate = true;
+    }
+
+    private void StartingDungeonRoom_OnDungeonStart(object sender, EventArgs e)
+    {
+        if (!IsServer) return;
+
         maxDungeonsRoomsCount = DungeonSettings.GetCurrentDungeonRoomsCount();
 
         foreach (var dungeonRoomVariation in dungeonRoomVariationsPrefabsList)
@@ -43,6 +59,28 @@ public class ProcedureDungeonGeneration : MonoBehaviour
         }
 
         GenerateDungeon();
+
+        FinishDungeonGenerationClientRpc();
+    }
+
+    [ClientRpc]
+    private void FinishDungeonGenerationClientRpc()
+    {
+        OnDungeonGenerationFinished?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void Update()
+    {
+        if (isFirstUpdate)
+        {
+            isFirstUpdate = false;
+
+            GenerateDungeonRoom(startingRoom.dungeonRoom, transform.position,
+                new Vector2Int(maxDungeonSize.x / 2, maxDungeonSize.y / 2),
+                new Vector2Int(0, 0));
+
+            StartingDungeonRoom.OnDungeonStart += StartingDungeonRoom_OnDungeonStart;
+        }
     }
 
     private void GenerateDungeon()
@@ -55,9 +93,9 @@ public class ProcedureDungeonGeneration : MonoBehaviour
             maxDungeonsRoomsCount = maxDungeonSize.x * maxDungeonSize.y;
         }
 
-        GenerateDungeonRoom(startingRoom.dungeonRoom, transform.position,
+        /*GenerateDungeonRoom(startingRoom.dungeonRoom, transform.position,
             new Vector2Int(maxDungeonSize.x / 2, maxDungeonSize.y / 2),
-            new Vector2Int(0, 0));
+            new Vector2Int(0, 0));*/
 
 
         while (allRoomsList.Count < maxDungeonsRoomsCount)
@@ -110,6 +148,8 @@ public class ProcedureDungeonGeneration : MonoBehaviour
     {
         var currentRoom = Instantiate(roomToCreatePrefab, roomTransformPosition,
             Quaternion.identity, transform).GetComponent<DungeonRoom>();
+        var currentRoomNetworkObject = currentRoom.GetComponent<NetworkObject>();
+        currentRoomNetworkObject.Spawn();
 
         currentRoom.TryGenerateExits();
         currentRoom.SetRoomGridPosition(roomGridPosition);
@@ -253,27 +293,34 @@ public class ProcedureDungeonGeneration : MonoBehaviour
                 dungeonMapUsedTilesList[i][j] = true;
 
             dungeonRoom.UseExit(exit);
+            Transform dungeonRoomHall = null;
             switch (exit)
             {
                 case Exits.Right:
                     nextRoom.UseExit(Exits.Left);
-                    Instantiate(dungeonRoom.GetRoomHall(), hallLocation, Quaternion.identity, transform);
+                    dungeonRoomHall = Instantiate(dungeonRoom.GetRoomHall(), hallLocation, Quaternion.identity,
+                        transform);
                     break;
                 case Exits.Left:
                     nextRoom.UseExit(Exits.Right);
-                    Instantiate(dungeonRoom.GetRoomHall(), hallLocation, Quaternion.identity, transform);
+                    dungeonRoomHall = Instantiate(dungeonRoom.GetRoomHall(), hallLocation, Quaternion.identity,
+                        transform);
                     break;
                 case Exits.Top:
                     nextRoom.UseExit(Exits.Bottom);
-                    Instantiate(dungeonRoom.GetRoomHall(), hallLocation, new Quaternion(0f, 0.707f, 0f, 0.707f),
+                    dungeonRoomHall = Instantiate(dungeonRoom.GetRoomHall(), hallLocation,
+                        new Quaternion(0f, 0.707f, 0f, 0.707f),
                         transform);
                     break;
                 case Exits.Bottom:
                     nextRoom.UseExit(Exits.Top);
-                    Instantiate(dungeonRoom.GetRoomHall(), hallLocation, new Quaternion(0f, 0.707f, 0f, 0.707f),
+                    dungeonRoomHall = Instantiate(dungeonRoom.GetRoomHall(), hallLocation,
+                        new Quaternion(0f, 0.707f, 0f, 0.707f),
                         transform);
                     break;
             }
+
+            dungeonRoomHall.GetComponent<NetworkObject>().Spawn();
         }
         else
         {
@@ -371,5 +418,10 @@ public class ProcedureDungeonGeneration : MonoBehaviour
             }
 
         return requiredRoomsCount;
+    }
+
+    public override void OnDestroy()
+    {
+        OnDungeonGenerationFinished = null;
     }
 }

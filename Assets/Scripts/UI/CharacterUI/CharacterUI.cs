@@ -1,8 +1,9 @@
 using System;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CharacterUI : MonoBehaviour
+public class CharacterUI : NetworkBehaviour
 {
     public static event EventHandler OnCharacterUIOpen;
     public static event EventHandler OnCharacterUIClose;
@@ -21,7 +22,7 @@ public class CharacterUI : MonoBehaviour
     [SerializeField] private Button relicsTabButton;
     public static event EventHandler OnRelicsTabButtonClick;
 
-    private bool isFirstUpdate = true;
+    private bool isFirstUpdate;
 
     private bool isSubscribed;
 
@@ -59,6 +60,11 @@ public class CharacterUI : MonoBehaviour
 
         GameInput.Instance.OnOpenCharacterInfoAction += GameInput_OnOpenCharacterInfoAction;
         isSubscribed = true;
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        isFirstUpdate = true;
     }
 
     private void Update()

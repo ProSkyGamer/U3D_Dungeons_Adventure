@@ -47,8 +47,8 @@
   <ItemGroup>
      <Compile Include="Library\PackageCache\com.unity.ai.navigation@1.1.5\Editor\Updater\NavMeshSceneConverter.cs" />
      <Compile Include="Library\PackageCache\com.unity.ai.navigation@1.1.5\Editor\Updater\BuiltInToNavMeshSurfaceConverterContainer.cs" />
-     <Compile Include="Library\PackageCache\com.unity.ai.navigation@1.1.5\Editor\Updater\AssemblyInfo.cs" />
      <Compile Include="Library\PackageCache\com.unity.ai.navigation@1.1.5\Editor\Updater\NavMeshUpdaterEditor.cs" />
+     <Compile Include="Library\PackageCache\com.unity.ai.navigation@1.1.5\Editor\Updater\AssemblyInfo.cs" />
      <Compile Include="Library\PackageCache\com.unity.ai.navigation@1.1.5\Editor\Updater\NavMeshUpdaterUtility.cs" />
      <None Include="Library\PackageCache\com.unity.ai.navigation@1.1.5\Editor\Updater\Unity.AI.Navigation.Updater.asmdef" />
      <Folder Include="Library\PackageCache\com.unity.ai.navigation@1.1.5\Editor\Updater" />
@@ -319,6 +319,9 @@
      <Reference Include="Unity.VisualScripting.YamlDotNet">
      <HintPath>D:\Unity\3D Dungeons Adventure\Library\PackageCache\com.unity.visualscripting@1.9.1\Editor\VisualScripting.Core\Dependencies\YamlDotNet\Unity.VisualScripting.YamlDotNet.dll</HintPath>
      </Reference>
+     <Reference Include="Unity.Collections.LowLevel.ILSupport">
+     <HintPath>D:\Unity\3D Dungeons Adventure\Library\PackageCache\com.unity.collections@1.2.4\Unity.Collections.LowLevel.ILSupport\Unity.Collections.LowLevel.ILSupport.dll</HintPath>
+     </Reference>
      <Reference Include="Unity.Plastic.Antlr3.Runtime">
      <HintPath>D:\Unity\3D Dungeons Adventure\Library\PackageCache\com.unity.collab-proxy@2.2.0\Lib\Editor\PlasticSCM\Unity.Plastic.Antlr3.Runtime.dll</HintPath>
      </Reference>
@@ -339,6 +342,9 @@
      </Reference>
      <Reference Include="Unity.VisualScripting.TextureAssets">
      <HintPath>D:\Unity\3D Dungeons Adventure\Library\PackageCache\com.unity.visualscripting@1.9.1\Editor\VisualScripting.Core\EditorAssetResources\Unity.VisualScripting.TextureAssets.dll</HintPath>
+     </Reference>
+     <Reference Include="Mono.Cecil">
+     <HintPath>D:\Unity\3D Dungeons Adventure\Library\PackageCache\com.unity.nuget.mono-cecil@1.11.4\Mono.Cecil.dll</HintPath>
      </Reference>
      <Reference Include="nunit.framework">
      <HintPath>D:\Unity\3D Dungeons Adventure\Library\PackageCache\com.unity.ext.nunit@1.0.6\net35\unity-custom\nunit.framework.dll</HintPath>

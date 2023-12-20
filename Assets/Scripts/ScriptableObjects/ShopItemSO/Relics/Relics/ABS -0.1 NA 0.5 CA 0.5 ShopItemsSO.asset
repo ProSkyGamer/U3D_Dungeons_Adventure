@@ -15,8 +15,8 @@ MonoBehaviour:
   soldItemType: 2
   boughtItemValue: 1
   coinsCost: 300
-  inventoryObjectToSold: {fileID: 11400000, guid: 62b9acf8d75953c4c9dc647926f53689,
-    type: 2}
+  inventoryObjectToSold: {fileID: 7386946131207136613, guid: 7ec63cf8ac429de43bc9817145c2170c,
+    type: 3}
   maxBoughtCount: 1
   isBoughtsUnlimited: 0
   isObjectMustBeSelling: 0

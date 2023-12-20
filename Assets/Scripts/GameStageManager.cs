@@ -32,7 +32,8 @@ public class GameStageManager : MonoBehaviour
 
     private void Start()
     {
-        StartingDungeonRoom.OnDungeonStart += StartingDungeonRoom_OnDungeonStart;
+        ProcedureDungeonGeneration.OnDungeonGenerationFinished +=
+            ProcedureDungeonGeneration_OnDungeonGenerationFinished;
 
         GameInput.Instance.OnPauseAction += GameInput_OnPauseAction;
         PauseUI.OnResumeButtonClick += GameInput_OnPauseAction;
@@ -74,7 +75,7 @@ public class GameStageManager : MonoBehaviour
         OnGamePause?.Invoke(this, EventArgs.Empty);
     }
 
-    private void StartingDungeonRoom_OnDungeonStart(object sender, EventArgs e)
+    private void ProcedureDungeonGeneration_OnDungeonGenerationFinished(object sender, EventArgs e)
     {
         currentGameStage = GameStages.Playing;
         OnGameStart?.Invoke(this, EventArgs.Empty);

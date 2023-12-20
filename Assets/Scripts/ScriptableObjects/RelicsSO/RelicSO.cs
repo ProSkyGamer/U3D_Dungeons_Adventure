@@ -4,13 +4,13 @@ using UnityEngine;
 [CreateAssetMenu]
 public class RelicSO : ScriptableObject
 {
-    public List<PlayerEffects.AppliedEffect> relicApplyingEffects = new();
+    public List<PlayerEffectsController.AppliedEffect> relicApplyingEffects = new();
 
     public void SetRelicSo(RelicSO relicToSet)
     {
         foreach (var relicEffect in relicToSet.relicApplyingEffects)
         {
-            var applyingEffect = new PlayerEffects.AppliedEffect
+            var applyingEffect = new PlayerEffectsController.AppliedEffect
             {
                 appliedEffectType = relicEffect.appliedEffectType,
                 effectPercentageScale = relicEffect.effectPercentageScale,

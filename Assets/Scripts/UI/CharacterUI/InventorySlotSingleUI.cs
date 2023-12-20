@@ -61,7 +61,7 @@ public class InventorySlotSingleUI : MonoBehaviour, IPointerEnterHandler, IPoint
         if (isShowingButtons) return;
 
         if (inventoryType == CharacterInventoryUI.InventoryType.PlayerWeaponInventory &&
-            PlayerController.Instance.GetPlayerAttackInventory().GetCurrentInventoryObjectsCount() <= 1) return;
+            PlayerController.Instance.GetPlayerWeaponsInventory().GetCurrentInventoryObjectsCount() <= 1) return;
 
         StartDraggingItem();
     }

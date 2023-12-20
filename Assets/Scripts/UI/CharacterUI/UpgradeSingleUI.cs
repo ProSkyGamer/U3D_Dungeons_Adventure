@@ -1,17 +1,18 @@
 using System;
 using System.Collections.Generic;
 using TMPro;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UpgradeSingleUI : MonoBehaviour
+public class UpgradeSingleUI : NetworkBehaviour
 {
     public event EventHandler OnUpgradeBuy;
 
     [SerializeField] private TextTranslationSingleUI upgradeTypeTextTranslationSingle;
     [SerializeField] private TextMeshProUGUI upgradeValueText;
 
-    private PlayerEffects.AllPlayerEffects buffType;
+    private PlayerEffectsController.AllPlayerEffects buffType;
     private float buffValue;
     private int itemUpgradeID;
     [SerializeField] private Transform lockedObjectTransform;
@@ -22,6 +23,8 @@ public class UpgradeSingleUI : MonoBehaviour
 
     private Button upgradeButton;
 
+    private bool isFirstUpdate;
+
     private void Awake()
     {
         upgradeButton = GetComponent<Button>();
@@ -29,11 +32,21 @@ public class UpgradeSingleUI : MonoBehaviour
         upgradeButton.onClick.AddListener(BuyUpgrade);
     }
 
-    private void Start()
+    public override void OnNetworkSpawn()
     {
-        PlayerController.Instance.OnSkillPointsValueChange += PlayerController_OnSkillPointsValueChange;
+        isFirstUpdate = true;
+    }
 
-        CharacterUI.OnStatsTabButtonClick += CharacterUI_OnStatsTabButtonClick;
+    private void Update()
+    {
+        if (isFirstUpdate)
+        {
+            isFirstUpdate = false;
+
+            PlayerController.Instance.OnSkillPointsValueChange += PlayerController_OnSkillPointsValueChange;
+
+            CharacterUI.OnStatsTabButtonClick += CharacterUI_OnStatsTabButtonClick;
+        }
     }
 
     private void CharacterUI_OnStatsTabButtonClick(object sender, EventArgs e)
@@ -59,7 +72,7 @@ public class UpgradeSingleUI : MonoBehaviour
         UpdateVisual();
     }
 
-    public void SetUpgradeType(PlayerEffects.AllPlayerEffects upgradeBuffType, float upgradeBuffValue,
+    public void SetUpgradeType(PlayerEffectsController.AllPlayerEffects upgradeBuffType, float upgradeBuffValue,
         TextTranslationsSO upgradeTypeTextTranslationSo, int id)
     {
         if (buffValue != 0f) return;

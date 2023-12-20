@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
-public class DungeonRoomSettings : MonoBehaviour
+public class DungeonRoomSettings : NetworkBehaviour
 {
     public event EventHandler OnAllEnemiesDefeated;
 
@@ -13,18 +14,21 @@ public class DungeonRoomSettings : MonoBehaviour
 
     private readonly List<EnemyController> remainingEnemies = new();
 
-
-    private void Start()
+    private void Awake()
     {
-        GameStageManager.Instance.OnGameStart += StartingDungeonRoom_OnDungeonStart;
+        StartingDungeonRoom.OnNavMeshBuild += StartingDungeonRoom_OnNavMeshBuild;
     }
 
-    private void StartingDungeonRoom_OnDungeonStart(object sender, EventArgs e)
+    private void StartingDungeonRoom_OnNavMeshBuild(object sender, EventArgs e)
     {
+        if (!IsServer) return;
+
         foreach (var enemy in enemiesToSpawn)
         {
             var enemyTransform = Instantiate(enemy, transform.position, Quaternion.identity);
             enemyTransform.TryGetComponent(out EnemyController enemyController);
+            var enemyNetworkObject = enemyTransform.GetComponent<NetworkObject>();
+            enemyNetworkObject.Spawn();
 
             remainingEnemies.Add(enemyController);
             enemyController.OnEnemyDeath += EnemyController_OnEnemyDeath;
