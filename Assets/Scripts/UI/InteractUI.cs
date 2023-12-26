@@ -29,6 +29,19 @@ public class InteractUI : MonoBehaviour
     private void Start()
     {
         Hide();
+
+        GiveCoinsUI.OnInterfaceShown += GiveCoinsUI_OnInterfaceShown;
+        GiveCoinsUI.OnInterfaceHidden += GiveCoinsUI_OnInterfaceHidden;
+    }
+
+    private void GiveCoinsUI_OnInterfaceHidden(object sender, EventArgs e)
+    {
+        Show();
+    }
+
+    private void GiveCoinsUI_OnInterfaceShown(object sender, EventArgs e)
+    {
+        Hide();
     }
 
     public void Update()
@@ -80,6 +93,7 @@ public class InteractUI : MonoBehaviour
             Show();
 
         var interactableItemButtonTransform = Instantiate(interactButtonPrefab, buttonsLayoutGroup);
+        interactableItemButtonTransform.gameObject.name = interactButtonUI.gameObject.name;
         var interactButtonSingle = interactableItemButtonTransform.GetComponent<InteractButtonSingleUI>();
         interactButtonSingle.InitializeButton(interactButtonUI, textTranslationsSo);
         var interactableItemButton = interactButtonSingle.GetInteractButton();
@@ -101,7 +115,7 @@ public class InteractUI : MonoBehaviour
             {
                 if (activeButton == allInteractButtonsList[i])
                     if (allInteractButtonsList.Count != 1)
-                        activeButton = i != 0 ? allInteractButtonsList[i--] : allInteractButtonsList[i++];
+                        activeButton = i != 0 ? allInteractButtonsList[i - 1] : allInteractButtonsList[i + 1];
 
                 Destroy(allInteractButtonsList[i].gameObject);
                 allInteractButtonsList.RemoveAt(i);

@@ -10,6 +10,7 @@ public class MainGameUI : NetworkBehaviour
     [SerializeField] private Transform healthBarPrefab;
     [SerializeField] private Transform healthBarsLayoutGroup;
     private readonly Dictionary<PlayerHealthController, HealthBarUI> allPlayersHealthBars = new();
+    [SerializeField] private Transform staminaBar;
     [SerializeField] private Image staminaBarValue;
     [SerializeField] private TextMeshProUGUI experienceText;
     [SerializeField] private Image experienceBarValue;
@@ -104,8 +105,13 @@ public class MainGameUI : NetworkBehaviour
 
     private void StaminaController_OnStaminaChange(object sender, StaminaController.OnStaminaChangeEventArgs e)
     {
+        staminaBar.gameObject.SetActive(true);
+
         var fillAmount = e.currentStamina / (float)e.maxStamina;
         staminaBarValue.fillAmount = fillAmount;
+
+        if (fillAmount == 1f)
+            staminaBar.gameObject.SetActive(false);
     }
 
     private void PlayerHealth_OnCurrentPlayerHealthChange(object sender,

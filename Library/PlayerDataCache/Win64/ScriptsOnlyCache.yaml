@@ -8,11 +8,14 @@ ScriptsOnlyBuild:
     - CameraController
     - ChangeLanguageDropdownUI
     - CharacterInventoryUI
+    - CharacterTradeCoins
     - CharacterUI
     - ChestSettings
+    - ConfirmTransferNotificationUI
     - DeleteObjectAfterTime
     - DroppedInventoryItemSingle
     - DroppedItemsController
+    - DungeonLevelsDifficulty
     - DungeonRoom
     - DungeonRoomSettings
     - EnemyAttackController
@@ -24,6 +27,7 @@ ScriptsOnlyBuild:
     - GameInput
     - GameStageManager
     - GetAdditionalInventoryTextTranslationSo
+    - GiveCoinsUI
     - HealerEnemy
     - HealthBarUI
     - InteractButtonSingleUI
@@ -38,6 +42,7 @@ ScriptsOnlyBuild:
     - LootChest
     - MainGameUI
     - Merchant
+    - MerchantDungeonRoom
     - MinimapCameraController
     - MinimapTabUI
     - PauseUI
@@ -52,12 +57,14 @@ ScriptsOnlyBuild:
     - PlayerWeaponsVisual
     - ProcedureDungeonGeneration
     - RebindKeymapSingleUI
+    - ReceivingItemSingle
+    - ReceivingItemsUI
     - RelicSO
     - RelicTabUI
     - SceneLanguageController
     - SettingsUI
     - ShielderEnemy
-    - ShopItemSO
+    - ShopItem
     - ShopItemSingleUI
     - ShopUI
     - StaminaController
@@ -84,6 +91,7 @@ ScriptsOnlyBuild:
     - UnityEngine.InputSystem.RemoteInputPlayerConnection
     - UnityEngine.InputSystem.UI.InputSystemUIInputModule
     Unity.Netcode.Components.dll:
+    - Unity.Netcode.Components.NetworkAnimator
     - Unity.Netcode.Components.NetworkRigidbody
     - Unity.Netcode.Components.NetworkTransform
     Unity.Netcode.Editor.dll:
@@ -145,7 +153,6 @@ ScriptsOnlyBuild:
     - UnityEngine.Rendering.Universal.XRSystemData
     Unity.Rider.Editor.dll:
     - Packages.Rider.Editor.RiderScriptEditorData
-    - Packages.Rider.Editor.RiderScriptEditorPersistedState
     - Packages.Rider.Editor.UnitTesting.CallbackData
     Unity.TextMeshPro:
     - TMPro.TMP_FontAsset
@@ -155,10 +162,13 @@ ScriptsOnlyBuild:
     Unity.TextMeshPro.dll:
     - TMPro.TMP_Dropdown
     - TMPro.TMP_FontAsset
+    - TMPro.TMP_InputField
     - TMPro.TMP_Settings
     - TMPro.TMP_SpriteAsset
     - TMPro.TMP_StyleSheet
     - TMPro.TextMeshProUGUI
+    Unity.Timeline.Editor.dll:
+    - TimelineProjectSettings
     UnityEditor.Graphs.dll:
     - UnityEditor.Graphs.AnimationBlendTree.Graph
     - UnityEditor.Graphs.AnimationBlendTree.GraphGUI
@@ -193,14 +203,19 @@ ScriptsOnlyBuild:
     - UnityEngine.UI.GridLayoutGroup
     - UnityEngine.UI.HorizontalLayoutGroup
     - UnityEngine.UI.Image
+    - UnityEngine.UI.LayoutElement
     - UnityEngine.UI.Mask
     - UnityEngine.UI.RawImage
+    - UnityEngine.UI.RectMask2D
     - UnityEngine.UI.ScrollRect
     - UnityEngine.UI.Scrollbar
     - UnityEngine.UI.Toggle
     - UnityEngine.UI.VerticalLayoutGroup
   serializedClasses:
     Assembly-CSharp:
+    - DungeonLevelsDifficulty/StatsIncreaseOnDungeonDifficulty
+    - DungeonLevelsDifficulty/StatsIncreaseOnDungeonDifficulty/StatIncreaseRequirement
+    - LootChest/ChestDropItem
     - Merchant/ShopTab
     - PlayerEffectsController/AppliedEffect
     - PlayerEffectsController/AppliedEffect/EffectCondition
@@ -254,6 +269,11 @@ ScriptsOnlyBuild:
     - TMPro.TMP_GlyphAdjustmentRecord
     - TMPro.TMP_GlyphPairAdjustmentRecord
     - TMPro.TMP_GlyphValueRecord
+    - TMPro.TMP_InputField/OnChangeEvent
+    - TMPro.TMP_InputField/SelectionEvent
+    - TMPro.TMP_InputField/SubmitEvent
+    - TMPro.TMP_InputField/TextSelectionEvent
+    - TMPro.TMP_InputField/TouchScreenKeyboardEvent
     - TMPro.TMP_Sprite
     - TMPro.TMP_SpriteCharacter
     - TMPro.TMP_SpriteGlyph
@@ -348,11 +368,17 @@ ScriptsOnlyBuild:
       Script: {instanceID: 0}
     - Class: 65
       Script: {instanceID: 0}
+    - Class: 74
+      Script: {instanceID: 0}
     - Class: 81
       Script: {instanceID: 0}
     - Class: 84
       Script: {instanceID: 0}
     - Class: 89
+      Script: {instanceID: 0}
+    - Class: 91
+      Script: {instanceID: 0}
+    - Class: 95
       Script: {instanceID: 0}
     - Class: 104
       Script: {instanceID: 0}
@@ -383,269 +409,289 @@ ScriptsOnlyBuild:
     - Class: 114
       Script: {instanceID: 17264}
     - Class: 114
-      Script: {instanceID: 17344}
+      Script: {instanceID: 17266}
     - Class: 114
-      Script: {instanceID: 17400}
+      Script: {instanceID: 17346}
     - Class: 114
-      Script: {instanceID: 17484}
+      Script: {instanceID: 17402}
     - Class: 114
-      Script: {instanceID: 17572}
+      Script: {instanceID: 17486}
     - Class: 114
-      Script: {instanceID: 17644}
+      Script: {instanceID: 17574}
     - Class: 114
-      Script: {instanceID: 17694}
+      Script: {instanceID: 17596}
     - Class: 114
-      Script: {instanceID: 17952}
+      Script: {instanceID: 17648}
     - Class: 114
-      Script: {instanceID: 17972}
+      Script: {instanceID: 17698}
     - Class: 114
-      Script: {instanceID: 18018}
+      Script: {instanceID: 17956}
     - Class: 114
-      Script: {instanceID: 18190}
+      Script: {instanceID: 17976}
     - Class: 114
-      Script: {instanceID: 18204}
+      Script: {instanceID: 18022}
     - Class: 114
-      Script: {instanceID: 18366}
+      Script: {instanceID: 18194}
     - Class: 114
-      Script: {instanceID: 18396}
+      Script: {instanceID: 18208}
     - Class: 114
-      Script: {instanceID: 18426}
+      Script: {instanceID: 18370}
     - Class: 114
-      Script: {instanceID: 18442}
+      Script: {instanceID: 18400}
     - Class: 114
-      Script: {instanceID: 18494}
+      Script: {instanceID: 18430}
     - Class: 114
-      Script: {instanceID: 18636}
+      Script: {instanceID: 18446}
     - Class: 114
-      Script: {instanceID: 18760}
+      Script: {instanceID: 18496}
     - Class: 114
-      Script: {instanceID: 18832}
+      Script: {instanceID: 18640}
     - Class: 114
-      Script: {instanceID: 19088}
+      Script: {instanceID: 18644}
     - Class: 114
-      Script: {instanceID: 19184}
+      Script: {instanceID: 18766}
     - Class: 114
-      Script: {instanceID: 19224}
+      Script: {instanceID: 18790}
     - Class: 114
-      Script: {instanceID: 19226}
+      Script: {instanceID: 18840}
     - Class: 114
-      Script: {instanceID: 19254}
+      Script: {instanceID: 19096}
     - Class: 114
-      Script: {instanceID: 19282}
+      Script: {instanceID: 19192}
     - Class: 114
-      Script: {instanceID: 19302}
+      Script: {instanceID: 19232}
     - Class: 114
-      Script: {instanceID: 19438}
+      Script: {instanceID: 19234}
     - Class: 114
-      Script: {instanceID: 19452}
+      Script: {instanceID: 19262}
     - Class: 114
-      Script: {instanceID: 19514}
+      Script: {instanceID: 19290}
+    - Class: 114
+      Script: {instanceID: 19310}
+    - Class: 114
+      Script: {instanceID: 19396}
+    - Class: 114
+      Script: {instanceID: 19448}
+    - Class: 114
+      Script: {instanceID: 19462}
     - Class: 114
       Script: {instanceID: 19524}
     - Class: 114
-      Script: {instanceID: 19630}
+      Script: {instanceID: 19534}
+    - Class: 114
+      Script: {instanceID: 19640}
     - Class: 114
       Script: {instanceID: 19702}
     - Class: 114
-      Script: {instanceID: 19788}
+      Script: {instanceID: 19714}
     - Class: 114
-      Script: {instanceID: 19824}
+      Script: {instanceID: 19800}
+    - Class: 114
+      Script: {instanceID: 19836}
     - Class: 114
       Script: {instanceID: 19878}
     - Class: 114
-      Script: {instanceID: 19888}
+      Script: {instanceID: 19892}
     - Class: 114
-      Script: {instanceID: 19890}
+      Script: {instanceID: 19902}
     - Class: 114
-      Script: {instanceID: 19922}
+      Script: {instanceID: 19904}
     - Class: 114
-      Script: {instanceID: 19966}
+      Script: {instanceID: 19936}
     - Class: 114
-      Script: {instanceID: 20020}
+      Script: {instanceID: 19980}
     - Class: 114
-      Script: {instanceID: 20086}
+      Script: {instanceID: 20030}
     - Class: 114
-      Script: {instanceID: 20256}
+      Script: {instanceID: 20034}
     - Class: 114
-      Script: {instanceID: 20272}
+      Script: {instanceID: 20100}
     - Class: 114
-      Script: {instanceID: 20330}
+      Script: {instanceID: 20270}
     - Class: 114
-      Script: {instanceID: 20712}
+      Script: {instanceID: 20286}
     - Class: 114
-      Script: {instanceID: 20718}
+      Script: {instanceID: 20724}
     - Class: 114
-      Script: {instanceID: 20756}
+      Script: {instanceID: 20730}
     - Class: 114
-      Script: {instanceID: 20770}
+      Script: {instanceID: 20768}
     - Class: 114
       Script: {instanceID: 20782}
     - Class: 114
-      Script: {instanceID: 20884}
+      Script: {instanceID: 20794}
     - Class: 114
-      Script: {instanceID: 20954}
+      Script: {instanceID: 20896}
     - Class: 114
-      Script: {instanceID: 21050}
+      Script: {instanceID: 20966}
     - Class: 114
-      Script: {instanceID: 21326}
+      Script: {instanceID: 21062}
     - Class: 114
-      Script: {instanceID: 21336}
+      Script: {instanceID: 21338}
     - Class: 114
-      Script: {instanceID: 21390}
+      Script: {instanceID: 21348}
     - Class: 114
-      Script: {instanceID: 21546}
+      Script: {instanceID: 21402}
     - Class: 114
-      Script: {instanceID: 21622}
+      Script: {instanceID: 21558}
     - Class: 114
-      Script: {instanceID: 21628}
+      Script: {instanceID: 21634}
     - Class: 114
-      Script: {instanceID: 21820}
+      Script: {instanceID: 21640}
     - Class: 114
-      Script: {instanceID: 21876}
+      Script: {instanceID: 21832}
     - Class: 114
-      Script: {instanceID: 21904}
+      Script: {instanceID: 21888}
     - Class: 114
-      Script: {instanceID: 22076}
+      Script: {instanceID: 21916}
     - Class: 114
-      Script: {instanceID: 22214}
+      Script: {instanceID: 22088}
     - Class: 114
-      Script: {instanceID: 22232}
+      Script: {instanceID: 22226}
+    - Class: 114
+      Script: {instanceID: 22244}
     - Class: 114
       Script: {instanceID: 22342}
     - Class: 114
-      Script: {instanceID: 22440}
+      Script: {instanceID: 22356}
     - Class: 114
-      Script: {instanceID: 22490}
+      Script: {instanceID: 22454}
     - Class: 114
-      Script: {instanceID: 22526}
+      Script: {instanceID: 22504}
     - Class: 114
-      Script: {instanceID: 22546}
+      Script: {instanceID: 22540}
     - Class: 114
-      Script: {instanceID: 23156}
+      Script: {instanceID: 22560}
     - Class: 114
-      Script: {instanceID: 23202}
+      Script: {instanceID: 22746}
+    - Class: 114
+      Script: {instanceID: 23172}
     - Class: 114
       Script: {instanceID: 23218}
     - Class: 114
-      Script: {instanceID: 23278}
+      Script: {instanceID: 23234}
     - Class: 114
-      Script: {instanceID: 23344}
+      Script: {instanceID: 23294}
     - Class: 114
-      Script: {instanceID: 23354}
+      Script: {instanceID: 23360}
     - Class: 114
-      Script: {instanceID: 23538}
+      Script: {instanceID: 23370}
     - Class: 114
-      Script: {instanceID: 23546}
+      Script: {instanceID: 23554}
     - Class: 114
-      Script: {instanceID: 23702}
+      Script: {instanceID: 23562}
     - Class: 114
-      Script: {instanceID: 24072}
+      Script: {instanceID: 23718}
     - Class: 114
-      Script: {instanceID: 24074}
+      Script: {instanceID: 24088}
     - Class: 114
-      Script: {instanceID: 24112}
+      Script: {instanceID: 24090}
     - Class: 114
-      Script: {instanceID: 24230}
+      Script: {instanceID: 24128}
     - Class: 114
-      Script: {instanceID: 24376}
+      Script: {instanceID: 24246}
     - Class: 114
-      Script: {instanceID: 24416}
+      Script: {instanceID: 24392}
     - Class: 114
-      Script: {instanceID: 24438}
+      Script: {instanceID: 24432}
     - Class: 114
-      Script: {instanceID: 24552}
+      Script: {instanceID: 24454}
     - Class: 114
-      Script: {instanceID: 24606}
+      Script: {instanceID: 24568}
     - Class: 114
-      Script: {instanceID: 24698}
+      Script: {instanceID: 24622}
     - Class: 114
-      Script: {instanceID: 24804}
+      Script: {instanceID: 24714}
     - Class: 114
       Script: {instanceID: 24820}
     - Class: 114
-      Script: {instanceID: 24950}
+      Script: {instanceID: 24836}
     - Class: 114
-      Script: {instanceID: 25068}
+      Script: {instanceID: 24952}
     - Class: 114
-      Script: {instanceID: 25116}
+      Script: {instanceID: 24966}
     - Class: 114
-      Script: {instanceID: 25150}
+      Script: {instanceID: 25084}
     - Class: 114
-      Script: {instanceID: 25196}
+      Script: {instanceID: 25132}
     - Class: 114
-      Script: {instanceID: 25274}
+      Script: {instanceID: 25166}
     - Class: 114
-      Script: {instanceID: 25282}
+      Script: {instanceID: 25212}
     - Class: 114
-      Script: {instanceID: 25304}
+      Script: {instanceID: 25290}
     - Class: 114
-      Script: {instanceID: 25676}
+      Script: {instanceID: 25298}
     - Class: 114
-      Script: {instanceID: 25770}
+      Script: {instanceID: 25320}
     - Class: 114
-      Script: {instanceID: 25790}
+      Script: {instanceID: 25640}
     - Class: 114
-      Script: {instanceID: 25820}
+      Script: {instanceID: 25692}
     - Class: 114
-      Script: {instanceID: 25972}
+      Script: {instanceID: 25786}
     - Class: 114
-      Script: {instanceID: 25994}
+      Script: {instanceID: 25806}
     - Class: 114
-      Script: {instanceID: 26134}
+      Script: {instanceID: 25836}
     - Class: 114
-      Script: {instanceID: 26242}
+      Script: {instanceID: 25988}
     - Class: 114
-      Script: {instanceID: 26302}
+      Script: {instanceID: 26010}
     - Class: 114
-      Script: {instanceID: 26526}
+      Script: {instanceID: 26150}
     - Class: 114
-      Script: {instanceID: 26538}
+      Script: {instanceID: 26260}
     - Class: 114
-      Script: {instanceID: 26608}
+      Script: {instanceID: 26320}
     - Class: 114
-      Script: {instanceID: 26652}
+      Script: {instanceID: 26544}
     - Class: 114
-      Script: {instanceID: 26750}
+      Script: {instanceID: 26556}
     - Class: 114
-      Script: {instanceID: 26754}
+      Script: {instanceID: 26626}
     - Class: 114
-      Script: {instanceID: 26784}
+      Script: {instanceID: 26670}
     - Class: 114
-      Script: {instanceID: 26846}
+      Script: {instanceID: 26768}
     - Class: 114
-      Script: {instanceID: 26974}
+      Script: {instanceID: 26772}
     - Class: 114
-      Script: {instanceID: 27032}
+      Script: {instanceID: 26802}
     - Class: 114
-      Script: {instanceID: 27116}
+      Script: {instanceID: 26864}
     - Class: 114
-      Script: {instanceID: 27254}
+      Script: {instanceID: 26992}
     - Class: 114
-      Script: {instanceID: 27384}
+      Script: {instanceID: 27050}
     - Class: 114
-      Script: {instanceID: 27474}
+      Script: {instanceID: 27134}
     - Class: 114
-      Script: {instanceID: 27686}
+      Script: {instanceID: 27272}
     - Class: 114
-      Script: {instanceID: 27886}
+      Script: {instanceID: 27402}
     - Class: 114
-      Script: {instanceID: 27998}
+      Script: {instanceID: 27492}
     - Class: 114
-      Script: {instanceID: 28114}
+      Script: {instanceID: 27704}
     - Class: 114
-      Script: {instanceID: 28132}
+      Script: {instanceID: 27906}
     - Class: 114
-      Script: {instanceID: 28162}
+      Script: {instanceID: 28018}
     - Class: 114
-      Script: {instanceID: 28170}
+      Script: {instanceID: 28134}
     - Class: 114
-      Script: {instanceID: 28176}
+      Script: {instanceID: 28152}
     - Class: 114
-      Script: {instanceID: 28342}
+      Script: {instanceID: 28182}
     - Class: 114
-      Script: {instanceID: 34314}
+      Script: {instanceID: 28190}
     - Class: 114
-      Script: {instanceID: 34376}
+      Script: {instanceID: 28196}
+    - Class: 114
+      Script: {instanceID: 28362}
+    - Class: 114
+      Script: {instanceID: 28446}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 124
@@ -801,6 +847,12 @@ ScriptsOnlyBuild:
     className: WhiteBalance
   - hash:
       serializedVersion: 2
+      Hash: 13cf4cf3a23a7d887538e6e726039e2d
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: HealthBarUI
+  - hash:
+      serializedVersion: 2
       Hash: 83be9adbcd19b738c8d7a69a61b8aa41
     assemblyName: Assembly-CSharp
     namespaceName: 
@@ -853,6 +905,12 @@ ScriptsOnlyBuild:
     assemblyName: Unity.RenderPipelines.Core.Runtime
     namespaceName: UnityEngine.Rendering.UI
     className: DebugUIHandlerToggle
+  - hash:
+      serializedVersion: 2
+      Hash: 98f8e366fb912d97e4e702258efcfbe9
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: DungeonLevelsDifficulty
   - hash:
       serializedVersion: 2
       Hash: 58cb38edcf0b7e4966c27b0d9e560ba5
@@ -987,7 +1045,7 @@ ScriptsOnlyBuild:
     className: UnityOnMouseDownMessageListener
   - hash:
       serializedVersion: 2
-      Hash: a970fd74a9ae9c8e85dfcfad0cfc95f7
+      Hash: f7ab53481409a6bb71c59305f0aabd46
     assemblyName: Assembly-CSharp
     namespaceName: 
     className: PlayerController
@@ -1053,6 +1111,12 @@ ScriptsOnlyBuild:
     className: DebugUIHandlerVBox
   - hash:
       serializedVersion: 2
+      Hash: b590357b47ad77836125292c05127b2d
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: GiveCoinsUI
+  - hash:
+      serializedVersion: 2
       Hash: 747284d692f6c45bae4955ed655ed04c
     assemblyName: Unity.TextMeshPro
     namespaceName: TMPro
@@ -1071,10 +1135,16 @@ ScriptsOnlyBuild:
     className: UnityOnCollisionExit2DMessageListener
   - hash:
       serializedVersion: 2
-      Hash: 4e2c80df85323791afdda17cdcdb514f
+      Hash: b90770b78ff3b4c9d396c3c3186c322e
     assemblyName: Assembly-CSharp
     namespaceName: 
     className: Merchant
+  - hash:
+      serializedVersion: 2
+      Hash: 189cba652fc49616c34316ce404d30da
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: ConfirmTransferNotificationUI
   - hash:
       serializedVersion: 2
       Hash: f6831ac80ec81c5d5b370c0ed0fee997
@@ -1191,10 +1261,16 @@ ScriptsOnlyBuild:
     className: OnScreenStick
   - hash:
       serializedVersion: 2
-      Hash: 1f612c625257d4750c5c91522a16bfda
+      Hash: 4d80dd2ca7eb5cc39f52bc4024398bcf
     assemblyName: Assembly-CSharp
     namespaceName: 
-    className: ShopItemSO
+    className: ReceivingItemSingle
+  - hash:
+      serializedVersion: 2
+      Hash: b4d38fc06e40b6c60db1ffbf3aba0269
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: ShopItem
   - hash:
       serializedVersion: 2
       Hash: 751e5bae2a317288c2ab58d66687092b
@@ -1245,6 +1321,12 @@ ScriptsOnlyBuild:
     className: ShopUI
   - hash:
       serializedVersion: 2
+      Hash: 963d35e92fa82c22b8923bd024e314a1
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: AllConnectedPlayers
+  - hash:
+      serializedVersion: 2
       Hash: 11c9841ae3301d768d780020d3d42905
     assemblyName: Assembly-CSharp
     namespaceName: 
@@ -1273,6 +1355,12 @@ ScriptsOnlyBuild:
     assemblyName: Assembly-CSharp
     namespaceName: 
     className: RelicTabUI
+  - hash:
+      serializedVersion: 2
+      Hash: 94867e300d6f44888b3284709d7c867a
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: MerchantDungeonRoom
   - hash:
       serializedVersion: 2
       Hash: 751e5bae2a317288c2ab58d66687092b
@@ -1389,12 +1477,6 @@ ScriptsOnlyBuild:
     className: UnityOnDeselectMessageListener
   - hash:
       serializedVersion: 2
-      Hash: 6bf294ae50c3ad3af9d5aebdc0c6383e
-    assemblyName: Assembly-CSharp
-    namespaceName: 
-    className: ProcedureDungeonGeneration
-  - hash:
-      serializedVersion: 2
       Hash: e8ff0f32aede797557af213671aa1a71
     assemblyName: Unity.RenderPipelines.Universal.Runtime
     namespaceName: UnityEngine.Experimental.Rendering.Universal
@@ -1431,7 +1513,7 @@ ScriptsOnlyBuild:
     className: TextMeshProUGUI
   - hash:
       serializedVersion: 2
-      Hash: 8facd7e345aa24a2cb52f2a965f49d44
+      Hash: 8d7bfe0f8163a75450ad0716a363d5f5
     assemblyName: Assembly-CSharp
     namespaceName: 
     className: MainGameUI
@@ -1719,6 +1801,12 @@ ScriptsOnlyBuild:
     className: TMP_ScrollbarEventHandler
   - hash:
       serializedVersion: 2
+      Hash: 1db87a9aeb813f0578a02635db1f7db4
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: ReceivingItemsUI
+  - hash:
+      serializedVersion: 2
       Hash: 737b3cd4e6a12ba8d9db2fe2b614f203
     assemblyName: Unity.RenderPipelines.Core.Runtime
     namespaceName: UnityEngine.Rendering
@@ -1795,6 +1883,12 @@ ScriptsOnlyBuild:
     assemblyName: Unity.RenderPipelines.Core.Runtime
     namespaceName: UnityEngine.Rendering
     className: FreeCamera
+  - hash:
+      serializedVersion: 2
+      Hash: 58cb38edcf0b7e4966c27b0d9e560ba5
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: CharacterTradeCoins
   - hash:
       serializedVersion: 2
       Hash: 751e5bae2a317288c2ab58d66687092b
@@ -2409,6 +2503,12 @@ ScriptsOnlyBuild:
     className: HealerEnemy
   - hash:
       serializedVersion: 2
+      Hash: 504ce94d407db6cc04deba6c49062bc8
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: OwnerNetworkAnimator
+  - hash:
+      serializedVersion: 2
       Hash: 654cebef8aa88cb6cd0504505364d614
     assemblyName: Unity.InputSystem
     namespaceName: UnityEngine.InputSystem.Editor
@@ -2499,7 +2599,7 @@ ScriptsOnlyBuild:
     className: MarkerTrack
   - hash:
       serializedVersion: 2
-      Hash: a9c269f5ebdb0ebeccb18d65aac0303b
+      Hash: 22e4e6451d837eb35f353004945bfbd5
     assemblyName: Assembly-CSharp
     namespaceName: 
     className: LootChest
@@ -2745,16 +2845,10 @@ ScriptsOnlyBuild:
     className: GroundCheck
   - hash:
       serializedVersion: 2
-      Hash: 963d35e92fa82c22b8923bd024e314a1
+      Hash: bd27ffa822611924b3a64416c225003f
     assemblyName: Assembly-CSharp
     namespaceName: 
-    className: AllConnectedPlayers
-  - hash:
-      serializedVersion: 2
-      Hash: 13cf4cf3a23a7d887538e6e726039e2d
-    assemblyName: Assembly-CSharp
-    namespaceName: 
-    className: HealthBarUI
+    className: ProcedureDungeonGeneration
   platform: 19
   scenePathNames:
   - Assets/Scenes/Level.unity

@@ -79,7 +79,7 @@ public class InventorySlotSingleUI : MonoBehaviour, IPointerEnterHandler, IPoint
         UpdateVisual();
     }
 
-    private void Start()
+    private void Awake()
     {
         inventorySlotTextTranslationSingleUI = inventorySlotText.GetComponent<TextTranslationSingleUI>();
 

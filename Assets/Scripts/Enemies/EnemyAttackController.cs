@@ -10,39 +10,31 @@ public class EnemyAttackController : NetworkBehaviour
     [SerializeField] private int baseAttack = 15;
     private int currentAttack;
 
-    private float currentAttackPercentageBuff = 1f;
-
     private void Awake()
     {
         currentAttack = baseAttack;
-    }
 
-    private void Start()
-    {
         if (!IsServer) return;
 
-        DungeonSettings.OnDungeonDifficultyChange += DungeonDifficulty_OnDungeonDifficultyChange;
-    }
+        var additionalBaseAtkIncrease =
+            DungeonLevelsDifficulty.Instance.GetEnemyBaseStatIncreaseByCurrentConnectedPlayers(DungeonLevelsDifficulty
+                .StatsIncreaseOnDungeonDifficulty.EnemiesStatIncrease.ATK);
 
-    private void DungeonDifficulty_OnDungeonDifficultyChange(object sender,
-        DungeonSettings.OnDungeonDifficultyChangeEventArgs e)
-    {
-        var currentAtkDifficultyMultiplayer =
-            DungeonSettings.GetEnemiesAtkMultiplayerByDungeonDifficulty(e.newDungeonDifficulty);
-        var currentAtkPlayersCountMultiplayer = DungeonSettings.GetEnemiesAtkMultiplayerByPlayersCount();
+        var newBaseAtk = (int)(baseAttack * additionalBaseAtkIncrease);
 
-        var newBaseAttack = (int)(baseAttack * currentAtkDifficultyMultiplayer * currentAtkPlayersCountMultiplayer);
+        var additionalAtkIncrease =
+            DungeonLevelsDifficulty.Instance.GetCurrentEnemyStatIncreaseMultiplayer(DungeonLevelsDifficulty
+                .StatsIncreaseOnDungeonDifficulty.EnemiesStatIncrease.ATK);
 
-        var newCurrentAttack = (int)(baseAttack * currentAttackPercentageBuff);
-
-        OnDungeonDifficultyChangeClientRpc(newBaseAttack, newCurrentAttack);
+        var newCurrentAttack = (int)(currentAttack + newBaseAtk * additionalAtkIncrease);
+        DungeonDifficultyAttackChangeClientRpc(newCurrentAttack, newBaseAtk);
     }
 
     [ClientRpc]
-    private void OnDungeonDifficultyChangeClientRpc(int newBaseAttack, int newCurrentAttack)
+    private void DungeonDifficultyAttackChangeClientRpc(int newCurrentAttack, int newBaseAtk)
     {
-        baseAttack = newBaseAttack;
         currentAttack = newCurrentAttack;
+        baseAttack = newBaseAtk;
     }
 
     public void Attack()
@@ -67,7 +59,6 @@ public class EnemyAttackController : NetworkBehaviour
     private void ChangeAttackBuffServerRpc(float percentageBuff)
     {
         var newCurrentAttack = (int)(currentAttack + baseAttack * percentageBuff);
-        currentAttackPercentageBuff += percentageBuff;
 
         ChangeAttackBuffClientRpc(newCurrentAttack);
     }

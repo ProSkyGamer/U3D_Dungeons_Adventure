@@ -38,6 +38,8 @@ public class CharacterInventoryUI : NetworkBehaviour
     {
         base.OnNetworkSpawn();
 
+        isFirstUpdate = true;
+
         OnAnySlotInteractButtonPressed += CharacterInventoryUI_OnAnySlotInteractButtonPressed;
         InventorySlotSingleUI.OnStartItemDragging += InventorySlotSingleUI_OnStartItemDragging;
 

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -8,8 +9,9 @@ public class Merchant : InteractableItem
     [Serializable]
     public class ShopTab
     {
+        public List<ShopItem.ShopItemType> sellingShopItemsCategories = new();
         public TextTranslationsSO shopTabNameTextTranslationsSo;
-        public List<ShopItemSO> shopTabItems = new();
+        public List<ShopItem> shopTabItems = new();
 
         public bool isAllItemsWillSold;
         public int maxRandomItems = 3;
@@ -17,49 +19,109 @@ public class Merchant : InteractableItem
 
     [SerializeField] private List<ShopTab> allShopTabs = new();
 
-    private readonly List<ShopTab> currentShopTabs = new();
+    [SerializeField] private List<ShopTab> currentShopTabs = new();
 
-    private void Awake()
+    private bool isFirstUpdate;
+
+    public override void OnNetworkSpawn()
     {
+        base.OnNetworkSpawn();
+
         foreach (var shopTab in allShopTabs)
-            if (shopTab.shopTabItems.Count <= shopTab.maxRandomItems || shopTab.isAllItemsWillSold)
+        {
+            var newCurrentShopTab = new ShopTab
             {
-                currentShopTabs.Add(shopTab);
-            }
-            else
-            {
-                var createdShopTab = new ShopTab();
-                createdShopTab.shopTabNameTextTranslationsSo = shopTab.shopTabNameTextTranslationsSo;
+                sellingShopItemsCategories = shopTab.sellingShopItemsCategories,
+                shopTabNameTextTranslationsSo = shopTab.shopTabNameTextTranslationsSo
+            };
+            currentShopTabs.Add(newCurrentShopTab);
+        }
 
-                for (var i = 0; i < shopTab.shopTabItems.Count; i++)
+        if (!IsServer) return;
+
+        isFirstUpdate = true;
+    }
+
+    private void Update()
+    {
+        if (isFirstUpdate)
+        {
+            isFirstUpdate = false;
+            InitializeShop();
+        }
+    }
+
+    private void InitializeShop()
+    {
+        if (!IsServer) return;
+
+        var allConnectedPlayers = AllConnectedPlayers.Instance.GetAllPlayerControllers();
+
+        var merchantNetworkObject = GetComponent<NetworkObject>();
+        var merchantNetworkObjectReference = new NetworkObjectReference(merchantNetworkObject);
+
+        foreach (var connectedPlayerController in allConnectedPlayers)
+        {
+            var connectedPlayerControllerNetworkObjectReference =
+                new NetworkObjectReference(connectedPlayerController.GetPlayerNetworkObject());
+
+            foreach (var shopTab in allShopTabs)
+                if (shopTab.shopTabItems.Count <= shopTab.maxRandomItems || shopTab.isAllItemsWillSold)
                 {
-                    var shopTabItem = shopTab.shopTabItems[i];
-                    if (!shopTabItem.isObjectMustBeSelling) continue;
+                    foreach (var shopTabItem in shopTab.shopTabItems)
+                    {
+                        var newShopItemTransform = CreateShopItem(shopTabItem);
 
-                    var newShopItem = ScriptableObject.CreateInstance<ShopItemSO>();
-                    newShopItem.SetShopItem(shopTabItem);
-
-                    createdShopTab.shopTabItems.Add(newShopItem);
-                    shopTab.shopTabItems.Remove(shopTabItem);
-                    i--;
+                        var newShopItem = newShopItemTransform.GetComponent<ShopItem>();
+                        newShopItem.AddShopItemToMerchant(merchantNetworkObjectReference,
+                            connectedPlayerControllerNetworkObjectReference);
+                    }
                 }
-
-                for (var i = 0; i < shopTab.maxRandomItems; i++)
+                else
                 {
-                    var chosenItemIndex = Random.Range(0, shopTab.shopTabItems.Count);
-                    var chosenItem = shopTab.shopTabItems[chosenItemIndex];
+                    var tempShopTabItems = new List<ShopItem>();
+                    tempShopTabItems.AddRange(shopTab.shopTabItems);
+                    for (var i = 0; i < tempShopTabItems.Count; i++)
+                    {
+                        var shopTabItem = tempShopTabItems[i];
+                        if (!shopTabItem.isObjectMustBeSelling) continue;
 
-                    if (createdShopTab.shopTabItems.Contains(chosenItem)) continue;
+                        var newShopItemTransform = CreateShopItem(shopTabItem);
 
-                    var newShopItem = ScriptableObject.CreateInstance<ShopItemSO>();
-                    newShopItem.SetShopItem(chosenItem);
+                        var newShopItem = newShopItemTransform.GetComponent<ShopItem>();
+                        newShopItem.AddShopItemToMerchant(merchantNetworkObjectReference,
+                            connectedPlayerControllerNetworkObjectReference);
 
-                    createdShopTab.shopTabItems.Add(newShopItem);
-                    shopTab.shopTabItems.Remove(chosenItem);
+                        tempShopTabItems.RemoveAt(i);
+                        i--;
+                    }
+
+                    for (var i = 0; i < shopTab.maxRandomItems; i++)
+                    {
+                        var chosenItemIndex = Random.Range(0, tempShopTabItems.Count);
+                        var chosenItem = tempShopTabItems[chosenItemIndex];
+
+                        var newShopItemTransform = CreateShopItem(chosenItem);
+
+                        var newShopItem = newShopItemTransform.GetComponent<ShopItem>();
+                        newShopItem.AddShopItemToMerchant(merchantNetworkObjectReference,
+                            connectedPlayerControllerNetworkObjectReference);
+
+                        tempShopTabItems.Remove(chosenItem);
+                    }
                 }
+        }
+    }
 
-                currentShopTabs.Add(createdShopTab);
-            }
+    private Transform CreateShopItem(ShopItem shopItemPrefab)
+    {
+        if (!IsServer) return null;
+
+        var newShopItemTransform = Instantiate(shopItemPrefab.transform, transform);
+        var newShopItemNetworkObject = newShopItemTransform.GetComponent<NetworkObject>();
+        newShopItemNetworkObject.Spawn();
+
+        return newShopItemTransform;
     }
 
     public override void OnInteract(PlayerController player)
@@ -70,6 +132,19 @@ public class Merchant : InteractableItem
 
         ShopUI.Instance.ShowShop(currentShopTabs);
         ShopUI.Instance.OnShopClose += ShopUI_OnShopClose;
+    }
+
+    public void AddSellingObject(ShopItem addingShopItem)
+    {
+        foreach (var shopTab in currentShopTabs)
+        {
+            if (!shopTab.sellingShopItemsCategories.Contains(addingShopItem.soldShopItemType)) continue;
+
+            if (shopTab.shopTabItems.Contains(addingShopItem)) return;
+
+            shopTab.shopTabItems.Add(addingShopItem);
+            return;
+        }
     }
 
     private void ShopUI_OnShopClose(object sender, EventArgs e)

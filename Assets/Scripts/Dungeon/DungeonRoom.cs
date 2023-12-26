@@ -10,6 +10,7 @@ public class DungeonRoom : NetworkBehaviour
     [SerializeField] private Vector2 hallSize = new(3f, 1.8f);
     [SerializeField] private Vector2Int hallGridSize = new(3, 2);
     private Vector2Int roomPosition;
+    private int distanceFromStart;
 
     private readonly List<Exits> usedExits = new();
     private readonly List<Exits> unusedExits = new();
@@ -26,7 +27,8 @@ public class DungeonRoom : NetworkBehaviour
         Right,
         Left,
         Top,
-        Bottom
+        Bottom,
+        Null
     }
 
     public void SetRoomGridPosition(Vector2Int position)
@@ -38,6 +40,11 @@ public class DungeonRoom : NetworkBehaviour
     {
         roomPosition = position;
         gameObject.name = $"Room {position.x} {position.y}";
+    }
+
+    public void SetDistanceFromStart(int newDistance)
+    {
+        distanceFromStart = newDistance;
     }
 
     public void TryGenerateExits()
@@ -66,6 +73,10 @@ public class DungeonRoom : NetworkBehaviour
 
     public void UseClosestExit(out Exits exitDirection)
     {
+        exitDirection = Exits.Null;
+
+        if (unusedExits.Count <= 0) return;
+
         exitDirection = unusedExits[0];
 
         usedExits.Add(exitDirection);
@@ -196,6 +207,11 @@ public class DungeonRoom : NetworkBehaviour
                 bottomExit.gameObject.SetActive(true);
                 break;
         }
+    }
+
+    public int GetDistanceFromStart()
+    {
+        return distanceFromStart;
     }
 
     public int GetUnusedExitsCount()

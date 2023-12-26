@@ -38,7 +38,7 @@ public class PlayerAttackController : NetworkBehaviour
     [SerializeField] private float chargedAttackPressTime = 1f;
     private float chargedAttackPressTimer;
 
-    [SerializeField] private float meleeWeaponAttackRange = 3f;
+    [SerializeField] private float meleeWeaponAttackRange = 0.25f;
     [SerializeField] private float rangedWeaponAttackRange = 10f;
     [SerializeField] private Transform bulletPrefab;
     [SerializeField] private float bulletLifetime = 3f;
@@ -76,12 +76,23 @@ public class PlayerAttackController : NetworkBehaviour
     private PlayerWeapons playerWeapons;
     private PlayerController playerController;
     private StaminaController staminaController;
+    private Animator animator;
+
+    private static readonly int CurrentNormalAttackCombo = Animator.StringToHash("CurrentNormalAttackCombo");
+    private static readonly int IsChargedAttack = Animator.StringToHash("IsChargedAttack");
+    private static readonly int WeaponType = Animator.StringToHash("WeaponType");
+
+    private WeaponSO chosenAttackWeapon;
+    private bool isCurrentlyAttacking;
+    private readonly List<EnemyController> enemiesWaitingToAttack = new();
+    private bool isCurrentAttackNormal;
 
     private void Awake()
     {
         playerWeapons = GetComponent<PlayerWeapons>();
         playerController = GetComponent<PlayerController>();
         staminaController = GetComponent<StaminaController>();
+        animator = GetComponent<Animator>();
 
         currentAttack = baseAttack;
 
@@ -126,6 +137,7 @@ public class PlayerAttackController : NetworkBehaviour
     private void GameInput_OnAttackAction(object sender, EventArgs e)
     {
         if (isAnyInterfaceOpened) return;
+        if (isCurrentlyAttacking) return;
 
         NormalAttack();
         isTryingToChargedAttack = true;
@@ -274,36 +286,79 @@ public class PlayerAttackController : NetworkBehaviour
     [ServerRpc]
     private void NormalAttackServerRpc()
     {
-        var currentChooseWeaponSo = playerWeapons.GetCurrentWeaponSo();
-        if (currentChooseWeaponSo == null) return;
+        chosenAttackWeapon = playerWeapons.GetCurrentWeaponSo();
+        if (chosenAttackWeapon == null) return;
 
         currentAttackCombo++;
-        if (currentAttackCombo >= currentChooseWeaponSo.comboAttack)
+        if (currentAttackCombo >= chosenAttackWeapon.comboAttack)
             currentAttackCombo = 0;
 
-        var normalAttackDamage = CalculateDamage(currentAttack,
-            currentChooseWeaponSo.comboAttackScales[currentAttackCombo],
-            normalAttackDamageBonus, currentCritRate, currentCritDamage);
+        animator.SetInteger(CurrentNormalAttackCombo, currentAttackCombo);
+        animator.SetBool(IsChargedAttack, false);
+        animator.SetInteger(WeaponType, (int)chosenAttackWeapon.weaponType);
 
-        switch (currentChooseWeaponSo.weaponType)
+        isCurrentlyAttacking = true;
+        isCurrentAttackNormal = true;
+    }
+
+    public void FindEnemiesToAttackAnimator()
+    {
+        if (!isCurrentlyAttacking) return;
+
+        var enemiesToAttack = FindEnemiesToAttack();
+
+        foreach (var enemyToAttack in enemiesToAttack)
+        {
+            if (enemiesWaitingToAttack.Contains(enemyToAttack)) continue;
+
+            enemiesWaitingToAttack.Add(enemyToAttack);
+        }
+    }
+
+    public void FinishAttackAnimator()
+    {
+        if (!IsServer) return;
+
+        isCurrentlyAttacking = false;
+
+        switch (chosenAttackWeapon.weaponType)
         {
             case WeaponSO.WeaponType.Katana:
-                KatanaNormalAttack(normalAttackDamage);
+                if (isCurrentAttackNormal)
+                    KatanaNormalAttack();
+                else
+                    KatanaChargedAttack();
                 break;
             case WeaponSO.WeaponType.Gun:
-                GunNormalAttack(normalAttackDamage);
+                if (isCurrentAttackNormal)
+                {
+                    GunNormalAttack();
+                }
+                else
+                {
+                    isAiming = true;
+                    OnGunChargedAttackTriggered?.Invoke(this, EventArgs.Empty);
+                }
+
                 break;
         }
 
         comboAttackResetTimer = comboAttackResetTime;
+
+        animator.SetInteger(CurrentNormalAttackCombo, -1);
+        animator.SetBool(IsChargedAttack, false);
     }
 
-    private void KatanaNormalAttack(int normalAttackDamage)
+    private void KatanaNormalAttack()
     {
-        var enemiesToAttack = FindEnemiesToAttack();
-
-        foreach (var enemy in enemiesToAttack)
+        foreach (var enemy in enemiesWaitingToAttack)
         {
+            if (!enemy.IsSpawned) return;
+
+            var normalAttackDamage = CalculateDamage(currentAttack,
+                chosenAttackWeapon.comboAttackScales[currentAttackCombo],
+                normalAttackDamageBonus, currentCritRate, currentCritDamage);
+
             enemy.ReceiveDamage(normalAttackDamage, playerController);
 
             var enemyEffectsController = enemy.GetComponent<EnemyEffects>();
@@ -317,10 +372,16 @@ public class PlayerAttackController : NetworkBehaviour
                     slowEnemyOnHit.speedDecrease, true, false, slowEnemyOnHit.slowDuration);
             }
         }
+
+        enemiesWaitingToAttack.Clear();
     }
 
-    private void GunNormalAttack(int normalAttackDamage)
+    private void GunNormalAttack()
     {
+        var normalAttackDamage = CalculateDamage(currentAttack,
+            chosenAttackWeapon.comboAttackScales[currentAttackCombo],
+            normalAttackDamageBonus, currentCritRate, currentCritDamage);
+
         var closestEnemyPosition = FindNearestEnemyPositionForRangeAttack();
 
         var bulletAngle = 0f;
@@ -354,6 +415,31 @@ public class PlayerAttackController : NetworkBehaviour
         weaponBullet.OnEnemyHitted += WeaponBullet_OnEnemyHitted;
     }
 
+    private void KatanaChargedAttack()
+    {
+        foreach (var enemy in enemiesWaitingToAttack)
+        {
+            var chargeAttackDamage = CalculateDamage(currentAttack,
+                chosenAttackWeapon.chargedAttackDamageScale,
+                chargedAttackDamageBonus, currentCritRate, currentCritDamage);
+
+            enemy.ReceiveDamage(chargeAttackDamage, playerController);
+
+            var enemyEffectsController = enemy.GetComponent<EnemyEffects>();
+            foreach (var slowEnemyOnHit in slowEnemyOnHits)
+            {
+                var isApplyingEffect = Random.Range(0, 100) <= slowEnemyOnHit.effectChance * 100;
+
+                if (!isApplyingEffect) return;
+
+                enemyEffectsController.AddOrRemoveEffect(EnemyEffects.EnemiesEffects.SlowDebuff,
+                    slowEnemyOnHit.speedDecrease, true, false, slowEnemyOnHit.slowDuration);
+            }
+        }
+
+        enemiesWaitingToAttack.Clear();
+    }
+
     private void WeaponBullet_OnEnemyHitted(object sender, WeaponBullet.OnEnemyHittedEventArgs e)
     {
         var bullet = sender as WeaponBullet;
@@ -381,6 +467,8 @@ public class PlayerAttackController : NetworkBehaviour
     {
         if (!IsServer) return;
 
+        isCurrentlyAttacking = false;
+
         ResetNormalAttackComboClientRpc();
     }
 
@@ -404,37 +492,14 @@ public class PlayerAttackController : NetworkBehaviour
 
         ResetNormalAttackCombo();
 
-        var chargeAttackDamage = CalculateDamage(currentAttack,
-            currentChooseWeaponSo.chargedAttackDamageScale,
-            chargedAttackDamageBonus, currentCritRate, currentCritDamage);
+        chosenAttackWeapon = playerWeapons.GetCurrentWeaponSo();
 
-        switch (currentChooseWeaponSo.weaponType)
-        {
-            case WeaponSO.WeaponType.Katana:
-                var enemiesToAttack = FindEnemiesToAttack();
-                staminaController.SpendStamina(currentChooseWeaponSo.chargedAttackStaminaCost);
-                foreach (var enemy in enemiesToAttack)
-                {
-                    enemy.ReceiveDamage(chargeAttackDamage, playerController);
+        animator.SetInteger(CurrentNormalAttackCombo, currentAttackCombo);
+        animator.SetBool(IsChargedAttack, true);
+        animator.SetInteger(WeaponType, (int)chosenAttackWeapon.weaponType);
 
-                    var enemyEffectsController = enemy.GetComponent<EnemyEffects>();
-                    foreach (var slowEnemyOnHit in slowEnemyOnHits)
-                    {
-                        var isApplyingEffect = Random.Range(0, 100) <= slowEnemyOnHit.effectChance * 100;
-
-                        if (!isApplyingEffect) return;
-
-                        enemyEffectsController.AddOrRemoveEffect(EnemyEffects.EnemiesEffects.SlowDebuff,
-                            slowEnemyOnHit.speedDecrease, true, false, slowEnemyOnHit.slowDuration);
-                    }
-                }
-
-                break;
-            case WeaponSO.WeaponType.Gun:
-                isAiming = true;
-                OnGunChargedAttackTriggered?.Invoke(this, EventArgs.Empty);
-                break;
-        }
+        isCurrentlyAttacking = true;
+        isCurrentAttackNormal = false;
 
         //Debug.Log($"I'm attacking with damage:{chargeAttackDamage} by C.A.");
     }

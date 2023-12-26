@@ -68,6 +68,12 @@ public class CameraController : MonoBehaviour
 
         CharacterUI.OnCharacterUIOpen += OnAnyTabOpen;
         CharacterUI.OnCharacterUIClose += OnAnyTabClose;
+
+        GiveCoinsUI.OnInterfaceShown += OnAnyTabOpen;
+        GiveCoinsUI.OnInterfaceHidden += OnAnyTabClose;
+
+        PauseUI.OnInterfaceShown += OnAnyTabOpen;
+        PauseUI.OnInterfaceHidden += OnAnyTabClose;
     }
 
     private void GameInput_OnCursorShowAction(object sender, EventArgs e)

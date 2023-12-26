@@ -26,7 +26,8 @@ public class AddInteractButtonUI : MonoBehaviour
                 Vector3.forward, Quaternion.identity, interactDistance);
 
             foreach (var hit in raycastHits)
-                if (hit.transform.gameObject.TryGetComponent(out PlayerController _))
+                if (hit.transform.gameObject.TryGetComponent(out PlayerController playerController) &&
+                    playerController.IsOwner)
                 {
                     if (!isHasInteractButtonOnScreen)
                     {
@@ -52,6 +53,7 @@ public class AddInteractButtonUI : MonoBehaviour
                 interactableItem.OnInteract(PlayerController.Instance);
 
         InteractUI.Instance.RemoveButtonInteractToScreen(this);
+        isHasInteractButtonOnScreen = false;
     }
 
     public void ChangeButtonText(TextTranslationsSO textTranslationsSo)
@@ -68,7 +70,7 @@ public class AddInteractButtonUI : MonoBehaviour
         return false;
     }
 
-    private void OnDestroy()
+    public void OnDestroy()
     {
         if (isHasInteractButtonOnScreen)
             InteractUI.Instance.RemoveButtonInteractToScreen(this);

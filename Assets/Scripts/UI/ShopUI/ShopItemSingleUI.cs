@@ -16,20 +16,14 @@ public class ShopItemSingleUI : NetworkBehaviour
 
     private Button shopItemButton;
 
-    private ShopItemSO currentShopItem;
+    private ShopItem currentShopItem;
 
     private void Awake()
     {
         shopItemButton = GetComponent<Button>();
     }
 
-    private void PlayerController_OnCoinsValueChange(object sender, EventArgs e)
-    {
-        if (currentShopItem != null)
-            TryChangeItemVisual();
-    }
-
-    public void SetShopItem(ShopItemSO shopItem)
+    public void SetShopItem(ShopItem shopItem)
     {
         if (currentShopItem != null) return;
 
@@ -47,87 +41,17 @@ public class ShopItemSingleUI : NetworkBehaviour
         TryChangeItemVisual();
     }
 
+    private void PlayerController_OnCoinsValueChange(object sender, EventArgs e)
+    {
+        if (currentShopItem != null)
+            TryChangeItemVisual();
+    }
+
     private void OnClick()
     {
-        if (IsSoldOut() || !IsEnoughCoinsToBuy() ||
-            !IsHasOnInventory(out var inventoryParent, out var inventorySlotNumber)) return;
+        currentShopItem.TryBuyItem(PlayerController.Instance);
 
-        if (PlayerController.Instance.IsEnoughCoins(currentShopItem.coinsCost))
-        {
-            PlayerController.Instance.SpendCoins(currentShopItem.coinsCost);
-            currentShopItem.maxBoughtCount =
-                currentShopItem.isBoughtsUnlimited ? 0 : currentShopItem.maxBoughtCount - 1;
-
-            switch (currentShopItem.soldItemType)
-            {
-                case ShopItemSO.ItemType.Experience:
-                    PlayerController.Instance.ReceiveExperience((int)currentShopItem.boughtItemValue);
-                    break;
-                case ShopItemSO.ItemType.Level:
-                    var boughtItemCount = currentShopItem.boughtItemValue;
-                    while (boughtItemCount > 0)
-                    {
-                        var currentMultiplayer = boughtItemCount > 1 ? 1 : boughtItemCount;
-                        boughtItemCount -= currentMultiplayer;
-
-                        PlayerController.Instance.ReceiveExperience(
-                            (int)(PlayerController.Instance.GetExperienceForCurrentLevel() *
-                                  currentMultiplayer));
-                    }
-
-                    break;
-                case ShopItemSO.ItemType.Relic:
-                    var playerNetworkObject = PlayerController.Instance.GetComponent<NetworkObject>();
-                    var playerNetworkObjectReference = new NetworkObjectReference(playerNetworkObject);
-                    var spawningInventoryObjectNetworkObject =
-                        currentShopItem.inventoryObjectToSold.GetComponent<NetworkObject>();
-                    var spawningInventoryObjectNetworkObjectReference =
-                        new NetworkObjectReference(spawningInventoryObjectNetworkObject);
-                    SpawnInventoryObjectServerRpc(playerNetworkObjectReference,
-                        spawningInventoryObjectNetworkObjectReference);
-                    break;
-                case ShopItemSO.ItemType.RelicReset:
-                    var resettingInventoryObject = inventoryParent.GetInventoryObjectBySlot(inventorySlotNumber);
-                    resettingInventoryObject.RepairObject();
-                    resettingInventoryObject.TryGetRelicSo(out var relicSo);
-                    foreach (var relicApplyingEffect in relicSo.relicApplyingEffects)
-                    {
-                        if (!relicApplyingEffect.isUsagesLimited) continue;
-
-                        relicApplyingEffect.currentUsages = 0;
-                    }
-
-                    break;
-            }
-
-            TryChangeItemVisual();
-        }
-    }
-
-    [ServerRpc(RequireOwnership = false)]
-    private void SpawnInventoryObjectServerRpc(NetworkObjectReference playerInventoryNetworkObjectReference,
-        NetworkObjectReference spawningInventoryObjectNetworkObjectReference)
-    {
-        spawningInventoryObjectNetworkObjectReference.TryGet(out var spawningInventoryObjectNetworkObject);
-        var newInventoryObjectTransform = Instantiate(spawningInventoryObjectNetworkObject.transform);
-        var newInventoryObjectNetworkObject = newInventoryObjectTransform.GetComponent<NetworkObject>();
-        newInventoryObjectNetworkObject.Spawn();
-        var newInventoryObject = newInventoryObjectTransform.GetComponent<InventoryObject>();
-        newInventoryObject.SpawnInventoryObject();
-        var spawnedInventoryObjectNetworkObjectReference = new NetworkObjectReference(newInventoryObjectNetworkObject);
-
-        SpawnInventoryObjectClientRpc(playerInventoryNetworkObjectReference,
-            spawnedInventoryObjectNetworkObjectReference);
-    }
-
-    [ClientRpc]
-    private void SpawnInventoryObjectClientRpc(NetworkObjectReference playerInventoryNetworkObjectReference,
-        NetworkObjectReference spawnedInventoryObjectNetworkObjectReference)
-    {
-        spawnedInventoryObjectNetworkObjectReference.TryGet(out var firstWeaponNetworkObject);
-        var addedInventoryObject = firstWeaponNetworkObject.GetComponent<InventoryObject>();
-        addedInventoryObject.SetInventoryParent(playerInventoryNetworkObjectReference,
-            CharacterInventoryUI.InventoryType.PlayerRelicsInventory);
+        TryChangeItemVisual();
     }
 
     private void TryChangeItemVisual()
@@ -149,13 +73,13 @@ public class ShopItemSingleUI : NetworkBehaviour
 
         var playerRelicsInventory = PlayerController.Instance.GetPlayerInventory();
 
-        switch (currentShopItem.soldItemType)
+        switch (currentShopItem.soldShopItemType)
         {
-            case ShopItemSO.ItemType.Experience:
+            case ShopItem.ShopItemType.Experience:
                 return true;
-            case ShopItemSO.ItemType.Level:
+            case ShopItem.ShopItemType.Level:
                 return true;
-            case ShopItemSO.ItemType.Relic:
+            case ShopItem.ShopItemType.Relic:
                 return playerRelicsInventory.IsHasAnyAvailableSlot();
         }
 

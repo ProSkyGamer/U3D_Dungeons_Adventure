@@ -21,9 +21,4 @@ public class BufferEnemy : MonoBehaviour
                 enemy.AddOrRemoveEffect(applyingEffect, buffScale);
             }
     }
-
-    private void OnDestroy()
-    {
-        foreach (var buffedEnemy in buffedEnemies) buffedEnemy.AddOrRemoveEffect(applyingEffect, buffScale, false);
-    }
 }

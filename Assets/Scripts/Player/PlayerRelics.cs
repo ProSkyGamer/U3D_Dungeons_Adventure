@@ -13,7 +13,7 @@ public class PlayerRelics : NetworkBehaviour, IInventoryParent
     }
 
     [SerializeField] private int maxRelicsSlotsCount = 3;
-    private static InventoryObject[] allStoredRelics;
+    private InventoryObject[] allStoredRelics;
 
     private PlayerEffectsController playerEffectsController;
 
@@ -21,14 +21,7 @@ public class PlayerRelics : NetworkBehaviour, IInventoryParent
     {
         playerEffectsController = GetComponent<PlayerEffectsController>();
 
-        if (allStoredRelics == null)
-            allStoredRelics = new InventoryObject[maxRelicsSlotsCount];
-        else if (IsServer)
-            foreach (var storedRelic in allStoredRelics)
-                OnRelicsChange?.Invoke(this, new OnRelicChangeEventArgs
-                {
-                    addedRelic = storedRelic
-                });
+        allStoredRelics = new InventoryObject[maxRelicsSlotsCount];
     }
 
     private void Start()
@@ -83,11 +76,13 @@ public class PlayerRelics : NetworkBehaviour, IInventoryParent
     {
         var newStoredRelicsInventory = new InventoryObject[newMaxRelicsSlotsCount];
 
-        for (var i = 0; i < newStoredRelicsInventory.Length; i++)
+        for (var i = 0; i < allStoredRelics.Length; i++)
         {
             var storedRelic = allStoredRelics[i];
             newStoredRelicsInventory[i] = storedRelic;
         }
+
+        maxRelicsSlotsCount = newMaxRelicsSlotsCount;
 
         allStoredRelics = newStoredRelicsInventory;
     }
@@ -104,6 +99,9 @@ public class PlayerRelics : NetworkBehaviour, IInventoryParent
         {
             addedRelic = inventoryObject
         });
+
+        ReceivingItemsUI.Instance.AddReceivedItem(inventoryObject.GetInventoryObjectSprite(),
+            inventoryObject.GetInventoryObjectNameTextTranslationSo(), 1, 1);
     }
 
     private void InventoryObject_OnObjectRepaired(object sender, EventArgs e)

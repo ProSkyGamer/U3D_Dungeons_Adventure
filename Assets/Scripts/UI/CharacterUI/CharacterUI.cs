@@ -44,6 +44,9 @@ public class CharacterUI : NetworkBehaviour
         PauseUI.OnSettingsButtonClick += OnOtherTabOpened;
         SettingsUI.OnSettingsClose += OnOtherTabClose;
 
+        GiveCoinsUI.OnInterfaceShown += OnOtherTabOpened;
+        GiveCoinsUI.OnInterfaceHidden += OnOtherTabClose;
+
         GameInput.Instance.OnOpenCharacterInfoAction += GameInput_OnOpenCharacterInfoAction;
         isSubscribed = true;
     }

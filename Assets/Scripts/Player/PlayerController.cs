@@ -30,14 +30,20 @@ public class PlayerController : NetworkBehaviour
     public event EventHandler<PlayerEffectsController.RelicBuffEffectTriggeredEventArgs>
         OnPlayerRegenerateHpAfterEnemyDeath;
 
+    private string playerName;
+
     [SerializeField] private int experienceForFirstLevel = 100;
     [SerializeField] private float experienceIncreaseForNextLevel = 0.2f;
     private int currentLevelExperienceNeeded;
     private int currentExperience;
     private float additionalExperienceMultiplayer;
+    [SerializeField] private Sprite experienceIconSprite;
+    [SerializeField] private TextTranslationsSO experienceTextTranslationsSo;
 
     private int currentAvailableSkillPoint;
     private int currentCoins;
+    [SerializeField] private Sprite coinsIconSprite;
+    [SerializeField] private TextTranslationsSO coinsTextTranslationsSo;
     private float coinsOnEnemyDeathMultiplayer = 1f;
 
     [SerializeField] private float walkSpeed = 1f;
@@ -100,6 +106,76 @@ public class PlayerController : NetworkBehaviour
 
         isFirstUpdate = true;
 
+        if (IsServer)
+        {
+            var currentStoredData = StoredPlayerData.GetPersonStoredData(GetPlayerOwnerID());
+
+            if (currentStoredData != null)
+            {
+                var storedEquippedRelicsCount = currentStoredData.relicsInventory.Length;
+
+                while (storedEquippedRelicsCount > 0)
+                    for (var i = 0; i < playerRelics.GetMaxSlotsCount(); i++)
+                    {
+                        if (currentStoredData.relicsInventory[i] == null) continue;
+
+                        var currentStoredRelicInventoryObjectTransform =
+                            Instantiate(currentStoredData.relicsInventory[i]);
+                        var currentStoredRelicNetworkObject =
+                            currentStoredRelicInventoryObjectTransform.GetComponent<NetworkObject>();
+                        currentStoredRelicNetworkObject.Spawn();
+
+                        var currentStoredRelicInventoryObject =
+                            currentStoredRelicInventoryObjectTransform.GetComponent<InventoryObject>();
+                        var currentPlayerNetworkObjectReference = new NetworkObjectReference(GetPlayerNetworkObject());
+                        currentStoredRelicInventoryObject.SetInventoryParentBySlot(currentPlayerNetworkObjectReference,
+                            (int)CharacterInventoryUI.InventoryType.PlayerRelicsInventory, i);
+                        currentStoredData.relicsInventory[i] = null;
+                        storedEquippedRelicsCount--;
+                    }
+
+                for (var i = 0; i < playerInventory.GetMaxSlotsCount(); i++)
+                {
+                    if (currentStoredData.playerInventory[i] == null) continue;
+
+                    var currentStoredRelicInventoryObjectTransform =
+                        Instantiate(currentStoredData.playerInventory[i]);
+                    var currentStoredRelicNetworkObject =
+                        currentStoredRelicInventoryObjectTransform.GetComponent<NetworkObject>();
+                    currentStoredRelicNetworkObject.Spawn();
+
+                    var currentStoredRelicInventoryObject =
+                        currentStoredRelicInventoryObjectTransform.GetComponent<InventoryObject>();
+                    var currentPlayerNetworkObjectReference = new NetworkObjectReference(GetPlayerNetworkObject());
+                    currentStoredRelicInventoryObject.SetInventoryParentBySlot(currentPlayerNetworkObjectReference,
+                        (int)CharacterInventoryUI.InventoryType.PlayerInventory, i);
+                    currentStoredData.playerInventory[i] = null;
+                }
+
+                for (var i = 0; i < playerWeapons.GetMaxSlotsCount(); i++)
+                {
+                    if (currentStoredData.weaponsInventory[i] == null) continue;
+
+                    var currentStoredRelicInventoryObjectTransform =
+                        Instantiate(currentStoredData.weaponsInventory[i]);
+                    var currentStoredRelicNetworkObject =
+                        currentStoredRelicInventoryObjectTransform.GetComponent<NetworkObject>();
+                    currentStoredRelicNetworkObject.Spawn();
+
+                    var currentStoredRelicInventoryObject =
+                        currentStoredRelicInventoryObjectTransform.GetComponent<InventoryObject>();
+                    var currentPlayerNetworkObjectReference = new NetworkObjectReference(GetPlayerNetworkObject());
+                    currentStoredRelicInventoryObject.SetInventoryParentBySlot(currentPlayerNetworkObjectReference,
+                        (int)CharacterInventoryUI.InventoryType.PlayerWeaponInventory, i);
+                    currentStoredData.weaponsInventory[i] = null;
+                }
+
+                SetStoredDataClientRpc(currentStoredData.currentLevelExperienceNeeded,
+                    currentStoredData.currentExperience, currentStoredData.currentAvailableSkillPoint,
+                    currentStoredData.currentCoins, currentStoredData.currentHealth);
+            }
+        }
+
         if (!IsOwner) return;
 
         if (Instance != null && Instance != this)
@@ -115,6 +191,22 @@ public class PlayerController : NetworkBehaviour
         GameInput.Instance.OnChangeMovementModeAction += GameInput_OnChangeMovementMode;
 
         staminaController.OnAllStaminaSpend += StaminaController_OnAllStaminaSpend;
+    }
+
+    [ClientRpc]
+    private void SetStoredDataClientRpc(int storedCurrentLevelExperienceNeeded, int storedCurrentExperience,
+        int storedCurrentAvailableSkillPoint, int storedCurrentCoins, int storedCurrentHealth)
+    {
+        currentLevelExperienceNeeded = storedCurrentLevelExperienceNeeded;
+        currentExperience = storedCurrentExperience;
+        currentAvailableSkillPoint = storedCurrentAvailableSkillPoint;
+        currentCoins = storedCurrentCoins;
+
+        if (playerHealthController.GetCurrentHealth() != storedCurrentHealth)
+        {
+            var deltaHealth = playerHealthController.GetCurrentHealth() - storedCurrentHealth;
+            playerHealthController.TakePureDamage(deltaHealth);
+        }
     }
 
     #region SubscribedEvents
@@ -331,12 +423,12 @@ public class PlayerController : NetworkBehaviour
         }
 
         ReceiveExperienceClientRpc(newCurrentExperience, newCurrentLevelExperienceNeeded,
-            newCurrentAvailableSkillPoints);
+            newCurrentAvailableSkillPoints, experience);
     }
 
     [ClientRpc]
     private void ReceiveExperienceClientRpc(int newCurrentExperience, int newCurrentLevelExperienceNeeded,
-        int newCurrentAvailableSkillPoints)
+        int newCurrentAvailableSkillPoints, int deltaExperience)
     {
         currentExperience = newCurrentExperience;
         currentLevelExperienceNeeded = newCurrentLevelExperienceNeeded;
@@ -349,6 +441,9 @@ public class PlayerController : NetworkBehaviour
         {
             currentXp = currentExperience, maxXp = currentLevelExperienceNeeded
         });
+
+        ReceivingItemsUI.Instance.AddReceivedItem(experienceIconSprite, experienceTextTranslationsSo,
+            deltaExperience, 100);
     }
 
     public void ChangeExpAdditionalMultiplayer(float additionalValue)
@@ -372,6 +467,28 @@ public class PlayerController : NetworkBehaviour
         additionalExperienceMultiplayer = newAdditionalExperienceMultiplier;
     }
 
+    public void TransferCoinsTo(PlayerController transferToPlayer, int coinsToTransfer)
+    {
+        if (!IsOwner) return;
+
+        var transferToPlayerNetworkObjectReference =
+            new NetworkObjectReference(transferToPlayer.GetPlayerNetworkObject());
+        TransferCoinsToServerRpc(transferToPlayerNetworkObjectReference, coinsToTransfer);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void TransferCoinsToServerRpc(NetworkObjectReference transferToPlayerNetworkObjectReference,
+        int coinsToTransfer)
+    {
+        if (currentCoins < coinsToTransfer) return;
+
+        transferToPlayerNetworkObjectReference.TryGet(out var transferToPlayerNetworkObject);
+        var transferToPlayer = transferToPlayerNetworkObject.GetComponent<PlayerController>();
+
+        SpendCoins(coinsToTransfer);
+        transferToPlayer.ReceiveCoins(coinsToTransfer);
+    }
+
     public void ReceiveCoins(int deltaCoins)
     {
         if (!IsServer) return;
@@ -382,19 +499,22 @@ public class PlayerController : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     private void ReceiveCoinsServerRpc(int deltaCoins)
     {
-        var newCurrentCoinsValue = currentCoins = deltaCoins;
+        var newCurrentCoinsValue = currentCoins + deltaCoins;
 
-        ReceiveCoinsClientRpc(newCurrentCoinsValue);
+        ReceiveCoinsClientRpc(newCurrentCoinsValue, deltaCoins);
     }
 
     [ClientRpc]
-    private void ReceiveCoinsClientRpc(int newCurrentCoinsValue)
+    private void ReceiveCoinsClientRpc(int newCurrentCoinsValue, int deltaCoins)
     {
         currentCoins = newCurrentCoinsValue;
 
         if (!IsOwner) return;
 
         OnCoinsValueChange?.Invoke(this, EventArgs.Empty);
+
+        ReceivingItemsUI.Instance.AddReceivedItem(coinsIconSprite, coinsTextTranslationsSo,
+            deltaCoins, 99);
     }
 
     public void ChangeCoinsPerKillMultiplayer(float deltaValue)
@@ -482,7 +602,10 @@ public class PlayerController : NetworkBehaviour
 
         if (hpRegenerationAfterEnemyDeathEffects.Count == 0) return;
 
-        foreach (var hpRegeneration in hpRegenerationAfterEnemyDeathEffects)
+        var hpRegenerationsToTrigger = new List<HpRegenerationAfterEnemyDeath>();
+        hpRegenerationsToTrigger.AddRange(hpRegenerationAfterEnemyDeathEffects);
+
+        foreach (var hpRegeneration in hpRegenerationsToTrigger)
         {
             playerHealthController.RegenerateHealth(hpRegeneration.hpRegenerationAmount);
 
@@ -508,6 +631,11 @@ public class PlayerController : NetworkBehaviour
 
     #region GetVariablesData
 
+    public ulong GetPlayerOwnerID()
+    {
+        return networkObject.OwnerClientId;
+    }
+
     public int GetCurrentCoinsValue()
     {
         return currentCoins;
@@ -516,6 +644,11 @@ public class PlayerController : NetworkBehaviour
     public int GetExperienceForCurrentLevel()
     {
         return currentLevelExperienceNeeded;
+    }
+
+    public int GetCurrentExperience()
+    {
+        return currentExperience;
     }
 
     public int GetCurrentSkillPointsValue()

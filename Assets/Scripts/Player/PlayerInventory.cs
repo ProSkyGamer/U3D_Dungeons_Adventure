@@ -8,8 +8,6 @@ public class PlayerInventory : NetworkBehaviour, IInventoryParent
 
     private void Awake()
     {
-        if (storedInventoryObjects != null) return;
-
         storedInventoryObjects = new InventoryObject[playerMaxSlots];
     }
 
@@ -19,6 +17,9 @@ public class PlayerInventory : NetworkBehaviour, IInventoryParent
         if (storedSlot == -1) return;
 
         storedInventoryObjects[storedSlot] = inventoryObject;
+
+        ReceivingItemsUI.Instance.AddReceivedItem(inventoryObject.GetInventoryObjectSprite(),
+            inventoryObject.GetInventoryObjectNameTextTranslationSo(), 1, 1);
     }
 
     public void AddInventoryObjectToSlot(InventoryObject inventoryObject, int slotNumber)
@@ -49,7 +50,8 @@ public class PlayerInventory : NetworkBehaviour, IInventoryParent
 
         if (storedInventoryObjects.Length > newSize)
             for (var i = newPlayerMaxSlots; i < storedInventoryObjects.Length; i++)
-                storedInventoryObjects[i].DropInventoryObjectToWorld(transform.position);
+                if (storedInventoryObjects[i] != null)
+                    storedInventoryObjects[i].DropInventoryObjectToWorld(transform.position);
 
         ChangeInventorySizeClientRpc(newPlayerMaxSlots);
     }
@@ -59,11 +61,13 @@ public class PlayerInventory : NetworkBehaviour, IInventoryParent
     {
         var newStoredRelicsInventory = new InventoryObject[newPlayerMaxSlots];
 
-        for (var i = 0; i < newStoredRelicsInventory.Length; i++)
+        for (var i = 0; i < storedInventoryObjects.Length; i++)
         {
             var storedRelic = storedInventoryObjects[i];
             newStoredRelicsInventory[i] = storedRelic;
         }
+
+        playerMaxSlots = newPlayerMaxSlots;
 
         storedInventoryObjects = newStoredRelicsInventory;
     }

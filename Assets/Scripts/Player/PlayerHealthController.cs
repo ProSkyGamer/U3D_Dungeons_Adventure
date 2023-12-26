@@ -8,8 +8,8 @@ public class PlayerHealthController : NetworkBehaviour
     #region GeneralStats
 
     [SerializeField] private int baseHealth = 100;
-    private static int maxHealth;
-    private static int currentHealth;
+    private int maxHealth;
+    private int currentHealth;
 
     [SerializeField] private int baseDefence = 100;
     [SerializeField] private int maxDefence = 1000;
@@ -74,6 +74,30 @@ public class PlayerHealthController : NetworkBehaviour
                 currentHealth = currentHealth, maxHealth = maxHealth
             });
         }
+    }
+
+    public void TakePureDamage(int damage)
+    {
+        TakePureDamageServerRpc(damage);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void TakePureDamageServerRpc(int damage)
+    {
+        var newCurrentHealthValue = currentHealth - damage;
+
+        TakePureDamageClientRpc(newCurrentHealthValue);
+    }
+
+    [ClientRpc]
+    private void TakePureDamageClientRpc(int newCurrentHealthValue)
+    {
+        currentHealth = newCurrentHealthValue;
+
+        OnCurrentPlayerHealthChange?.Invoke(this, new OnCurrentPlayerHealthChangeEventArgs
+        {
+            currentHealth = currentHealth, maxHealth = maxHealth
+        });
     }
 
     public void TakeDamage(int damage)

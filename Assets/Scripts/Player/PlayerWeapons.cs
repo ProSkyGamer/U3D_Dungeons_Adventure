@@ -14,25 +14,14 @@ public class PlayerWeapons : NetworkBehaviour, IInventoryParent
     }
 
     [SerializeField] private InventoryObject firstChosenWeapon;
-    private static InventoryObject[] currentOwnedWeapon;
+    private InventoryObject[] currentOwnedWeapon;
     [SerializeField] private int maxOwnedWeaponCount = 3;
 
-    private static InventoryObject currentChooseWeapon;
-
-    private bool isFirstUpdate;
+    private InventoryObject currentChooseWeapon;
 
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
-
-        if (currentOwnedWeapon != null)
-        {
-            OnCurrentWeaponChange?.Invoke(this, new OnCurrentWeaponChangeEventArgs
-            {
-                newWeapon = currentChooseWeapon
-            });
-            return;
-        }
 
         currentOwnedWeapon = new InventoryObject[maxOwnedWeaponCount];
 
@@ -40,23 +29,20 @@ public class PlayerWeapons : NetworkBehaviour, IInventoryParent
 
         if (firstChosenWeapon == null) Debug.LogError("No First Weapon");
 
-        var networkObject = GetComponent<NetworkObject>();
-        var networkObjectReference = new NetworkObjectReference(networkObject);
-
-        SetFirstWeaponServerRpc(networkObjectReference);
-
-        isFirstUpdate = true;
+        SetFirstWeaponServerRpc();
     }
 
     [ServerRpc(RequireOwnership = false)]
-    private void SetFirstWeaponServerRpc(NetworkObjectReference playerWeaponsNetworkObjectReference)
+    private void SetFirstWeaponServerRpc()
     {
         var firstChosenWeaponNewObjectTransform = Instantiate(firstChosenWeapon.transform);
         var firstChosenWeaponNetworkObject = firstChosenWeaponNewObjectTransform.GetComponent<NetworkObject>();
         firstChosenWeaponNetworkObject.Spawn();
         var firstChosenWeaponInventoryObject = firstChosenWeaponNewObjectTransform.GetComponent<InventoryObject>();
         firstChosenWeaponInventoryObject.SpawnInventoryObject();
-        firstChosenWeaponInventoryObject.SetInventoryParent(playerWeaponsNetworkObjectReference,
+        var networkObject = GetComponent<NetworkObject>();
+        var networkObjectReference = new NetworkObjectReference(networkObject);
+        firstChosenWeaponInventoryObject.SetInventoryParent(networkObjectReference,
             CharacterInventoryUI.InventoryType.PlayerWeaponInventory);
     }
 
@@ -116,16 +102,6 @@ public class PlayerWeapons : NetworkBehaviour, IInventoryParent
         var nextChosenWeapon = FindNearestInventoryObjectWeapon(currentSelectedWeaponSlotNumber);
 
         TryChangeWeapon(nextChosenWeapon);
-    }
-
-    private void Update()
-    {
-        if (isFirstUpdate)
-        {
-            isFirstUpdate = false;
-
-            if (currentOwnedWeapon.Length > 0) TryChangeWeapon(currentOwnedWeapon[0]);
-        }
     }
 
     private void TryChangeWeapon(InventoryObject weaponInventoryObject)
@@ -243,6 +219,12 @@ public class PlayerWeapons : NetworkBehaviour, IInventoryParent
         if (storedSlot == -1) return;
 
         currentOwnedWeapon[storedSlot] = inventoryObject;
+
+        ReceivingItemsUI.Instance.AddReceivedItem(inventoryObject.GetInventoryObjectSprite(),
+            inventoryObject.GetInventoryObjectNameTextTranslationSo(), 1, 1);
+
+        if (currentChooseWeapon == null)
+            ChangeToNextChosenWeapon();
     }
 
     public void AddInventoryObjectToSlot(InventoryObject inventoryObject, int slotNumber)
@@ -289,11 +271,13 @@ public class PlayerWeapons : NetworkBehaviour, IInventoryParent
     {
         var newStoredRelicsInventory = new InventoryObject[newMaxOwnedWeaponCount];
 
-        for (var i = 0; i < newStoredRelicsInventory.Length; i++)
+        for (var i = 0; i < currentOwnedWeapon.Length; i++)
         {
             var storedRelic = currentOwnedWeapon[i];
             newStoredRelicsInventory[i] = storedRelic;
         }
+
+        maxOwnedWeaponCount = newMaxOwnedWeaponCount;
 
         currentOwnedWeapon = newStoredRelicsInventory;
     }

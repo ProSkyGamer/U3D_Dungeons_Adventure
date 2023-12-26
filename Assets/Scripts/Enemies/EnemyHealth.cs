@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class EnemyHealth : NetworkBehaviour
 {
-    [SerializeField] private int maxHealth = 75;
+    [SerializeField] private int baseHealth = 75;
+    private int maxHealth;
     private int currentHealth;
 
     [SerializeField] private int baseDefence = 75;
@@ -30,46 +31,55 @@ public class EnemyHealth : NetworkBehaviour
 
     private void Awake()
     {
-        currentHealth = maxHealth;
+        maxHealth = baseHealth;
+        currentHealth = baseHealth;
         currentDefence = baseDefence;
 
         additionalDefenceNumberFormula =
             (int)(maxDefence * (1 - maxDefenceAbsorption) / maxDefenceAbsorption);
-    }
 
-    private void Start()
-    {
         if (!IsServer) return;
 
-        DungeonSettings.OnDungeonDifficultyChange += DungeonDifficulty_OnDungeonDifficultyChange;
-    }
+        var additionalBaseStatIncrease =
+            DungeonLevelsDifficulty.Instance.GetEnemyBaseStatIncreaseByCurrentConnectedPlayers(DungeonLevelsDifficulty
+                .StatsIncreaseOnDungeonDifficulty.EnemiesStatIncrease.HP);
 
-    private void DungeonDifficulty_OnDungeonDifficultyChange(object sender,
-        DungeonSettings.OnDungeonDifficultyChangeEventArgs e)
-    {
-        var currentHpDifficultyMultiplayer =
-            DungeonSettings.GetEnemiesHpMultiplayerByDungeonDifficulty(e.newDungeonDifficulty);
-        var currentHpPlayersCountMultiplayer = DungeonSettings.GetEnemiesHpMultiplayerByPlayersCount();
+        var newBaseHealth = (int)(baseHealth * additionalBaseStatIncrease);
 
-        var healthPercentage = (float)currentHealth / maxHealth;
+        var additionalHpIncrease =
+            DungeonLevelsDifficulty.Instance.GetCurrentEnemyStatIncreaseMultiplayer(DungeonLevelsDifficulty
+                .StatsIncreaseOnDungeonDifficulty.EnemiesStatIncrease.HP);
 
-        var newMaxHealth = (int)(maxHealth * currentHpDifficultyMultiplayer * currentHpPlayersCountMultiplayer);
+        var newMaxHealth = (int)(newBaseHealth * (1 + additionalHpIncrease));
+        var newCurrentHealth = newMaxHealth;
 
-        var newCurrentHealth = currentHealth = (int)(maxHealth * healthPercentage);
+        DungeonDifficultyHealthChangeClientRpc(newCurrentHealth, newMaxHealth, newBaseHealth);
 
-        OnDungeonDifficultyChangeClientRpc(newCurrentHealth, newMaxHealth);
+        var additionalDefIncrease =
+            DungeonLevelsDifficulty.Instance.GetCurrentEnemyStatIncreaseMultiplayer(DungeonLevelsDifficulty
+                .StatsIncreaseOnDungeonDifficulty.EnemiesStatIncrease.DEF);
+
+        var newCurrentDefence = (int)(currentDefence + baseDefence * additionalDefIncrease);
+        DungeonDifficultyDefenceChangeClientRpc(newCurrentDefence);
     }
 
     [ClientRpc]
-    private void OnDungeonDifficultyChangeClientRpc(int newCurrentHealth, int newMaxHealth)
+    private void DungeonDifficultyHealthChangeClientRpc(int newCurrentHealth, int newMaxHealth, int newBaseHealth)
     {
         currentHealth = newCurrentHealth;
         maxHealth = newMaxHealth;
+        baseHealth = newBaseHealth;
 
         OnEnemyHealthChange?.Invoke(this, new OnEnemyHealthChangeEventArgs
         {
             currentHealth = currentHealth, maxHealth = maxHealth, lostHealth = 0, obtainedHealth = 0
         });
+    }
+
+    [ClientRpc]
+    private void DungeonDifficultyDefenceChangeClientRpc(int newCurrentDefence)
+    {
+        currentDefence = newCurrentDefence;
     }
 
     private void Update()
@@ -107,7 +117,7 @@ public class EnemyHealth : NetworkBehaviour
 
         var newCurrentHealth = Mathf.Clamp(currentHealth - takenDamage, 0, maxHealth);
 
-        if (currentHealth <= 0)
+        if (newCurrentHealth <= 0)
             OnEnemyDie?.Invoke(this, EventArgs.Empty);
         else
             TakeDamageClientRpc(newCurrentHealth, newCurrentShieldDurability, takenDamage);

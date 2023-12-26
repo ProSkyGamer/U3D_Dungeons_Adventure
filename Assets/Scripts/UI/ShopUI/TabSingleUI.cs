@@ -12,7 +12,7 @@ public class TabSingleUI : MonoBehaviour
 
     private Button tabButton;
 
-    private List<ShopItemSO> allShopItems = new();
+    private List<ShopItem> allShopItems = new();
 
     private void Awake()
     {
@@ -36,7 +36,7 @@ public class TabSingleUI : MonoBehaviour
         tabNameTextTranslationSingleUI.ChangeTextTranslationSO(tabNameTextTranslationsSo);
     }
 
-    public void SetShopItemsList(List<ShopItemSO> tabShopItems)
+    public void SetShopItemsList(List<ShopItem> tabShopItems)
     {
         if (allShopItems.Count != 0) return;
 

@@ -104,4 +104,9 @@ public class AllConnectedPlayers : NetworkBehaviour
     {
         return allConnectedPlayerControllers;
     }
+
+    public int GetAllConnectedPlayerCount()
+    {
+        return allConnectedPlayerControllers.Count;
+    }
 }

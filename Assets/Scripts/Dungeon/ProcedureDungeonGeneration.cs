@@ -17,13 +17,30 @@ public class ProcedureDungeonGeneration : NetworkBehaviour
     private class DungeonRoomType
     {
         public Transform dungeonRoom;
+
         public int maxRoomCount = 1;
         public bool isBuildingsUnlimited;
         [HideInInspector] public int createdRoomCount;
         public int minRequiredRoomCount;
+        public int roomSpawningChance = 1;
+        public List<RoomSpawnSettings> roomSpawnSettings = new();
+
+        [Serializable]
+        public class RoomSpawnSettings
+        {
+            public enum RoomSpawnCondition
+            {
+                CurrentDungeonLevelIsMoreThen,
+                CurrentDungeonLevelIsLessThen
+            }
+
+            public RoomSpawnCondition roomSpawnCondition;
+            public int intCondition;
+        }
     }
 
     [SerializeField] private List<DungeonRoomType> dungeonRoomVariationsPrefabsList = new();
+    [SerializeField] private List<DungeonRoomType> finalDungeonRoomVariationsPrefabsList = new();
     [SerializeField] private DungeonRoomType startingRoom;
 
     private readonly List<DungeonRoom> allRoomsList = new();
@@ -51,6 +68,35 @@ public class ProcedureDungeonGeneration : NetworkBehaviour
 
         maxDungeonsRoomsCount = DungeonSettings.GetCurrentDungeonRoomsCount();
 
+        var currentDungeonLevel = DungeonSettings.GetCurrentDungeonLevel();
+        for (var i = 0; i < dungeonRoomVariationsPrefabsList.Count; i++)
+        {
+            var dungeonRoomVariationPrefab = dungeonRoomVariationsPrefabsList[i];
+            if (dungeonRoomVariationPrefab.roomSpawnSettings == null) continue;
+
+            var isConditionComplete = false;
+            foreach (var roomSpawnSettings in dungeonRoomVariationPrefab.roomSpawnSettings)
+            {
+                switch (roomSpawnSettings.roomSpawnCondition)
+                {
+                    case DungeonRoomType.RoomSpawnSettings.RoomSpawnCondition.CurrentDungeonLevelIsLessThen:
+                        isConditionComplete = currentDungeonLevel < roomSpawnSettings.intCondition;
+                        break;
+                    case DungeonRoomType.RoomSpawnSettings.RoomSpawnCondition.CurrentDungeonLevelIsMoreThen:
+                        isConditionComplete = currentDungeonLevel > roomSpawnSettings.intCondition;
+                        break;
+                }
+
+                if (isConditionComplete) continue;
+
+                dungeonRoomVariationsPrefabsList.RemoveAt(i);
+                i--;
+                break;
+            }
+
+            if (!isConditionComplete) break;
+        }
+
         foreach (var dungeonRoomVariation in dungeonRoomVariationsPrefabsList)
         {
             if (dungeonRoomVariation.minRequiredRoomCount <= 0) continue;
@@ -77,7 +123,7 @@ public class ProcedureDungeonGeneration : NetworkBehaviour
 
             GenerateDungeonRoom(startingRoom.dungeonRoom, transform.position,
                 new Vector2Int(maxDungeonSize.x / 2, maxDungeonSize.y / 2),
-                new Vector2Int(0, 0));
+                new Vector2Int(0, 0), -1);
 
             StartingDungeonRoom.OnDungeonStart += StartingDungeonRoom_OnDungeonStart;
         }
@@ -92,11 +138,6 @@ public class ProcedureDungeonGeneration : NetworkBehaviour
                            $"{maxDungeonSize.x * maxDungeonSize.y}");
             maxDungeonsRoomsCount = maxDungeonSize.x * maxDungeonSize.y;
         }
-
-        /*GenerateDungeonRoom(startingRoom.dungeonRoom, transform.position,
-            new Vector2Int(maxDungeonSize.x / 2, maxDungeonSize.y / 2),
-            new Vector2Int(0, 0));*/
-
 
         while (allRoomsList.Count < maxDungeonsRoomsCount)
         {
@@ -140,11 +181,56 @@ public class ProcedureDungeonGeneration : NetworkBehaviour
             }
         }
 
+        var isFinalRoomAdded = false;
+        var failedDungeonRooms = new List<DungeonRoom>();
+
+        while (!isFinalRoomAdded)
+        {
+            if (failedDungeonRooms.Count >= allRoomsList.Count)
+            {
+                Debug.LogError("НУ ВСЕ ПИЗДА! ИДИ ЧИНИ ЭТО ДЕЛО!!!");
+                break;
+            }
+
+            var maxRandomDungeonRoomIndex = 0;
+            foreach (var currentDungeonRoomType in finalDungeonRoomVariationsPrefabsList)
+                maxDungeonsRoomsCount += currentDungeonRoomType.roomSpawningChance;
+
+            var randomRoomIndex = Random.Range(1, maxRandomDungeonRoomIndex + 1);
+            var currentRoomIndex = 0;
+            DungeonRoomType chosenRoom = null;
+            foreach (var currentDungeonRoomType in finalDungeonRoomVariationsPrefabsList)
+            {
+                currentRoomIndex += currentDungeonRoomType.roomSpawningChance;
+
+                if (currentRoomIndex < randomRoomIndex) continue;
+
+                chosenRoom = currentDungeonRoomType;
+                break;
+            }
+
+            var maxDistanceFromStart = 0;
+            DungeonRoom farthestDungeonRoom = null;
+            foreach (var currentDungeonRoom in allRoomsList)
+            {
+                if (maxDistanceFromStart >= currentDungeonRoom.GetDistanceFromStart() ||
+                    failedDungeonRooms.Contains(currentDungeonRoom)) continue;
+
+                maxDistanceFromStart = currentDungeonRoom.GetDistanceFromStart();
+                farthestDungeonRoom = currentDungeonRoom;
+            }
+
+            if (farthestDungeonRoom == null) continue;
+
+            UseRandomDungeonRoomExit(farthestDungeonRoom, chosenRoom.dungeonRoom, out isFinalRoomAdded);
+            failedDungeonRooms.Add(farthestDungeonRoom);
+        }
+
         for (var i = 1; i < allRoomsList.Count; i++) allRoomsList[i].UnlockAllExits();
     }
 
     private DungeonRoom GenerateDungeonRoom(Transform roomToCreatePrefab, Vector3 roomTransformPosition,
-        Vector2Int roomGridPosition, Vector2Int roomPosition)
+        Vector2Int roomGridPosition, Vector2Int roomPosition, int previousDistanceFromStart)
     {
         var currentRoom = Instantiate(roomToCreatePrefab, roomTransformPosition,
             Quaternion.identity, transform).GetComponent<DungeonRoom>();
@@ -153,6 +239,7 @@ public class ProcedureDungeonGeneration : NetworkBehaviour
 
         currentRoom.TryGenerateExits();
         currentRoom.SetRoomGridPosition(roomGridPosition);
+        currentRoom.SetDistanceFromStart(previousDistanceFromStart + 1);
         var createdRoomSize = roomToCreatePrefab.GetComponent<DungeonRoom>().GetRoomSize();
         var sideXCheckLength = (createdRoomSize.x - 1) / 2;
         var sideYCheckLength = (createdRoomSize.y - 1) / 2;
@@ -219,6 +306,10 @@ public class ProcedureDungeonGeneration : NetworkBehaviour
         isRoomAdded = false;
         dungeonRoom.UseClosestExit(out var exit);
 
+        if (exit == Exits.Null) return;
+
+        var previousDistanceFromStart = dungeonRoom.GetDistanceFromStart();
+
         var roomPosition = dungeonRoom.GetRoomPosition();
         var hallPosition = dungeonRoom.GetRoomPosition();
 
@@ -279,7 +370,8 @@ public class ProcedureDungeonGeneration : NetworkBehaviour
         if (CheckPositionAvailability(roomPosition, creatingRoomSize, roomGridPosition) &&
             CheckPositionAvailability(hallPosition, hallGridSize))
         {
-            var nextRoom = GenerateDungeonRoom(dungeonRoomPrefab, roomLocation, roomGridPosition, roomPosition);
+            var nextRoom = GenerateDungeonRoom(dungeonRoomPrefab, roomLocation, roomGridPosition, roomPosition,
+                previousDistanceFromStart);
             isRoomAdded = true;
 
             var hallGridSideXSize = (hallGridSize.x - 1) / 2;
@@ -375,22 +467,37 @@ public class ProcedureDungeonGeneration : NetworkBehaviour
         List<DungeonRoomType> currentAvailableDungeonRoomType = new();
 
         if (GetRemainingRequiredRoomsCount() < maxDungeonsRoomsCount - allRoomsList.Count)
-        {
             foreach (var dungeonRoom in dungeonRoomVariationsPrefabsList)
+            {
                 if (dungeonRoom.isBuildingsUnlimited || dungeonRoom.createdRoomCount < dungeonRoom.maxRoomCount)
                     currentAvailableDungeonRoomType.Add(dungeonRoom);
-        }
+            }
         else
-        {
             foreach (var dungeonRoom in allRequiredRoomsList)
                 currentAvailableDungeonRoomType.Add(dungeonRoom);
-        }
+
+        var maxRandomDungeonRoomIndex = 0;
+        foreach (var currentDungeonRoomType in currentAvailableDungeonRoomType)
+            maxRandomDungeonRoomIndex += currentDungeonRoomType.roomSpawningChance;
 
         if (currentAvailableDungeonRoomType.Count > 0)
         {
             isHaveAvailableRoom = true;
 
-            var roomTypeIndex = Random.Range(0, currentAvailableDungeonRoomType.Count);
+            var randomRoomTypeIndex = Random.Range(1, maxRandomDungeonRoomIndex);
+            var currentIndex = 0;
+            var roomTypeIndex = 0;
+            for (var i = 0; i < dungeonRoomVariationsPrefabsList.Count; i++)
+            {
+                var dungeonRoomTypePrefab = dungeonRoomVariationsPrefabsList[i];
+                currentIndex += dungeonRoomTypePrefab.roomSpawningChance;
+
+                if (currentIndex < randomRoomTypeIndex) continue;
+
+                roomTypeIndex = i;
+                break;
+            }
+
             currentAvailableDungeonRoomType[roomTypeIndex].createdRoomCount++;
 
             currentAvailableDungeonRoomType[roomTypeIndex].minRequiredRoomCount =

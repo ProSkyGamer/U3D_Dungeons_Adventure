@@ -10,10 +10,6 @@ public class PlayerWeaponsVisual : MonoBehaviour
     private void Awake()
     {
         playerWeapons = GetComponent<PlayerWeapons>();
-    }
-
-    private void Start()
-    {
         playerWeapons.OnCurrentWeaponChange += PlayerWeapons_OnCurrentWeaponChange;
     }
 

@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 4535101221338316016}
   - component: {fileID: 3424053691801829363}
   - component: {fileID: 2496447859891703775}
+  - component: {fileID: 5380118648153923656}
   m_Layer: 0
   m_Name: Merchant
   m_TagString: Untagged
@@ -28,7 +29,7 @@ Transform:
   m_GameObject: {fileID: 466686032751654056}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.661, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -85,39 +86,67 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isCanInteract: 1
   allShopTabs:
-  - shopTabNameTextTranslationsSo: {fileID: 11400000, guid: cb66798ae56c6ff489d144f0215eccee,
+  - sellingShopItemsCategories: 0000000001000000
+    shopTabNameTextTranslationsSo: {fileID: 11400000, guid: cb66798ae56c6ff489d144f0215eccee,
       type: 2}
     shopTabItems:
-    - {fileID: 11400000, guid: 50c6119675c98b746822688a5e69c1eb, type: 2}
-    - {fileID: 11400000, guid: e643253d58e1b1e41bd73e44a6489310, type: 2}
-    - {fileID: 11400000, guid: b27b1261fff22d64dad2ee7043150715, type: 2}
-    - {fileID: 11400000, guid: d22019e22755f974e82ba6fa3c9f40ce, type: 2}
-    - {fileID: 11400000, guid: 92c68d13af69bab4e95e03f6e5f7dd63, type: 2}
-    - {fileID: 11400000, guid: 53494cb249a912042bee786dad1208b7, type: 2}
-    - {fileID: 11400000, guid: d73b712f8ad499547ae897bc2503882c, type: 2}
-    - {fileID: 11400000, guid: 24c59d43104f24e4da978d5df38270a6, type: 2}
-    - {fileID: 11400000, guid: bb6d85af7e9767b4eb01ad7e43985051, type: 2}
+    - {fileID: 1468857672794330202, guid: 84ca34920e8836841baee3b9d7bb739f, type: 3}
+    - {fileID: 1468857672794330202, guid: 9e0a67c6e367eda42931c7e9ae4fcd36, type: 3}
+    - {fileID: 1468857672794330202, guid: d5d08b3d188a9fa4d999ee0f4d152734, type: 3}
+    - {fileID: 1468857672794330202, guid: 3ceb27f13e0e3b14c8a4f876439786a5, type: 3}
+    - {fileID: 1468857672794330202, guid: 690733cdd338f4140ad72436ceb9ebeb, type: 3}
+    - {fileID: 1468857672794330202, guid: 451920890be44674d8d818bc841e208c, type: 3}
+    - {fileID: 1468857672794330202, guid: 17991e36c9029c046af4856055d80d74, type: 3}
+    - {fileID: 1468857672794330202, guid: 558d48b4f460783418756be08dcb67b7, type: 3}
+    - {fileID: 1468857672794330202, guid: 2636ff54da008a94fbf1750f29020048, type: 3}
     isAllItemsWillSold: 0
     maxRandomItems: 2
-  - shopTabNameTextTranslationsSo: {fileID: 11400000, guid: 8eab65929bc6b45468edfdf88c56d2cf,
+  - sellingShopItemsCategories: 02000000
+    shopTabNameTextTranslationsSo: {fileID: 11400000, guid: 8eab65929bc6b45468edfdf88c56d2cf,
       type: 2}
     shopTabItems:
-    - {fileID: 11400000, guid: 4e6614ef57ebd6c438a9b6a33db764b7, type: 2}
-    - {fileID: 11400000, guid: 6cdde1b62d409354f930b05864da8d74, type: 2}
-    - {fileID: 11400000, guid: 9712d011ed8326e4ea9bce5c58a14551, type: 2}
-    - {fileID: 11400000, guid: 6d886b1716158ee4a90ebab144d8c833, type: 2}
-    - {fileID: 11400000, guid: 93f4b872e4adcf8419066d561a2daa28, type: 2}
-    - {fileID: 11400000, guid: 9fc9d58e8fb4e8f4689276b347b391b1, type: 2}
-    - {fileID: 11400000, guid: 826e0f42d6d41a64ba6a448dda2fa55d, type: 2}
+    - {fileID: 1468857672794330202, guid: 297c41b25630c6d4da25a5338c6d50e0, type: 3}
+    - {fileID: 1468857672794330202, guid: 67db16912fbacef4fa9e777be0dca57e, type: 3}
+    - {fileID: 1468857672794330202, guid: f17eef18c8a08b74b9ea770b75ba79ff, type: 3}
+    - {fileID: 1468857672794330202, guid: ee87d07ce7b229f42996facf1a051df3, type: 3}
+    - {fileID: 1468857672794330202, guid: b3194e3bdffc90f4da54c68614b6043d, type: 3}
+    - {fileID: 1468857672794330202, guid: 74724ee0a0e6a4c478d3439343af15af, type: 3}
+    - {fileID: 1468857672794330202, guid: b80c5ed87da896f4182ffce78cdf3229, type: 3}
+    - {fileID: 1468857672794330202, guid: 346a99c853ebefe44b9f6834105e9f35, type: 3}
+    - {fileID: 1468857672794330202, guid: 18562aba424fabe4caf7318371aa83f4, type: 3}
+    - {fileID: 1468857672794330202, guid: 9de44d87af012634794e29068a0bb188, type: 3}
     isAllItemsWillSold: 0
     maxRandomItems: 3
-  - shopTabNameTextTranslationsSo: {fileID: 11400000, guid: 65d43279f4db1ef45800340fde22e6ee,
+  - sellingShopItemsCategories: 03000000
+    shopTabNameTextTranslationsSo: {fileID: 11400000, guid: 65d43279f4db1ef45800340fde22e6ee,
       type: 2}
     shopTabItems:
-    - {fileID: 11400000, guid: c2ad2c6a9d9dd5a44a211b0b338bea27, type: 2}
-    - {fileID: 11400000, guid: 86e926cf9f67e9b4da80e6f7ea4e6d4a, type: 2}
+    - {fileID: 1468857672794330202, guid: 37537928f5b8276479990798721889cb, type: 3}
+    - {fileID: 1468857672794330202, guid: 1931a680962befe4b94a9a4e385b88ef, type: 3}
+    - {fileID: 1468857672794330202, guid: 513fe8ec9b73f654b801233fa0b602b5, type: 3}
     isAllItemsWillSold: 0
     maxRandomItems: 1
+  currentShopTabs: []
+--- !u!114 &5380118648153923656
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 466686032751654056}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 951099334
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 1
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
 --- !u!1 &7677373501177236952
 GameObject:
   m_ObjectHideFlags: 0

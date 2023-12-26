@@ -24,7 +24,13 @@ public class FinalDungeonRoom : InteractableItem
 
     public override void OnInteract(PlayerController player)
     {
+        if (!IsServer) return;
+
         base.OnInteract(player);
+
+        var allConnectedPlayerControllers = AllConnectedPlayers.Instance.GetAllPlayerControllers();
+        foreach (var connectedPlayerController in allConnectedPlayerControllers)
+            StoredPlayerData.AddStoredPlayerData(connectedPlayerController);
 
         DungeonSettings.OnDungeonComplete();
 
@@ -34,6 +40,6 @@ public class FinalDungeonRoom : InteractableItem
 
     public override bool IsCanInteract()
     {
-        return isCanInteract && isBossKilled;
+        return isCanInteract && isBossKilled && IsServer;
     }
 }

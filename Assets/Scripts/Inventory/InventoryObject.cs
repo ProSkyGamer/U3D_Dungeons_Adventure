@@ -182,6 +182,13 @@ public class InventoryObject : NetworkBehaviour
         ChangeBrokenObjectStateServerRpc(true);
     }
 
+    public void RepairObject()
+    {
+        if (!IsServer) return;
+
+        ChangeBrokenObjectStateServerRpc(false);
+    }
+
     [ServerRpc(RequireOwnership = false)]
     private void ChangeBrokenObjectStateServerRpc(bool newState)
     {
@@ -197,11 +204,31 @@ public class InventoryObject : NetworkBehaviour
             OnObjectRepaired?.Invoke(this, EventArgs.Empty);
     }
 
-    public void RepairObject()
+    public void TryNullifyRelicUsages()
     {
         if (!IsServer) return;
+        if (relicSo == null) return;
 
-        ChangeBrokenObjectStateServerRpc(false);
+        TryNullifyRelicUsagesServerRpc();
+    }
+
+    [ServerRpc]
+    private void TryNullifyRelicUsagesServerRpc()
+    {
+        var newRelicUsagesCount = 0;
+
+        TryNullifyRelicUsagesClientRpc(newRelicUsagesCount);
+    }
+
+    [ClientRpc]
+    private void TryNullifyRelicUsagesClientRpc(int newRelicUsagesCount)
+    {
+        foreach (var relicApplyingEffect in relicSo.relicApplyingEffects)
+        {
+            if (!relicApplyingEffect.isUsagesLimited) continue;
+
+            relicApplyingEffect.currentUsages = newRelicUsagesCount;
+        }
     }
 
     public bool IsBroken()

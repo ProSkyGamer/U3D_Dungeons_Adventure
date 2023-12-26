@@ -170,11 +170,57 @@ MonoBehaviour:
   isCanInteract: 1
   coinsInChest: 100
   experienceForChest: 10
-  weaponDropChance: 1
-  availableItemsToDrop:
-  - {fileID: 7386946131207136613, guid: 7ec63cf8ac429de43bc9817145c2170c, type: 3}
-  - {fileID: 7386946131207136613, guid: 758c90a87ef5feb448ffabd9bf800e66, type: 3}
-  - {fileID: 7386946131207136613, guid: 461282904badf2447a390edc2db73b6b, type: 3}
+  multipleItemsDropChances:
+  - 1
+  - 0.5
+  - 0.1
+  maxChestDropItems: 3
+  allChestDropItems:
+  - inventoryObjectToDrop: {fileID: 7386946131207136613, guid: 7ec63cf8ac429de43bc9817145c2170c,
+      type: 3}
+    inventoryObjectDropChance: 3
+  - inventoryObjectToDrop: {fileID: 7386946131207136613, guid: 17a7ed8f3f19cf446bc1626a4df95099,
+      type: 3}
+    inventoryObjectDropChance: 20
+  - inventoryObjectToDrop: {fileID: 7386946131207136613, guid: 758c90a87ef5feb448ffabd9bf800e66,
+      type: 3}
+    inventoryObjectDropChance: 1
+  - inventoryObjectToDrop: {fileID: 7386946131207136613, guid: ff27b0dc79a9d034ab9175b8c9a85ab3,
+      type: 3}
+    inventoryObjectDropChance: 8
+  - inventoryObjectToDrop: {fileID: 7386946131207136613, guid: b416094b66ccacb4fb2245e979b436ed,
+      type: 3}
+    inventoryObjectDropChance: 25
+  - inventoryObjectToDrop: {fileID: 7386946131207136613, guid: d787271ba49c3384d8207b64d6cd3b60,
+      type: 3}
+    inventoryObjectDropChance: 2
+  - inventoryObjectToDrop: {fileID: 7386946131207136613, guid: e3e5fafe36a0d124fbaf8d0905b367c2,
+      type: 3}
+    inventoryObjectDropChance: 1
+  - inventoryObjectToDrop: {fileID: 7386946131207136613, guid: fa2d5fe838d4882469f983fdf2277c31,
+      type: 3}
+    inventoryObjectDropChance: 25
+  - inventoryObjectToDrop: {fileID: 7386946131207136613, guid: 6e2dfb57d2a0d304a88270f09bbb305d,
+      type: 3}
+    inventoryObjectDropChance: 20
+  - inventoryObjectToDrop: {fileID: 7386946131207136613, guid: a2f8dfff3c1791445856b239d55e630a,
+      type: 3}
+    inventoryObjectDropChance: 4
+  - inventoryObjectToDrop: {fileID: 7386946131207136613, guid: ab8bb1465cc64e74cb28ec0c5bdb0725,
+      type: 3}
+    inventoryObjectDropChance: 8
+  - inventoryObjectToDrop: {fileID: 7386946131207136613, guid: 1ebac6cc8a63f7d4d9a54ca3606de238,
+      type: 3}
+    inventoryObjectDropChance: 15
+  - inventoryObjectToDrop: {fileID: 7386946131207136613, guid: 82518fb5cad971b4c95b5ea6ce7b69cc,
+      type: 3}
+    inventoryObjectDropChance: 3
+  - inventoryObjectToDrop: {fileID: 7386946131207136613, guid: c25459dd5b1394c439664f578f85a196,
+      type: 3}
+    inventoryObjectDropChance: 10
+  - inventoryObjectToDrop: {fileID: 7386946131207136613, guid: e1db9c0b7a663124191b0ab6fd09cb9b,
+      type: 3}
+    inventoryObjectDropChance: 4
 --- !u!114 &4854032186214961243
 MonoBehaviour:
   m_ObjectHideFlags: 0

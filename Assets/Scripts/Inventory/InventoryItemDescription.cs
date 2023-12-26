@@ -134,7 +134,7 @@ public class InventoryItemDescription : MonoBehaviour
                     effect));
 
             fullEffectString += string.Format(singleEffectString, effect.effectPercentageScale * 100,
-                effect.effectApplyingChance * 100, effect.effectLimit, effect.applyingEffectDuration);
+                effect.effectApplyingChance, effect.effectLimit, effect.applyingEffectDuration);
             fullEffectString += "\n";
 
             if (effect.isUsagesLimited)

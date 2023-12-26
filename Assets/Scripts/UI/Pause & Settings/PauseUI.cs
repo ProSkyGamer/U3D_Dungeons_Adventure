@@ -7,6 +7,9 @@ public class PauseUI : MonoBehaviour
     public static event EventHandler OnResumeButtonClick;
     public static event EventHandler OnSettingsButtonClick;
 
+    public static event EventHandler OnInterfaceShown;
+    public static event EventHandler OnInterfaceHidden;
+
     [SerializeField] private Button resumeButton;
     [SerializeField] private Button settingsButton;
     [SerializeField] private Button mainMenuButton;
@@ -55,11 +58,15 @@ public class PauseUI : MonoBehaviour
     private void Show()
     {
         gameObject.SetActive(true);
+
+        OnInterfaceShown?.Invoke(this, EventArgs.Empty);
     }
 
     private void Hide()
     {
         gameObject.SetActive(false);
+
+        OnInterfaceHidden?.Invoke(this, EventArgs.Empty);
     }
 
     public static void ResetStaticData()
