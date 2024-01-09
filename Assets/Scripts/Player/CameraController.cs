@@ -3,13 +3,19 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
-    public static CameraController Instance;
+    public static CameraController Instance { get; private set; }
+
+    #region Enums
 
     public enum CameraModes
     {
         ThirdPerson,
         Weapon
     }
+
+    #endregion
+
+    #region Variables & References
 
     [Header("Main Camera Settings")]
     [SerializeField] private Transform playerVisualTransform;
@@ -42,6 +48,10 @@ public class CameraController : MonoBehaviour
     private Transform cameraTransform;
 
     private bool isSubscribedToChangeCameraMode;
+
+    #endregion
+
+    #region Initialization & Subscribed events
 
     private void Awake()
     {
@@ -92,6 +102,7 @@ public class CameraController : MonoBehaviour
         isAnyInterfaceOpened = true;
         isShowingCursor = true;
         Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.Confined;
     }
 
     private void PlayerAttackController_OnGunChargedAttackTriggered(object sender, EventArgs e)
@@ -107,6 +118,10 @@ public class CameraController : MonoBehaviour
         }
     }
 
+    #endregion
+
+    #region Update & Connected
+
     private void Update()
     {
         if (GameStageManager.Instance.IsPause()) return;
@@ -121,7 +136,10 @@ public class CameraController : MonoBehaviour
 
         if (isShowingCursor)
             if (GameInput.Instance.GetBindingValue(GameInput.Binding.ShowCursor) != 1f)
+            {
                 Cursor.visible = false;
+                Cursor.lockState = CursorLockMode.Locked;
+            }
     }
 
     private void CameraMovement()
@@ -267,6 +285,10 @@ public class CameraController : MonoBehaviour
         playerVisualTransform.gameObject.SetActive(currentCameraDistance > playerHideDistance);
     }
 
+    #endregion
+
+    #region Camera Methods
+
     public void ChangeCameraMode(CameraModes newCameraMode)
     {
         currentCameraMode = newCameraMode;
@@ -297,8 +319,14 @@ public class CameraController : MonoBehaviour
         playerVisualTransform = followingObject;
     }
 
+    #endregion
+
+    #region Get Camera Data
+
     public CameraModes GetCurrentCameraMode()
     {
         return currentCameraMode;
     }
+
+    #endregion
 }

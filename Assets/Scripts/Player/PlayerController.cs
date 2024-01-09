@@ -13,7 +13,9 @@ using UnityEngine;
 [RequireComponent(typeof(PlayerWeapons))]
 public class PlayerController : NetworkBehaviour
 {
-    public static PlayerController Instance { get; private set; }
+    #region Events & Event Args
+
+    public static event EventHandler OnPlayerSpawned;
 
     public event EventHandler<OnExperienceChangeEventArgs> OnExperienceChange;
 
@@ -30,7 +32,23 @@ public class PlayerController : NetworkBehaviour
     public event EventHandler<PlayerEffectsController.RelicBuffEffectTriggeredEventArgs>
         OnPlayerRegenerateHpAfterEnemyDeath;
 
+    #endregion
+
+    #region Created Classes
+
+    private class HpRegenerationAfterEnemyDeath
+    {
+        public float hpRegenerationAmount;
+        public int effectID;
+    }
+
+    #endregion
+
+    public static PlayerController Instance { get; private set; }
+
     private string playerName;
+
+    #region Experience & Skill Points
 
     [SerializeField] private int experienceForFirstLevel = 100;
     [SerializeField] private float experienceIncreaseForNextLevel = 0.2f;
@@ -46,6 +64,10 @@ public class PlayerController : NetworkBehaviour
     [SerializeField] private TextTranslationsSO coinsTextTranslationsSo;
     private float coinsOnEnemyDeathMultiplayer = 1f;
 
+    #endregion
+
+    #region Movement & Stamina
+
     [SerializeField] private float walkSpeed = 1f;
     [SerializeField] private float runSpeed = 3f;
     [SerializeField] private float sprintSpeed = 5f;
@@ -59,15 +81,17 @@ public class PlayerController : NetworkBehaviour
     [SerializeField] private float waitingForStaminaRegenerationTime = 2.5f;
     private float waitingForStaminaRegenerationTimer;
 
+    #endregion
+
+    #region Effects
+
     private readonly List<EnemyController> attackedNotDeadEnemies = new();
 
-    private class HpRegenerationAfterEnemyDeath
-    {
-        public float hpRegenerationAmount;
-        public int effectID;
-    }
-
     private readonly List<HpRegenerationAfterEnemyDeath> hpRegenerationAfterEnemyDeathEffects = new();
+
+    #endregion
+
+    #region References & Other
 
     [SerializeField] private Transform playerVisual;
     private PlayerMovement playerMovement;
@@ -82,6 +106,10 @@ public class PlayerController : NetworkBehaviour
     private NetworkObject networkObject;
 
     private bool isFirstUpdate;
+
+    #endregion
+
+    #region Initialize & Subscribed Events
 
     public override void OnNetworkSpawn()
     {
@@ -183,6 +211,8 @@ public class PlayerController : NetworkBehaviour
         else
             Instance = this;
 
+        OnPlayerSpawned?.Invoke(this, EventArgs.Empty);
+
         CameraController.Instance.ChangeFollowingObject(playerVisual);
         MinimapCameraController.Instance.ChangeFollowingObject(transform);
 
@@ -208,8 +238,6 @@ public class PlayerController : NetworkBehaviour
             playerHealthController.TakePureDamage(deltaHealth);
         }
     }
-
-    #region SubscribedEvents
 
     private void PlayerAttackController_OnEnemyHitted(object sender, PlayerAttackController.OnEnemyHittedEventArgs e)
     {
@@ -261,6 +289,8 @@ public class PlayerController : NetworkBehaviour
         if (isFirstUpdate)
         {
             isFirstUpdate = false;
+
+            SpawnPlayers.Instance.SetPlayerAsSpawned();
 
             if (IsServer)
             {
@@ -315,7 +345,7 @@ public class PlayerController : NetworkBehaviour
             }
 
             moveVector *= speedModifier;
-            playerMovement.Move(moveVector);
+            playerMovement.Move(moveVector, true);
 
             return;
         }
@@ -341,6 +371,8 @@ public class PlayerController : NetworkBehaviour
     }
 
     #endregion
+
+    #region Health & Connected Effects
 
     public void ChangeHealth(int healthChangeValue)
     {
@@ -380,6 +412,10 @@ public class PlayerController : NetworkBehaviour
         }
     }
 
+    #endregion
+
+    #region Speed & Connected Effects
+
     public void ChangeSpeedModifier(float deltaValue)
     {
         if (!IsServer) return;
@@ -400,6 +436,10 @@ public class PlayerController : NetworkBehaviour
     {
         speedModifier = newSpeedModifier;
     }
+
+    #endregion
+
+    #region Experience, Skill Points & Connected Effects
 
     public void ReceiveExperience(int experience)
     {
@@ -466,6 +506,33 @@ public class PlayerController : NetworkBehaviour
     {
         additionalExperienceMultiplayer = newAdditionalExperienceMultiplier;
     }
+
+    public void SpendSkillPoints(int deltaValue)
+    {
+        SpendSkillPointServerRpc(deltaValue);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void SpendSkillPointServerRpc(int deltaValue)
+    {
+        var newCurrentAvailableSkillPoint = currentAvailableSkillPoint - deltaValue;
+
+        SpendSkillPointClientRpc(newCurrentAvailableSkillPoint);
+    }
+
+    [ClientRpc]
+    private void SpendSkillPointClientRpc(int newCurrentAvailableSkillPoint)
+    {
+        currentAvailableSkillPoint = newCurrentAvailableSkillPoint;
+
+        if (!IsOwner) return;
+
+        OnSkillPointsValueChange?.Invoke(this, EventArgs.Empty);
+    }
+
+    #endregion
+
+    #region Coins & Connected Effects
 
     public void TransferCoinsTo(PlayerController transferToPlayer, int coinsToTransfer)
     {
@@ -563,28 +630,7 @@ public class PlayerController : NetworkBehaviour
         OnCoinsValueChange?.Invoke(this, EventArgs.Empty);
     }
 
-    public void SpendSkillPoints(int deltaValue)
-    {
-        SpendSkillPointServerRpc(deltaValue);
-    }
-
-    [ServerRpc(RequireOwnership = false)]
-    private void SpendSkillPointServerRpc(int deltaValue)
-    {
-        var newCurrentAvailableSkillPoint = currentAvailableSkillPoint - deltaValue;
-
-        SpendSkillPointClientRpc(newCurrentAvailableSkillPoint);
-    }
-
-    [ClientRpc]
-    private void SpendSkillPointClientRpc(int newCurrentAvailableSkillPoint)
-    {
-        currentAvailableSkillPoint = newCurrentAvailableSkillPoint;
-
-        if (!IsOwner) return;
-
-        OnSkillPointsValueChange?.Invoke(this, EventArgs.Empty);
-    }
+    #endregion
 
     #region Attack & Weapons
 
@@ -619,6 +665,8 @@ public class PlayerController : NetworkBehaviour
 
     #endregion
 
+    #region Check Enough Value
+
     public bool IsEnoughCoins(int coins)
     {
         return currentCoins >= coins;
@@ -628,6 +676,8 @@ public class PlayerController : NetworkBehaviour
     {
         return currentAvailableSkillPoint >= skillPoints;
     }
+
+    #endregion
 
     #region GetVariablesData
 
@@ -762,4 +812,9 @@ public class PlayerController : NetworkBehaviour
     }
 
     #endregion
+
+    public static void ResetStaticData()
+    {
+        OnPlayerSpawned = null;
+    }
 }

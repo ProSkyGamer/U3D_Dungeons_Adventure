@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class PlayerRelics : NetworkBehaviour, IInventoryParent
 {
+    #region Events & Event Args
+
     public event EventHandler<OnRelicChangeEventArgs> OnRelicsChange;
 
     public class OnRelicChangeEventArgs : EventArgs
@@ -12,10 +14,18 @@ public class PlayerRelics : NetworkBehaviour, IInventoryParent
         public InventoryObject removedRelic;
     }
 
+    #endregion
+
+    #region Variables & References
+
     [SerializeField] private int maxRelicsSlotsCount = 3;
     private InventoryObject[] allStoredRelics;
 
     private PlayerEffectsController playerEffectsController;
+
+    #endregion
+
+    #region Initialization & Subscribed events
 
     private void Awake()
     {
@@ -49,6 +59,10 @@ public class PlayerRelics : NetworkBehaviour, IInventoryParent
                 }
         }
     }
+
+    #endregion
+
+    #region Inventory Size
 
     public void ChangeInventorySize(int newSize)
     {
@@ -87,7 +101,11 @@ public class PlayerRelics : NetworkBehaviour, IInventoryParent
         allStoredRelics = newStoredRelicsInventory;
     }
 
-    public void AddInventoryObject(InventoryObject inventoryObject)
+    #endregion
+
+    #region Add & Remove Items
+
+    public void AddInventoryObject(InventoryObject inventoryObject, bool isNeedToSendNotification)
     {
         var storedSlot = GetFirstAvailableSlot();
         if (storedSlot == -1) return;
@@ -100,8 +118,9 @@ public class PlayerRelics : NetworkBehaviour, IInventoryParent
             addedRelic = inventoryObject
         });
 
-        ReceivingItemsUI.Instance.AddReceivedItem(inventoryObject.GetInventoryObjectSprite(),
-            inventoryObject.GetInventoryObjectNameTextTranslationSo(), 1, 1);
+        if (IsOwner && isNeedToSendNotification)
+            ReceivingItemsUI.Instance.AddReceivedItem(inventoryObject.GetInventoryObjectSprite(),
+                inventoryObject.GetInventoryObjectNameTextTranslationSo(), 1, 1);
     }
 
     private void InventoryObject_OnObjectRepaired(object sender, EventArgs e)
@@ -114,7 +133,7 @@ public class PlayerRelics : NetworkBehaviour, IInventoryParent
         });
     }
 
-    public void AddInventoryObjectToSlot(InventoryObject inventoryObject, int slotNumber)
+    public void AddInventoryObjectToSlot(InventoryObject inventoryObject, int slotNumber, bool isNeedToSendNotification)
     {
         if (!IsSlotNumberAvailable(slotNumber)) return;
 
@@ -125,7 +144,15 @@ public class PlayerRelics : NetworkBehaviour, IInventoryParent
         {
             addedRelic = inventoryObject
         });
+
+        if (IsOwner && isNeedToSendNotification)
+            ReceivingItemsUI.Instance.AddReceivedItem(inventoryObject.GetInventoryObjectSprite(),
+                inventoryObject.GetInventoryObjectNameTextTranslationSo(), 1, 1);
     }
+
+    #endregion
+
+    #region Get Inventory Data
 
     public InventoryObject GetInventoryObjectBySlot(int slotNumber)
     {
@@ -199,4 +226,6 @@ public class PlayerRelics : NetworkBehaviour, IInventoryParent
 
         return storedInventoryObjectsCount;
     }
+
+    #endregion
 }

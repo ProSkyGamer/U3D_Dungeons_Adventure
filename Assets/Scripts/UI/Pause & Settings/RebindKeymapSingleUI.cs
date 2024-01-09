@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 public class RebindKeymapSingleUI : MonoBehaviour
 {
+    #region Events & Event Args
+
     public static event EventHandler<OnBindingButtonRebindEventArgs> OnBindingButtonRebind;
 
     public class OnBindingButtonRebindEventArgs : EventArgs
@@ -12,10 +14,18 @@ public class RebindKeymapSingleUI : MonoBehaviour
         public bool isShowing;
     }
 
+    #endregion
+
+    #region Variables & References
+
     [SerializeField] private GameInput.Binding bindingType = GameInput.Binding.MoveUp;
     [SerializeField] private TextMeshProUGUI bindButtonText;
 
     private Button bindingButton;
+
+    #endregion
+
+    #region Initialization & Subscribed events
 
     private void Awake()
     {
@@ -36,10 +46,18 @@ public class RebindKeymapSingleUI : MonoBehaviour
         UpdateBindingText();
     }
 
+    #endregion
+
+    #region Visual
+
     private void UpdateBindingText()
     {
         bindButtonText.text = GameInput.Instance.GetBindingText(bindingType);
     }
+
+    #endregion
+
+    #region Rebind
 
     private void RebindBinding(GameInput.Binding binding)
     {
@@ -57,6 +75,8 @@ public class RebindKeymapSingleUI : MonoBehaviour
             UpdateBindingText();
         });
     }
+
+    #endregion
 
     public static void ResetStaticData()
     {

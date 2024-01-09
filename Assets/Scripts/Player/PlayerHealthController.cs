@@ -5,35 +5,7 @@ using UnityEngine;
 
 public class PlayerHealthController : NetworkBehaviour
 {
-    #region GeneralStats
-
-    [SerializeField] private int baseHealth = 100;
-    private int maxHealth;
-    private int currentHealth;
-
-    [SerializeField] private int baseDefence = 100;
-    [SerializeField] private int maxDefence = 1000;
-    [SerializeField] [Range(0, 0.99f)] private float maxDefenceAbsorption = 0.5f;
-    private int additionalDefenceNumberFormula;
-    private int currentDefence;
-
-    public class DeathSavingBuff
-    {
-        public float regenerateHp;
-        public int effectId;
-    }
-
-    private readonly List<DeathSavingBuff> deathSavingBuffs = new();
-
-    public class DmgAbsorptionBuff
-    {
-        public float dmgAbsorptionMultiplayer;
-        public int effectId;
-    }
-
-    private readonly List<DmgAbsorptionBuff> currentDamageAbsorptionBuffs = new();
-
-    #endregion
+    #region Effects & Event Args
 
     public event EventHandler<OnCurrentPlayerHealthChangeEventArgs> OnCurrentPlayerHealthChange;
     public event EventHandler OnCurrentDefenceChange;
@@ -47,7 +19,49 @@ public class PlayerHealthController : NetworkBehaviour
     public event EventHandler<PlayerEffectsController.RelicBuffEffectTriggeredEventArgs> OnHealthAbsorptionTriggered;
     public event EventHandler<PlayerEffectsController.RelicBuffEffectTriggeredEventArgs> OnDeathSavingEffectTriggered;
 
+    #endregion
+
+    #region Created Classes
+
+    public class DmgAbsorptionBuff
+    {
+        public float dmgAbsorptionMultiplayer;
+        public int effectId;
+    }
+
+    public class DeathSavingBuff
+    {
+        public float regenerateHp;
+        public int effectId;
+    }
+
+    #endregion
+
+    #region GeneralStats
+
+    [SerializeField] private int baseHealth = 100;
+    private int maxHealth;
+    private int currentHealth;
+
+    [SerializeField] private int baseDefence = 100;
+    [SerializeField] private int maxDefence = 1000;
+    [SerializeField] [Range(0, 0.99f)] private float maxDefenceAbsorption = 0.5f;
+    private int additionalDefenceNumberFormula;
+    private int currentDefence;
+
+    #endregion
+
+    #region Effects
+
+    private readonly List<DeathSavingBuff> deathSavingBuffs = new();
+
+    private readonly List<DmgAbsorptionBuff> currentDamageAbsorptionBuffs = new();
+
+    #endregion
+
     private bool isFirstUpdate = true;
+
+    #region Initialization
 
     private void Awake()
     {
@@ -63,6 +77,10 @@ public class PlayerHealthController : NetworkBehaviour
             (int)(maxDefence * (1 - maxDefenceAbsorption) / maxDefenceAbsorption);
     }
 
+    #endregion
+
+    #region Update
+
     private void Update()
     {
         if (isFirstUpdate)
@@ -75,6 +93,10 @@ public class PlayerHealthController : NetworkBehaviour
             });
         }
     }
+
+    #endregion
+
+    #region Take Damage
 
     public void TakePureDamage(int damage)
     {
@@ -164,6 +186,10 @@ public class PlayerHealthController : NetworkBehaviour
         });
     }
 
+    #endregion
+
+    #region Regenerate Health
+
     public void RegenerateHealth(int healthToRegenerate)
     {
         if (!IsServer) return;
@@ -197,6 +223,10 @@ public class PlayerHealthController : NetworkBehaviour
             currentHealth = currentHealth, maxHealth = maxHealth
         });
     }
+
+    #endregion
+
+    #region Buffs
 
     public void ChangeHealthBuff(float percentageBuff = default, int flatBuff = default)
     {
@@ -334,6 +364,10 @@ public class PlayerHealthController : NetworkBehaviour
         }
     }
 
+    #endregion
+
+    #region Get Damage Absorbtion
+
     private float GetDamageAbsorptionMultiplayer(out List<DmgAbsorptionBuff> usedEffectsId)
     {
         usedEffectsId = new List<DmgAbsorptionBuff>();
@@ -350,6 +384,8 @@ public class PlayerHealthController : NetworkBehaviour
 
         return dmgAbsorptionMultiplayer;
     }
+
+    #endregion
 
     #region GetVariablesData
 

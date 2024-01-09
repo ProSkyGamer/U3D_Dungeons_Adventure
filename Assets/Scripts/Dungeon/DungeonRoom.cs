@@ -5,6 +5,21 @@ using UnityEngine;
 [RequireComponent(typeof(DungeonRoomSettings))]
 public class DungeonRoom : NetworkBehaviour
 {
+    #region Enums
+
+    public enum Exits
+    {
+        Right,
+        Left,
+        Top,
+        Bottom,
+        Null
+    }
+
+    #endregion
+
+    #region Varibales & References
+
     [SerializeField] private Vector2Int roomSize = new(3, 3);
     [SerializeField] private Transform roomHall;
     [SerializeField] private Vector2 hallSize = new(3f, 1.8f);
@@ -22,14 +37,9 @@ public class DungeonRoom : NetworkBehaviour
     [SerializeField] private Transform topExit;
     [SerializeField] private Transform bottomExit;
 
-    public enum Exits
-    {
-        Right,
-        Left,
-        Top,
-        Bottom,
-        Null
-    }
+    #endregion
+
+    #region Set Basic Room Info
 
     public void SetRoomGridPosition(Vector2Int position)
     {
@@ -46,6 +56,10 @@ public class DungeonRoom : NetworkBehaviour
     {
         distanceFromStart = newDistance;
     }
+
+    #endregion
+
+    #region Creating & Deliting exits
 
     public void TryGenerateExits()
     {
@@ -97,6 +111,43 @@ public class DungeonRoom : NetworkBehaviour
         unusedExits.Remove(exit);
         availableExits.Remove(exit);
     }
+
+    private void LockExit(Exits exit)
+    {
+        if (!IsServer) return;
+
+        LockExitServerRpc((int)exit);
+    }
+
+    [ServerRpc]
+    private void LockExitServerRpc(int exitToLock)
+    {
+        LockExitClientRpc(exitToLock);
+    }
+
+    [ClientRpc]
+    private void LockExitClientRpc(int exitToLock)
+    {
+        switch ((Exits)exitToLock)
+        {
+            case Exits.Right:
+                rightExit.gameObject.SetActive(true);
+                break;
+            case Exits.Left:
+                leftExit.gameObject.SetActive(true);
+                break;
+            case Exits.Top:
+                topExit.gameObject.SetActive(true);
+                break;
+            case Exits.Bottom:
+                bottomExit.gameObject.SetActive(true);
+                break;
+        }
+    }
+
+    #endregion
+
+    #region Unlocking exits
 
     public void UnlockAllExits()
     {
@@ -176,38 +227,9 @@ public class DungeonRoom : NetworkBehaviour
             }
     }
 
-    private void LockExit(Exits exit)
-    {
-        if (!IsServer) return;
+    #endregion
 
-        LockExitServerRpc((int)exit);
-    }
-
-    [ServerRpc]
-    private void LockExitServerRpc(int exitToLock)
-    {
-        LockExitClientRpc(exitToLock);
-    }
-
-    [ClientRpc]
-    private void LockExitClientRpc(int exitToLock)
-    {
-        switch ((Exits)exitToLock)
-        {
-            case Exits.Right:
-                rightExit.gameObject.SetActive(true);
-                break;
-            case Exits.Left:
-                leftExit.gameObject.SetActive(true);
-                break;
-            case Exits.Top:
-                topExit.gameObject.SetActive(true);
-                break;
-            case Exits.Bottom:
-                bottomExit.gameObject.SetActive(true);
-                break;
-        }
-    }
+    #region Get Room Info
 
     public int GetDistanceFromStart()
     {
@@ -253,4 +275,6 @@ public class DungeonRoom : NetworkBehaviour
     {
         return hallGridSize;
     }
+
+    #endregion
 }

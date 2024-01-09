@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 public class TabSingleUI : MonoBehaviour
 {
+    #region Variables & References
+
     [SerializeField] private TextTranslationSingleUI tabNameTextTranslationSingleUI;
 
     [SerializeField] private Transform shopItemsGrid;
@@ -13,6 +15,10 @@ public class TabSingleUI : MonoBehaviour
     private Button tabButton;
 
     private List<ShopItem> allShopItems = new();
+
+    #endregion
+
+    #region Initialization & Subscribed events
 
     private void Awake()
     {
@@ -30,6 +36,10 @@ public class TabSingleUI : MonoBehaviour
     {
         ClearShopItemsGrid();
     }
+
+    #endregion
+
+    #region Shop Tabs
 
     public void SetTabName(TextTranslationsSO tabNameTextTranslationsSo)
     {
@@ -71,4 +81,6 @@ public class TabSingleUI : MonoBehaviour
             Destroy(shopItem.gameObject);
         }
     }
+
+    #endregion
 }

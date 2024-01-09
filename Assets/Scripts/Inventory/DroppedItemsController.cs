@@ -3,9 +3,15 @@ using UnityEngine;
 
 public class DroppedItemsController : NetworkBehaviour
 {
-    public static DroppedItemsController Instance;
+    public static DroppedItemsController Instance { get; private set; }
+
+    #region Variables & References
 
     [SerializeField] private Transform droppedItemPrefab;
+
+    #endregion
+
+    #region Initialization
 
     private void Awake()
     {
@@ -14,6 +20,10 @@ public class DroppedItemsController : NetworkBehaviour
         else
             Instance = this;
     }
+
+    #endregion
+
+    #region Droped Items Methods
 
     public void AddNewDroppedItem(Vector3 dropPosition, out NetworkObjectReference droppedItemNetworkObjectReference)
     {
@@ -38,4 +48,6 @@ public class DroppedItemsController : NetworkBehaviour
         droppedItemSingleNetworkObject.GetComponent<AddInteractButtonUI>()
             .ChangeButtonText(droppedObject.GetInventoryObjectNameTextTranslationSo());
     }
+
+    #endregion
 }

@@ -2,13 +2,30 @@ using System;
 using TMPro;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class ShopItemSingleUI : NetworkBehaviour
+public class ShopItemSingleUI : NetworkBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
+    #region Events & Event Args
+
+    public static event EventHandler<OnDisplaySellingItemDescriptionEventArgs> OnDisplaySellingItemDescription;
+
+    public class OnDisplaySellingItemDescriptionEventArgs : EventArgs
+    {
+        public ShopItem sellingShopItem;
+    }
+
+    public static event EventHandler OnStopDisplayingSellingItemDescription;
+
+    #endregion
+
+    #region Variables & References
+
     [SerializeField] private Image shopItemImage;
     [SerializeField] private TextMeshProUGUI coinsCostText;
-    [SerializeField] private TextMeshProUGUI maxSoldValue;
+    [SerializeField] private TextMeshProUGUI leftText;
+    [SerializeField] private TextTranslationsSO leftTextTranslationSo;
     [SerializeField] private TextTranslationSingleUI soldItemName;
 
     [SerializeField] private Transform unavailableItemTransform;
@@ -18,10 +35,18 @@ public class ShopItemSingleUI : NetworkBehaviour
 
     private ShopItem currentShopItem;
 
+    #endregion
+
+    #region Initialization
+
     private void Awake()
     {
         shopItemButton = GetComponent<Button>();
     }
+
+    #endregion
+
+    #region Shop Item Initialization
 
     public void SetShopItem(ShopItem shopItem)
     {
@@ -30,9 +55,14 @@ public class ShopItemSingleUI : NetworkBehaviour
         currentShopItem = shopItem;
 
         coinsCostText.text = $"{currentShopItem.coinsCost} C";
-        maxSoldValue.text =
-            currentShopItem.isBoughtsUnlimited ? "INFINITY" : currentShopItem.maxBoughtCount.ToString();
+
         soldItemName.ChangeTextTranslationSO(currentShopItem.itemNameTextTranslationsSo);
+        var leftCountText = TextTranslationController.GetTextFromTextTranslationSOByLanguage(
+            TextTranslationController.GetCurrentLanguage(), leftTextTranslationSo);
+        var fullLeftCountText = string.Format(leftCountText, currentShopItem.maxBoughtCount);
+        leftText.text = fullLeftCountText;
+
+        leftText.gameObject.SetActive(!currentShopItem.isBoughtsUnlimited);
 
         shopItemButton.onClick.AddListener(OnClick);
 
@@ -47,12 +77,25 @@ public class ShopItemSingleUI : NetworkBehaviour
             TryChangeItemVisual();
     }
 
+    #endregion
+
+    #region Selling
+
     private void OnClick()
     {
         currentShopItem.TryBuyItem(PlayerController.Instance);
 
+        ShopItem.OnFinishBuyingItem += ShopItemOnFinishBuyingItem;
+    }
+
+    private void ShopItemOnFinishBuyingItem(object sender, EventArgs e)
+    {
         TryChangeItemVisual();
     }
+
+    #endregion
+
+    #region Visual
 
     private void TryChangeItemVisual()
     {
@@ -60,6 +103,27 @@ public class ShopItemSingleUI : NetworkBehaviour
         unavailableItemTransform.gameObject.SetActive(IsSoldOut() || !IsEnoughCoinsToBuy() ||
                                                       !IsHasOnInventory(out var _, out var _));
     }
+
+    #endregion
+
+    #region Shop Item Description
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        OnDisplaySellingItemDescription?.Invoke(this, new OnDisplaySellingItemDescriptionEventArgs
+        {
+            sellingShopItem = currentShopItem
+        });
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        OnStopDisplayingSellingItemDescription?.Invoke(this, EventArgs.Empty);
+    }
+
+    #endregion
+
+    #region Get Shop Item Data
 
     private bool IsSoldOut()
     {
@@ -133,8 +197,16 @@ public class ShopItemSingleUI : NetworkBehaviour
         return PlayerController.Instance.IsEnoughCoins(currentShopItem.coinsCost);
     }
 
+    #endregion
+
     private void OnDestroy()
     {
         PlayerController.Instance.OnCoinsValueChange -= PlayerController_OnCoinsValueChange;
+    }
+
+    public static void ResetStaticData()
+    {
+        OnDisplaySellingItemDescription = null;
+        OnStopDisplayingSellingItemDescription = null;
     }
 }

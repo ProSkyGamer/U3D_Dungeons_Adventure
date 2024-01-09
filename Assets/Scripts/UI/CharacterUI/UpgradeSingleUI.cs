@@ -7,7 +7,13 @@ using UnityEngine.UI;
 
 public class UpgradeSingleUI : NetworkBehaviour
 {
+    #region Events
+
     public event EventHandler OnUpgradeBuy;
+
+    #endregion
+
+    #region Variables & References
 
     [SerializeField] private TextTranslationSingleUI upgradeTypeTextTranslationSingle;
     [SerializeField] private TextMeshProUGUI upgradeValueText;
@@ -25,6 +31,10 @@ public class UpgradeSingleUI : NetworkBehaviour
 
     private bool isFirstUpdate;
 
+    #endregion
+
+    #region Inititalization & Subscribed events
+
     private void Awake()
     {
         upgradeButton = GetComponent<Button>();
@@ -34,7 +44,14 @@ public class UpgradeSingleUI : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
+        PlayerController.OnPlayerSpawned += PlayerController_OnPlayerSpawned;
+    }
+
+    private void PlayerController_OnPlayerSpawned(object sender, EventArgs e)
+    {
         isFirstUpdate = true;
+
+        PlayerController.OnPlayerSpawned -= PlayerController_OnPlayerSpawned;
     }
 
     private void Update()
@@ -59,6 +76,10 @@ public class UpgradeSingleUI : NetworkBehaviour
         UpdateVisual();
     }
 
+    #endregion
+
+    #region Upgrade Methods
+
     private void BuyUpgrade()
     {
         PlayerController.Instance.SpendSkillPoints(1);
@@ -71,6 +92,19 @@ public class UpgradeSingleUI : NetworkBehaviour
         OnUpgradeBuy?.Invoke(this, EventArgs.Empty);
         UpdateVisual();
     }
+
+    private void UpgradeLock_OnUpgradeBuy(object sender, EventArgs e)
+    {
+        var upgradeSingle = sender as UpgradeSingleUI;
+
+        upgradesThatLock.Remove(upgradeSingle);
+
+        UpdateVisual();
+    }
+
+    #endregion
+
+    #region Upgrade Initialization
 
     public void SetUpgradeType(PlayerEffectsController.AllPlayerEffects upgradeBuffType, float upgradeBuffValue,
         TextTranslationsSO upgradeTypeTextTranslationSo, int id)
@@ -102,14 +136,9 @@ public class UpgradeSingleUI : NetworkBehaviour
         UpdateVisual();
     }
 
-    private void UpgradeLock_OnUpgradeBuy(object sender, EventArgs e)
-    {
-        var upgradeSingle = sender as UpgradeSingleUI;
+    #endregion
 
-        upgradesThatLock.Remove(upgradeSingle);
-
-        UpdateVisual();
-    }
+    #region Upgrade Visual
 
     private void UpdateVisual()
     {
@@ -122,8 +151,14 @@ public class UpgradeSingleUI : NetworkBehaviour
             !isBought && !IsLocked() && PlayerController.Instance.GetCurrentSkillPointsValue() > 0;
     }
 
+    #endregion
+
+    #region Get Upgrade Data
+
     private bool IsLocked()
     {
         return upgradesThatLock.Count > 0;
     }
+
+    #endregion
 }

@@ -5,12 +5,18 @@ using UnityEngine.AI;
 
 public class EnemyEffects : NetworkBehaviour
 {
+    #region Enums
+
     public enum EnemiesEffects
     {
         DefBuff,
         AtkBuff,
         SlowDebuff
     }
+
+    #endregion
+
+    #region Created Classes
 
     private class AppliedEnemiesEffects
     {
@@ -20,6 +26,10 @@ public class EnemyEffects : NetworkBehaviour
         public float buffValue;
     }
 
+    #endregion
+
+    #region Variables & References
+
     private readonly List<AppliedEnemiesEffects> appliedEffects = new();
 
     private EnemyAttackController enemyAttackController;
@@ -28,6 +38,10 @@ public class EnemyEffects : NetworkBehaviour
 
     private float baseSpeed;
 
+    #endregion
+
+    #region Initialization
+
     private void Awake()
     {
         enemyAttackController = GetComponent<EnemyAttackController>();
@@ -35,6 +49,10 @@ public class EnemyEffects : NetworkBehaviour
         navMeshAgent = GetComponent<NavMeshAgent>();
         baseSpeed = navMeshAgent.speed;
     }
+
+    #endregion
+
+    #region Update & Connected
 
     private void Update()
     {
@@ -58,6 +76,10 @@ public class EnemyEffects : NetworkBehaviour
         foreach (var effectToRemove in effectsToRemove)
             AddOrRemoveEffect(effectToRemove.enemiesEffectType, effectToRemove.buffValue, false);
     }
+
+    #endregion
+
+    #region Effect Methods
 
     public void AddOrRemoveEffect(EnemiesEffects enemiesEffectToApply, float percentageScale, bool isAdding = true,
         bool isBuffEndless = true, float buffDuration = 1f)
@@ -101,4 +123,6 @@ public class EnemyEffects : NetworkBehaviour
                 break;
         }
     }
+
+    #endregion
 }

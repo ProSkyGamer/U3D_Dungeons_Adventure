@@ -5,6 +5,8 @@ using UnityEngine;
 [RequireComponent(typeof(PlayerWeaponsVisual))]
 public class PlayerWeapons : NetworkBehaviour, IInventoryParent
 {
+    #region Event & Event Args
+
     public event EventHandler<OnCurrentWeaponChangeEventArgs> OnCurrentWeaponChange;
 
     public class OnCurrentWeaponChangeEventArgs : EventArgs
@@ -13,23 +15,38 @@ public class PlayerWeapons : NetworkBehaviour, IInventoryParent
         public InventoryObject newWeapon;
     }
 
+    #endregion
+
+    #region Variables & References
+
     [SerializeField] private InventoryObject firstChosenWeapon;
     private InventoryObject[] currentOwnedWeapon;
     [SerializeField] private int maxOwnedWeaponCount = 3;
 
     private InventoryObject currentChooseWeapon;
 
+    #endregion
+
+    #region Inititalization & Subscribed events
+
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
 
-        currentOwnedWeapon = new InventoryObject[maxOwnedWeaponCount];
+        SpawnPlayers.OnAllPlayersSpawned += SpawnPlayers_OnAllPlayersSpawned;
 
+        currentOwnedWeapon = new InventoryObject[maxOwnedWeaponCount];
+    }
+
+    private void SpawnPlayers_OnAllPlayersSpawned(object sender, EventArgs e)
+    {
         if (!IsOwner) return;
 
         if (firstChosenWeapon == null) Debug.LogError("No First Weapon");
 
         SetFirstWeaponServerRpc();
+
+        SpawnPlayers.OnAllPlayersSpawned -= SpawnPlayers_OnAllPlayersSpawned;
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -95,6 +112,10 @@ public class PlayerWeapons : NetworkBehaviour, IInventoryParent
         ChangeToNextChosenWeapon();
     }
 
+    #endregion
+
+    #region Weapon Change
+
     private void ChangeToNextChosenWeapon()
     {
         var currentSelectedWeaponSlotNumber = GetSlotNumberByInventoryObject(currentChooseWeapon);
@@ -133,6 +154,8 @@ public class PlayerWeapons : NetworkBehaviour, IInventoryParent
 
         return false;
     }
+
+    #endregion
 
     #region GetData
 
@@ -211,27 +234,48 @@ public class PlayerWeapons : NetworkBehaviour, IInventoryParent
         return storedInventoryObjectsCount;
     }
 
+    private InventoryObject FindNearestInventoryObjectWeapon(int startingPoint = 0)
+    {
+        var i = startingPoint < currentOwnedWeapon.Length - 1 ? startingPoint + 1 : 0;
+        while (i != startingPoint)
+        {
+            if (currentOwnedWeapon[i] != null)
+                return currentOwnedWeapon[i];
+
+            i = i < currentOwnedWeapon.Length - 1 ? i + 1 : 0;
+        }
+
+        return null;
+    }
+
     #endregion
 
-    public void AddInventoryObject(InventoryObject inventoryObject)
+    #region Add Remove Items
+
+    public void AddInventoryObject(InventoryObject inventoryObject, bool isNeedToSendNotification)
     {
         var storedSlot = GetFirstAvailableSlot();
         if (storedSlot == -1) return;
 
         currentOwnedWeapon[storedSlot] = inventoryObject;
 
-        ReceivingItemsUI.Instance.AddReceivedItem(inventoryObject.GetInventoryObjectSprite(),
-            inventoryObject.GetInventoryObjectNameTextTranslationSo(), 1, 1);
+        if (IsOwner && isNeedToSendNotification)
+            ReceivingItemsUI.Instance.AddReceivedItem(inventoryObject.GetInventoryObjectSprite(),
+                inventoryObject.GetInventoryObjectNameTextTranslationSo(), 1, 1);
 
         if (currentChooseWeapon == null)
             ChangeToNextChosenWeapon();
     }
 
-    public void AddInventoryObjectToSlot(InventoryObject inventoryObject, int slotNumber)
+    public void AddInventoryObjectToSlot(InventoryObject inventoryObject, int slotNumber, bool isNeedToSendNotification)
     {
         if (!IsSlotNumberAvailable(slotNumber)) return;
 
         currentOwnedWeapon[slotNumber] = inventoryObject;
+
+        if (IsOwner && isNeedToSendNotification)
+            ReceivingItemsUI.Instance.AddReceivedItem(inventoryObject.GetInventoryObjectSprite(),
+                inventoryObject.GetInventoryObjectNameTextTranslationSo(), 1, 1);
     }
 
     public void RemoveInventoryObjectBySlot(int slotNumber)
@@ -244,6 +288,10 @@ public class PlayerWeapons : NetworkBehaviour, IInventoryParent
 
         currentOwnedWeapon[slotNumber] = null;
     }
+
+    #endregion
+
+    #region Inventory Size
 
     public void ChangeInventorySize(int newSize)
     {
@@ -282,17 +330,5 @@ public class PlayerWeapons : NetworkBehaviour, IInventoryParent
         currentOwnedWeapon = newStoredRelicsInventory;
     }
 
-    private InventoryObject FindNearestInventoryObjectWeapon(int startingPoint = 0)
-    {
-        var i = startingPoint < currentOwnedWeapon.Length - 1 ? startingPoint + 1 : 0;
-        while (i != startingPoint)
-        {
-            if (currentOwnedWeapon[i] != null)
-                return currentOwnedWeapon[i];
-
-            i = i < currentOwnedWeapon.Length - 1 ? i + 1 : 0;
-        }
-
-        return null;
-    }
+    #endregion
 }

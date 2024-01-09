@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class InventoryItemDescription : MonoBehaviour
 {
+    #region Variables & References
+
     [SerializeField] private TextTranslationSingleUI inventoryObjectName;
     [SerializeField] private TextTranslationSingleUI inventoryObjectType;
 
@@ -29,6 +31,10 @@ public class InventoryItemDescription : MonoBehaviour
     [SerializeField] private TextMeshProUGUI inventoryObjectRelicPassive;
     [SerializeField] private TextTranslationsSO inventoryObjectRelicUsagesLeftTextTranslationsSo;
     [SerializeField] private TextMeshProUGUI inventoryObjectRelicUsagesLeft;
+
+    #endregion
+
+    #region Inventory Object Methods
 
     public void SetInventoryObject(InventoryObject inventoryObject)
     {
@@ -109,6 +115,10 @@ public class InventoryItemDescription : MonoBehaviour
         }
     }
 
+    #endregion
+
+    #region Get Additional Text
+
     private string GetEffectsTextFromEffectList(List<PlayerEffectsController.AppliedEffect> givenEffects,
         out string fullEffectLimitString)
     {
@@ -147,4 +157,6 @@ public class InventoryItemDescription : MonoBehaviour
 
         return fullEffectString;
     }
+
+    #endregion
 }

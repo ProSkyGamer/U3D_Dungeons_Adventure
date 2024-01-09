@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class LanguagesTabUI : MonoBehaviour
 {
+    #region Initialization & Subscribed events
+
     private void Start()
     {
         SettingsUI.OnLanguagesButtonClick += SettingsUI_OnLanguagesButtonClick;
@@ -21,6 +23,10 @@ public class LanguagesTabUI : MonoBehaviour
         Show();
     }
 
+    #endregion
+
+    #region Visual
+
     private void Show()
     {
         gameObject.SetActive(true);
@@ -30,4 +36,6 @@ public class LanguagesTabUI : MonoBehaviour
     {
         gameObject.SetActive(false);
     }
+
+    #endregion
 }

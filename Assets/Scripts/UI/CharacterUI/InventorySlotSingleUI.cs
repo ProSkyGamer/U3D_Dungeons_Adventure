@@ -6,6 +6,8 @@ using UnityEngine.UI;
 
 public class InventorySlotSingleUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler
 {
+    #region Events & Event Args
+
     public static event EventHandler<OnStartItemDraggingEventArgs> OnStartItemDragging;
 
     public class OnStartItemDraggingEventArgs : EventArgs
@@ -33,6 +35,10 @@ public class InventorySlotSingleUI : MonoBehaviour, IPointerEnterHandler, IPoint
         public CharacterInventoryUI displayedInventory;
     }
 
+    #endregion
+
+    #region Variables & References
+
     private CharacterInventoryUI.InventoryType inventoryType;
 
     [SerializeField] private Image inventorySlotImage;
@@ -54,17 +60,9 @@ public class InventorySlotSingleUI : MonoBehaviour, IPointerEnterHandler, IPoint
 
     private CharacterInventoryUI inventoryParent;
 
-    public void OnPointerDown(PointerEventData eventData)
-    {
-        if (!isInteractable) return;
-        if (storedItem == null) return;
-        if (isShowingButtons) return;
+    #endregion
 
-        if (inventoryType == CharacterInventoryUI.InventoryType.PlayerWeaponInventory &&
-            PlayerController.Instance.GetPlayerWeaponsInventory().GetCurrentInventoryObjectsCount() <= 1) return;
-
-        StartDraggingItem();
-    }
+    #region Initialization
 
     public void SetStarterData(int newSlotNumber, CharacterInventoryUI.InventoryType newInventoryType,
         bool isSlotInteractable, bool isShowingObjectName, CharacterInventoryUI inventoryUI)
@@ -87,9 +85,32 @@ public class InventorySlotSingleUI : MonoBehaviour, IPointerEnterHandler, IPoint
         OnDisplaySlotDescription += InventorySingleUI_OnDisplaySlotDescription;
     }
 
-    private void InventorySingleUI_OnDisplaySlotDescription(object sender, OnDisplaySlotDescriptionEventArgs e)
+    #endregion
+
+    #region Item Dragging
+
+    public void OnPointerDown(PointerEventData eventData)
     {
-        isShowingButtons = false;
+        if (!isInteractable) return;
+        if (storedItem == null) return;
+        if (isShowingButtons) return;
+
+        if (inventoryType == CharacterInventoryUI.InventoryType.PlayerWeaponInventory &&
+            PlayerController.Instance.GetPlayerWeaponsInventory().GetCurrentInventoryObjectsCount() <= 1) return;
+
+        StartDraggingItem();
+    }
+
+    private void StartDraggingItem()
+    {
+        if (!isInteractable) return;
+
+        OnStartItemDragging?.Invoke(this, new OnStartItemDraggingEventArgs
+        {
+            draggingInventoryObject = storedItem
+        });
+
+        RemoveItem();
     }
 
     private void InventorySlotSingleUI_OnStartItemDragging(object sender, OnStartItemDraggingEventArgs e)
@@ -111,18 +132,6 @@ public class InventorySlotSingleUI : MonoBehaviour, IPointerEnterHandler, IPoint
         selectedInventorySlotTransform.gameObject.SetActive(true);
     }
 
-    private void StatsTabUI_OnStopItemDragging(object sender, EventArgs e)
-    {
-        if (!isInteractable) return;
-
-        isCurrentSlotSelected = false;
-        isCurrentlyDragging = false;
-        lockedInventorySlotTransform.gameObject.SetActive(false);
-        selectedInventorySlotTransform.gameObject.SetActive(false);
-
-        CharacterInventoryUI.OnStopItemDragging -= StatsTabUI_OnStopItemDragging;
-    }
-
     private void InventorySlotSingleUI_OnCurrentSlotSelected(object sender, EventArgs e)
     {
         if (!isInteractable) return;
@@ -135,16 +144,25 @@ public class InventorySlotSingleUI : MonoBehaviour, IPointerEnterHandler, IPoint
         selectedInventorySlotTransform.gameObject.SetActive(false);
     }
 
-    private void StartDraggingItem()
+    private void StatsTabUI_OnStopItemDragging(object sender, EventArgs e)
     {
         if (!isInteractable) return;
 
-        OnStartItemDragging?.Invoke(this, new OnStartItemDraggingEventArgs
-        {
-            draggingInventoryObject = storedItem
-        });
+        isCurrentSlotSelected = false;
+        isCurrentlyDragging = false;
+        lockedInventorySlotTransform.gameObject.SetActive(false);
+        selectedInventorySlotTransform.gameObject.SetActive(false);
 
-        RemoveItem();
+        CharacterInventoryUI.OnStopItemDragging -= StatsTabUI_OnStopItemDragging;
+    }
+
+    #endregion
+
+    #region Item Description
+
+    private void InventorySingleUI_OnDisplaySlotDescription(object sender, OnDisplaySlotDescriptionEventArgs e)
+    {
+        isShowingButtons = false;
     }
 
     public void OnPointerEnter(PointerEventData eventData)
@@ -170,6 +188,10 @@ public class InventorySlotSingleUI : MonoBehaviour, IPointerEnterHandler, IPoint
         OnCurrentSlotSelected?.Invoke(this, EventArgs.Empty);
     }
 
+    #endregion
+
+    #region Item Interact Buttons
+
     private void GameInput_OnInventorySlotInteractAction(object sender, EventArgs e)
     {
         isShowingButtons = true;
@@ -190,6 +212,10 @@ public class InventorySlotSingleUI : MonoBehaviour, IPointerEnterHandler, IPoint
         }
     }
 
+    #endregion
+
+    #region Inventory Slot Methods
+
     public void StoreItem(InventoryObject inventoryObject)
     {
         storedItem = inventoryObject;
@@ -204,12 +230,19 @@ public class InventorySlotSingleUI : MonoBehaviour, IPointerEnterHandler, IPoint
         UpdateVisual();
     }
 
+    #endregion
+
+    #region Inventory Slot Visual
+
     private void UpdateVisual()
     {
         if (storedItem != null)
         {
             inventorySlotImage.gameObject.SetActive(true);
             inventorySlotImage.sprite = storedItem.GetInventoryObjectSprite();
+
+            if (inventorySlotTextTranslationSingleUI == null)
+                inventorySlotTextTranslationSingleUI = inventorySlotText.GetComponent<TextTranslationSingleUI>();
 
             if (isShowingName)
             {
@@ -224,6 +257,10 @@ public class InventorySlotSingleUI : MonoBehaviour, IPointerEnterHandler, IPoint
             inventorySlotText.gameObject.SetActive(false);
         }
     }
+
+    #endregion
+
+    #region Get Inventory Slot Data
 
     private bool IsCurrentDraggingObjectMatchesCurrentInventoryType()
     {
@@ -260,9 +297,14 @@ public class InventorySlotSingleUI : MonoBehaviour, IPointerEnterHandler, IPoint
         return isCurrentSlotSelected;
     }
 
+    #endregion
+
     public static void ResetStaticData()
     {
-        OnCurrentSlotSelected = null;
         OnStartItemDragging = null;
+        OnCurrentSlotSelected = null;
+        OnDisplaySlotDescription = null;
+        OnStopDisplaySlotDescription = null;
+        OnDisplaySlotInteractButtons = null;
     }
 }

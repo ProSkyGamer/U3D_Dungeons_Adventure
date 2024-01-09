@@ -4,12 +4,17 @@ using UnityEngine;
 [RequireComponent(typeof(EnemyController))]
 public class BufferEnemy : MonoBehaviour
 {
-    [SerializeField] private EnemyEffects.EnemiesEffects applyingEffect = EnemyEffects.EnemiesEffects.DefBuff;
+    #region Variables & References
 
+    [SerializeField] private EnemyEffects.EnemiesEffects applyingEffect = EnemyEffects.EnemiesEffects.DefBuff;
 
     [SerializeField] private float buffScale = 0.2f;
 
     private readonly List<EnemyEffects> buffedEnemies = new();
+
+    #endregion
+
+    #region Enemy Type Methods
 
     public void BuffEnemies(List<EnemyEffects> enemiesToBuff)
     {
@@ -21,4 +26,6 @@ public class BufferEnemy : MonoBehaviour
                 enemy.AddOrRemoveEffect(applyingEffect, buffScale);
             }
     }
+
+    #endregion
 }

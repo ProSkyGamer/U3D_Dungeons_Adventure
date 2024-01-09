@@ -4,7 +4,13 @@ using UnityEngine;
 
 public class MerchantDungeonRoom : NetworkBehaviour
 {
+    #region Variables & References
+
     [SerializeField] private Merchant merchantToSpawn;
+
+    #endregion
+
+    #region Initialization & Susbcribed events
 
     private void Awake()
     {
@@ -19,4 +25,6 @@ public class MerchantDungeonRoom : NetworkBehaviour
         var merchantNetworkObject = merchantTransform.GetComponent<NetworkObject>();
         merchantNetworkObject.Spawn();
     }
+
+    #endregion
 }

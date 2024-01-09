@@ -3,8 +3,14 @@ using UnityEngine;
 
 public class RelicTabUI : MonoBehaviour
 {
+    #region Variables & References
+
     [SerializeField] private CharacterInventoryUI characterInventoryUI;
     [SerializeField] private CharacterInventoryUI characterRelicsInventoryUI;
+
+    #endregion
+
+    #region Inititalization & Subscribed events
 
     private void Start()
     {
@@ -13,8 +19,6 @@ public class RelicTabUI : MonoBehaviour
         CharacterUI.OnUpgradesTabButtonClick += CharacterUI_OnOtherTabButtonClick;
         CharacterUI.OnWeaponsTabButtonClick += CharacterUI_OnOtherTabButtonClick;
     }
-
-    #region SubscribedEvents
 
     private void CharacterUI_OnOtherTabButtonClick(object sender, EventArgs e)
     {
@@ -28,11 +32,18 @@ public class RelicTabUI : MonoBehaviour
 
     #endregion
 
+    #region Tab Visual
+
     private void Show()
     {
         gameObject.SetActive(true);
 
         UpdatePageVisual();
+    }
+
+    private void Hide()
+    {
+        gameObject.SetActive(false);
     }
 
     private void UpdatePageVisual()
@@ -41,8 +52,5 @@ public class RelicTabUI : MonoBehaviour
         characterRelicsInventoryUI.UpdateInventory();
     }
 
-    private void Hide()
-    {
-        gameObject.SetActive(false);
-    }
+    #endregion
 }

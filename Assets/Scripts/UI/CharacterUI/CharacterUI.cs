@@ -5,26 +5,33 @@ using UnityEngine.UI;
 
 public class CharacterUI : NetworkBehaviour
 {
+    #region Events
+
     public static event EventHandler OnCharacterUIOpen;
     public static event EventHandler OnCharacterUIClose;
 
-    [SerializeField] private Button closeButton;
-
-    [SerializeField] private Button statsTabButton;
     public static event EventHandler OnStatsTabButtonClick;
-
-    [SerializeField] private Button upgradesTabButton;
     public static event EventHandler OnUpgradesTabButtonClick;
-
-    [SerializeField] private Button weaponsTabButton;
     public static event EventHandler OnWeaponsTabButtonClick;
-
-    [SerializeField] private Button relicsTabButton;
     public static event EventHandler OnRelicsTabButtonClick;
+
+    #endregion
+
+    #region Variables & References
+
+    [SerializeField] private Button closeButton;
+    [SerializeField] private Button statsTabButton;
+    [SerializeField] private Button upgradesTabButton;
+    [SerializeField] private Button weaponsTabButton;
+    [SerializeField] private Button relicsTabButton;
 
     private bool isFirstUpdate;
 
     private bool isSubscribed;
+
+    #endregion
+
+    #region Initialization & Subscribed events
 
     private void Awake()
     {
@@ -65,9 +72,21 @@ public class CharacterUI : NetworkBehaviour
         isSubscribed = true;
     }
 
+    private void GameInput_OnOpenCharacterInfoAction(object sender, EventArgs e)
+    {
+        Show();
+    }
+
     public override void OnNetworkSpawn()
     {
+        PlayerController.OnPlayerSpawned += PlayerController_OnPlayerSpawned;
+    }
+
+    private void PlayerController_OnPlayerSpawned(object sender, EventArgs e)
+    {
         isFirstUpdate = true;
+
+        PlayerController.OnPlayerSpawned -= PlayerController_OnPlayerSpawned;
     }
 
     private void Update()
@@ -79,10 +98,9 @@ public class CharacterUI : NetworkBehaviour
         }
     }
 
-    private void GameInput_OnOpenCharacterInfoAction(object sender, EventArgs e)
-    {
-        Show();
-    }
+    #endregion
+
+    #region Tab Visual
 
     private void Show()
     {
@@ -94,6 +112,13 @@ public class CharacterUI : NetworkBehaviour
         GameInput.Instance.OnPauseAction += GameInput_OnPauseAction;
     }
 
+    private void Hide()
+    {
+        gameObject.SetActive(false);
+
+        OnCharacterUIClose?.Invoke(this, EventArgs.Empty);
+    }
+
     private void GameInput_OnPauseAction(object sender, EventArgs e)
     {
         Hide();
@@ -101,12 +126,7 @@ public class CharacterUI : NetworkBehaviour
         GameInput.Instance.OnPauseAction -= GameInput_OnPauseAction;
     }
 
-    private void Hide()
-    {
-        gameObject.SetActive(false);
-
-        OnCharacterUIClose?.Invoke(this, EventArgs.Empty);
-    }
+    #endregion
 
     public static void ResetStaticData()
     {

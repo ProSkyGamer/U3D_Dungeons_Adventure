@@ -1087,17 +1087,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enemiesToSpawn:
   - {fileID: 7196321624016137463, guid: 84f2cd22d9ca9a6419121fa2d70dab41, type: 3}
-  - {fileID: 7196321624016137463, guid: 84f2cd22d9ca9a6419121fa2d70dab41, type: 3}
-  - {fileID: 7196321624016137463, guid: b450e10a4ae7ed84582899aa0d4087d3, type: 3}
-  - {fileID: 7196321624016137463, guid: 02b380583087d8449ba266be5a584a61, type: 3}
-  - {fileID: 7196321624016137463, guid: 3901b71b9a3bf8c439914937773f3468, type: 3}
-  - {fileID: 7196321624016137463, guid: 84f2cd22d9ca9a6419121fa2d70dab41, type: 3}
-  - {fileID: 7196321624016137463, guid: 84f2cd22d9ca9a6419121fa2d70dab41, type: 3}
-  - {fileID: 7196321624016137463, guid: 84f2cd22d9ca9a6419121fa2d70dab41, type: 3}
-  - {fileID: 7196321624016137463, guid: 84f2cd22d9ca9a6419121fa2d70dab41, type: 3}
-  - {fileID: 7196321624016137463, guid: 84f2cd22d9ca9a6419121fa2d70dab41, type: 3}
-  - {fileID: 7196321624016137463, guid: 84f2cd22d9ca9a6419121fa2d70dab41, type: 3}
-  - {fileID: 7196321624016137463, guid: 84f2cd22d9ca9a6419121fa2d70dab41, type: 3}
   minimapRoomIcon: {fileID: 4822324099321882549}
   minimapRoomIconCleared: {fileID: 940037053019657935}
 --- !u!114 &-8043528568680674314

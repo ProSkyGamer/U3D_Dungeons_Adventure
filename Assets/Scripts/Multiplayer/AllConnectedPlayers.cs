@@ -7,6 +7,8 @@ public class AllConnectedPlayers : NetworkBehaviour
 {
     public static AllConnectedPlayers Instance { get; private set; }
 
+    #region Events & Event Args
+
     public event EventHandler<OnNewPlayerConnectedEventArgs> OnNewPlayerConnected;
 
     public class OnNewPlayerConnectedEventArgs : EventArgs
@@ -14,9 +16,17 @@ public class AllConnectedPlayers : NetworkBehaviour
         public PlayerController newConnectedPlayerController;
     }
 
+    #endregion
+
+    #region Variables & References
+
     [SerializeField] private List<PlayerController> allConnectedPlayerControllers = new();
 
     private bool isInitialized;
+
+    #endregion
+
+    #region Initialization & Susbcribed events
 
     private void Awake()
     {
@@ -30,7 +40,14 @@ public class AllConnectedPlayers : NetworkBehaviour
     {
         base.OnNetworkSpawn();
 
+        PlayerController.OnPlayerSpawned += PlayerController_OnPlayerSpawned;
+    }
+
+    private void PlayerController_OnPlayerSpawned(object sender, EventArgs e)
+    {
         InitializeConnectedPlayerServerRpc();
+
+        PlayerController.OnPlayerSpawned -= PlayerController_OnPlayerSpawned;
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -68,6 +85,10 @@ public class AllConnectedPlayers : NetworkBehaviour
         isInitialized = true;
     }
 
+    #endregion
+
+    #region Add Connected Player
+
     public void AddConnectedPlayerController(PlayerController newConnectedPlayerController)
     {
         if (!IsServer) return;
@@ -100,6 +121,10 @@ public class AllConnectedPlayers : NetworkBehaviour
         });
     }
 
+    #endregion
+
+    #region Get Connected Player Data
+
     public List<PlayerController> GetAllPlayerControllers()
     {
         return allConnectedPlayerControllers;
@@ -109,4 +134,6 @@ public class AllConnectedPlayers : NetworkBehaviour
     {
         return allConnectedPlayerControllers.Count;
     }
+
+    #endregion
 }

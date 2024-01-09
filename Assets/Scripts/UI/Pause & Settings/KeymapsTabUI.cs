@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class KeymapsTabUI : MonoBehaviour
 {
+    #region Initialization & Subscribed events
+
     private void Start()
     {
         SettingsUI.OnKeymapsButtonClick += SettingsUI_OnKeymapsButtonClick;
@@ -21,6 +23,10 @@ public class KeymapsTabUI : MonoBehaviour
         Show();
     }
 
+    #endregion
+
+    #region Visual
+
     private void Show()
     {
         gameObject.SetActive(true);
@@ -30,4 +36,6 @@ public class KeymapsTabUI : MonoBehaviour
     {
         gameObject.SetActive(false);
     }
+
+    #endregion
 }

@@ -4,9 +4,15 @@ using UnityEngine;
 
 public class BindingButtonTextTracker : MonoBehaviour
 {
+    #region Vatiables & References
+
     [SerializeField] private GameInput.Binding followingBinding = GameInput.Binding.Attack;
 
     private TextMeshProUGUI bindingText;
+
+    #endregion
+
+    #region Initialization & Subscribed events
 
     private void Start()
     {
@@ -19,6 +25,10 @@ public class BindingButtonTextTracker : MonoBehaviour
     {
         UpdateBindingText();
     }
+
+    #endregion
+
+    #region Binding Button Methods
 
     private void UpdateBindingText()
     {
@@ -33,4 +43,6 @@ public class BindingButtonTextTracker : MonoBehaviour
         followingBinding = newBinding;
         UpdateBindingText();
     }
+
+    #endregion
 }

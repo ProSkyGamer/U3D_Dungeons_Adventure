@@ -3,12 +3,18 @@ using UnityEngine;
 
 public class WeaponBullet : MonoBehaviour
 {
+    #region Events & Event Args
+
     public event EventHandler<OnEnemyHittedEventArgs> OnEnemyHitted;
 
     public class OnEnemyHittedEventArgs : EventArgs
     {
         public EnemyController hittedEnemy;
     }
+
+    #endregion
+
+    #region Variables & References
 
     [SerializeField] private float bulletSpeed = 12.5f;
 
@@ -17,6 +23,10 @@ public class WeaponBullet : MonoBehaviour
     private int bulletDamage;
     private PlayerController createdPlayer;
     private LayerMask enemiesLayers;
+
+    #endregion
+
+    #region Initialization
 
     public void InitializeBullet(float bulletDirection,
         float lifetime, int damage, PlayerController player, LayerMask enemiesLayer)
@@ -29,6 +39,10 @@ public class WeaponBullet : MonoBehaviour
 
         isInitialized = true;
     }
+
+    #endregion
+
+    #region Update
 
     private void Update()
     {
@@ -63,4 +77,6 @@ public class WeaponBullet : MonoBehaviour
         if (remainingLifetime <= 0)
             Destroy(gameObject);
     }
+
+    #endregion
 }

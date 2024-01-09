@@ -1,7 +1,10 @@
 public interface IInventoryParent
 {
-    public void AddInventoryObject(InventoryObject inventoryObject);
-    public void AddInventoryObjectToSlot(InventoryObject inventoryObject, int slotNumber);
+    public void AddInventoryObject(InventoryObject inventoryObject, bool isNeedToSendNotification);
+
+    public void AddInventoryObjectToSlot(InventoryObject inventoryObject, int slotNumber,
+        bool isNeedToSendNotification);
+
     public void RemoveInventoryObjectBySlot(int slotNumber);
     public void ChangeInventorySize(int newSize);
     public InventoryObject GetInventoryObjectBySlot(int slotNumber);

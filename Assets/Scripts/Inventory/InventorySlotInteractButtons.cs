@@ -6,6 +6,8 @@ using UnityEngine.UI;
 
 public class InventorySlotInteractButtons : MonoBehaviour
 {
+    #region Variables & References
+
     [SerializeField] private Button unEquipItem;
     [SerializeField] private Button equipItem;
     [SerializeField] private Button dropItem;
@@ -20,6 +22,10 @@ public class InventorySlotInteractButtons : MonoBehaviour
     [SerializeField] private TextMeshProUGUI deleteItemText;
     [SerializeField] private TextTranslationsSO deleteItemTextTranslationsSo;
 
+    #endregion
+
+    #region Slot Buttons Methods
+
     public void SetSlotInfo(InventoryObject inventoryObject,
         CharacterInventoryUI.InventoryType storedInventoryType, Action onClickAction)
     {
@@ -32,6 +38,7 @@ public class InventorySlotInteractButtons : MonoBehaviour
         deleteItem.onClick.AddListener(() =>
         {
             inventoryObject.RemoveInventoryParent();
+            inventoryObject.DestroyInventoryObject();
             onClickAction();
         });
 
@@ -109,4 +116,6 @@ public class InventorySlotInteractButtons : MonoBehaviour
             unEquipItem.interactable = false;
         }
     }
+
+    #endregion
 }

@@ -4,7 +4,15 @@ using UnityEngine;
 
 public class InventoryObject : NetworkBehaviour
 {
+    #region Events
+
+    public static event EventHandler OnInventoryParentChanged;
+
     public event EventHandler OnObjectRepaired;
+
+    #endregion
+
+    #region Variables & References
 
     [SerializeField] private Sprite inventoryObjectSprite;
     [SerializeField] private Sprite brokenInventoryObjectSprite;
@@ -15,6 +23,10 @@ public class InventoryObject : NetworkBehaviour
     [SerializeField] private bool isBroken;
 
     private IInventoryParent inventoryObjectParent;
+
+    #endregion
+
+    #region Inventory Object Initialization
 
     public void SpawnInventoryObject()
     {
@@ -46,24 +58,30 @@ public class InventoryObject : NetworkBehaviour
         }
     }
 
+    #endregion
+
+    #region Inventory Parent
+
     public void SetInventoryParent(NetworkObjectReference inventoryNetworkObjectReference,
-        CharacterInventoryUI.InventoryType inventoryType)
+        CharacterInventoryUI.InventoryType inventoryType, bool isNeedToSendNotification = false)
     {
-        SetInventoryParentServerRpc(inventoryNetworkObjectReference, (int)inventoryType);
+        SetInventoryParentServerRpc(inventoryNetworkObjectReference, (int)inventoryType, isNeedToSendNotification);
     }
 
     [ServerRpc(RequireOwnership = false)]
     private void SetInventoryParentServerRpc(NetworkObjectReference inventoryObjectOwnerNetworkObjectReference,
-        int intInventoryType)
+        int intInventoryType, bool isNeedToSendNotification)
     {
-        SetInventoryParentClientRpc(inventoryObjectOwnerNetworkObjectReference, intInventoryType);
+        SetInventoryParentClientRpc(inventoryObjectOwnerNetworkObjectReference, intInventoryType,
+            isNeedToSendNotification);
     }
 
     [ClientRpc]
     private void SetInventoryParentClientRpc(NetworkObjectReference inventoryObjectOwnerNetworkObjectReference,
-        int intInventoryType)
+        int intInventoryType, bool isNeedToSendNotification)
     {
         inventoryObjectOwnerNetworkObjectReference.TryGet(out var inventoryObjectOwnerNetworkObject);
+        Debug.Log(inventoryObjectOwnerNetworkObject);
 
         IInventoryParent storedInventory;
         switch ((CharacterInventoryUI.InventoryType)intInventoryType)
@@ -83,26 +101,30 @@ public class InventoryObject : NetworkBehaviour
         }
 
         inventoryObjectParent?.RemoveInventoryObjectBySlot(inventoryObjectParent.GetSlotNumberByInventoryObject(this));
-        storedInventory.AddInventoryObject(this);
+        storedInventory.AddInventoryObject(this, isNeedToSendNotification);
         inventoryObjectParent = storedInventory;
+
+        OnInventoryParentChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public void SetInventoryParentBySlot(NetworkObjectReference inventoryObjectOwnerNetworkObjectReference,
-        int intInventoryType, int slotNumber)
+        int intInventoryType, int slotNumber, bool isNeedToSendNotification = false)
     {
-        SetInventoryParentBySlotServerRpc(inventoryObjectOwnerNetworkObjectReference, intInventoryType, slotNumber);
+        SetInventoryParentBySlotServerRpc(inventoryObjectOwnerNetworkObjectReference, intInventoryType, slotNumber,
+            isNeedToSendNotification);
     }
 
     [ServerRpc(RequireOwnership = false)]
     private void SetInventoryParentBySlotServerRpc(NetworkObjectReference inventoryObjectOwnerNetworkObjectReference,
-        int intInventoryType, int newSlotNumber)
+        int intInventoryType, int newSlotNumber, bool isNeedToSendNotification)
     {
-        SetInventoryParentBySlotClientRpc(inventoryObjectOwnerNetworkObjectReference, intInventoryType, newSlotNumber);
+        SetInventoryParentBySlotClientRpc(inventoryObjectOwnerNetworkObjectReference, intInventoryType, newSlotNumber,
+            isNeedToSendNotification);
     }
 
     [ClientRpc]
     private void SetInventoryParentBySlotClientRpc(NetworkObjectReference inventoryObjectOwnerNetworkObjectReference,
-        int intInventoryType, int newSlotNumber)
+        int intInventoryType, int newSlotNumber, bool isNeedToSendNotification)
     {
         inventoryObjectOwnerNetworkObjectReference.TryGet(out var inventoryObjectOwnerNetworkObject);
 
@@ -128,9 +150,35 @@ public class InventoryObject : NetworkBehaviour
         inventoryObjectParent?.RemoveInventoryObjectBySlot(
             inventoryObjectParent.GetSlotNumberByInventoryObject(this));
 
-        storedInventory.AddInventoryObjectToSlot(this, newSlotNumber);
+        storedInventory.AddInventoryObjectToSlot(this, newSlotNumber, isNeedToSendNotification);
         inventoryObjectParent = storedInventory;
+
+        OnInventoryParentChanged?.Invoke(this, EventArgs.Empty);
     }
+
+    public void RemoveInventoryParent()
+    {
+        RemoveInventoryParentServerRpc();
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void RemoveInventoryParentServerRpc()
+    {
+        RemoveInventoryParentClientRpc();
+    }
+
+    [ClientRpc]
+    private void RemoveInventoryParentClientRpc()
+    {
+        inventoryObjectParent?.RemoveInventoryObjectBySlot(inventoryObjectParent.GetSlotNumberByInventoryObject(this));
+        inventoryObjectParent = null;
+
+        OnInventoryParentChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    #endregion
+
+    #region Drop To World
 
     public void DropInventoryObjectToWorld(Vector3 dropPosition)
     {
@@ -142,6 +190,7 @@ public class InventoryObject : NetworkBehaviour
     {
         dropPosition += new Vector3(0f, 0.5f, 0f);
         DroppedItemsController.Instance.AddNewDroppedItem(dropPosition, out var droppedItemNetworkObjectReference);
+        RemoveInventoryParent();
 
         DropInventoryObjectToWorldClientRpc(droppedItemNetworkObjectReference);
     }
@@ -154,11 +203,9 @@ public class InventoryObject : NetworkBehaviour
         DroppedItemsController.Instance.SetDroppedItem(droppedItemNetworkObjectReference, this);
     }
 
-    public void RemoveInventoryParent()
-    {
-        inventoryObjectParent?.RemoveInventoryObjectBySlot(inventoryObjectParent.GetSlotNumberByInventoryObject(this));
-        inventoryObjectParent = null;
-    }
+    #endregion
+
+    #region Get Inventory Object Data
 
     public IInventoryParent GetInventoryObjectParent()
     {
@@ -174,6 +221,27 @@ public class InventoryObject : NetworkBehaviour
     {
         return inventoryObjectNameTextTranslationSo;
     }
+
+    public bool IsBroken()
+    {
+        return isBroken;
+    }
+
+    public bool TryGetWeaponSo(out WeaponSO gottenWeaponSo)
+    {
+        gottenWeaponSo = weaponSo;
+        return gottenWeaponSo != null;
+    }
+
+    public bool TryGetRelicSo(out RelicSO gottenRelicSo)
+    {
+        gottenRelicSo = relicSo;
+        return gottenRelicSo != null;
+    }
+
+    #endregion
+
+    #region Inventory Object Break States
 
     public void BreakObject()
     {
@@ -204,6 +272,10 @@ public class InventoryObject : NetworkBehaviour
             OnObjectRepaired?.Invoke(this, EventArgs.Empty);
     }
 
+    #endregion
+
+    #region Relic Usages Reset
+
     public void TryNullifyRelicUsages()
     {
         if (!IsServer) return;
@@ -231,20 +303,23 @@ public class InventoryObject : NetworkBehaviour
         }
     }
 
-    public bool IsBroken()
+    #endregion
+
+    #region Destoroy Inventory Object
+
+    public void DestroyInventoryObject()
     {
-        return isBroken;
+        DestroyInventoryObjectServerRpc();
     }
 
-    public bool TryGetWeaponSo(out WeaponSO gottenWeaponSo)
+    [ServerRpc(RequireOwnership = false)]
+    private void DestroyInventoryObjectServerRpc()
     {
-        gottenWeaponSo = weaponSo;
-        return gottenWeaponSo != null;
+        var inventoryNetworkObject = GetComponent<NetworkObject>();
+
+        inventoryNetworkObject.Despawn();
+        Destroy(gameObject);
     }
 
-    public bool TryGetRelicSo(out RelicSO gottenRelicSo)
-    {
-        gottenRelicSo = relicSo;
-        return gottenRelicSo != null;
-    }
+    #endregion
 }

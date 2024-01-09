@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class EnemyStatsUI : MonoBehaviour
 {
+    #region Vatiables & References
+
     [SerializeField] private EnemyController followingEnemyStats;
 
     [SerializeField] private TextMeshProUGUI healthText;
@@ -11,6 +13,10 @@ public class EnemyStatsUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI shieldText;
 
     private EnemyHealth enemyHealth;
+
+    #endregion
+
+    #region Initalization & Subscribed events
 
     private void Awake()
     {
@@ -46,4 +52,6 @@ public class EnemyStatsUI : MonoBehaviour
             healedText.gameObject.SetActive(false);
         }
     }
+
+    #endregion
 }

@@ -5,12 +5,24 @@ using UnityEngine;
 
 public class PlayerEffectsController : NetworkBehaviour
 {
+    #region Events & Event Args
+
     public event EventHandler<OnPlayerRelicOutOfUsagesCountEventArgs> OnPlayerRelicOutOfUsagesCount;
 
     public class OnPlayerRelicOutOfUsagesCountEventArgs : EventArgs
     {
         public AppliedEffect relicBuff;
     }
+
+    public class RelicBuffEffectTriggeredEventArgs : EventArgs
+    {
+        public int spentValue;
+        public int effectID;
+    }
+
+    #endregion
+
+    #region Enums
 
     public enum AllPlayerEffects
     {
@@ -38,6 +50,10 @@ public class PlayerEffectsController : NetworkBehaviour
         OnHitEnemyPoison, //NOT ADDED
         OnHitEnemyStun //NOT ADDED
     }
+
+    #endregion
+
+    #region Created Classes
 
     [Serializable]
     public class AppliedEffect
@@ -82,17 +98,11 @@ public class PlayerEffectsController : NetworkBehaviour
         public float effectRemainingTime;
     }
 
-    public class RelicBuffEffectTriggeredEventArgs : EventArgs
-    {
-        public int spentValue;
-        public int effectID;
-    }
+    #endregion
 
-    #region Buffs
+    #region Effects & References
 
     private readonly List<AppliedEffect> allPlayerAppliedEffects = new();
-
-    #endregion
 
     private int lastUsedEffectID;
 
@@ -103,6 +113,10 @@ public class PlayerEffectsController : NetworkBehaviour
     private PlayerInventory playerInventory;
     private StaminaController staminaController;
     private PlayerController playerController;
+
+    #endregion
+
+    #region Initialization & Subscribed events
 
     private void Awake()
     {
@@ -169,6 +183,10 @@ public class PlayerEffectsController : NetworkBehaviour
         foreach (var passiveEffect in newWeaponSo.weaponPassiveTalent) ApplyEffect(passiveEffect);
     }
 
+    #endregion
+
+    #region Effects Conditions
+
     private void SetAllPlayerEffectsToControllerByCondition()
     {
         foreach (var appliedEffect in allPlayerAppliedEffects)
@@ -189,73 +207,6 @@ public class PlayerEffectsController : NetworkBehaviour
                     : appliedEffect.effectCurrentlyAppliedTimes++;
             }
         }
-    }
-
-    private void Update()
-    {
-        if (!IsServer) return;
-        if (GameStageManager.Instance.IsPause()) return;
-
-        TickBuffTimers();
-    }
-
-    private void TickBuffTimers()
-    {
-        foreach (var effect in allPlayerAppliedEffects)
-            if (!effect.isEffectEndless)
-            {
-                effect.effectRemainingTime -= Time.deltaTime;
-                if (effect.effectRemainingTime <= 0) DispelEffect(effect);
-            }
-    }
-
-    public void ApplyEffect(AllPlayerEffects applyingEffectType, float effectTotalDuration,
-        float effectPercentageScale, int effectFlatScale = 0,
-        int maxUsagesLimit = 0, float effectLimit = 0f, float effectApplyingChance = 0f,
-        float applyingEffectDuration = 0f)
-    {
-        if (!IsServer) return;
-
-        lastUsedEffectID++;
-
-        var applyingEffect = new AppliedEffect
-        {
-            appliedEffectID = lastUsedEffectID,
-            appliedEffectType = applyingEffectType,
-            effectPercentageScale = effectPercentageScale,
-            isUsagesLimited = maxUsagesLimit > 0,
-            maxUsagesLimit = maxUsagesLimit,
-            effectLimit = effectLimit,
-            effectApplyingChance = effectApplyingChance,
-            applyingEffectDuration = applyingEffectDuration,
-            effectFlatScale = effectFlatScale,
-            effectRemainingTime = effectTotalDuration,
-            isEffectEndless = effectTotalDuration <= 0,
-            effectCurrentlyAppliedTimes = 1
-        };
-
-        AddOrRemoveEffectToController(applyingEffect);
-        allPlayerAppliedEffects.Add(applyingEffect);
-    }
-
-    public void ApplyEffect(AppliedEffect applyingEffect)
-    {
-        if (!IsServer) return;
-
-        lastUsedEffectID++;
-
-        applyingEffect.appliedEffectID = lastUsedEffectID;
-
-        var applyingTimes = GetEffectAppliedTimesByConditions(applyingEffect);
-        applyingEffect.effectCurrentlyAppliedTimes = applyingTimes;
-
-        while (applyingTimes > 0)
-        {
-            AddOrRemoveEffectToController(applyingEffect);
-            applyingTimes--;
-        }
-
-        allPlayerAppliedEffects.Add(applyingEffect);
     }
 
     private int GetEffectAppliedTimesByConditions(AppliedEffect appliedEffect)
@@ -314,6 +265,81 @@ public class PlayerEffectsController : NetworkBehaviour
         return effectAppliedTimes;
     }
 
+    #endregion
+
+    #region Update & Connected
+
+    private void Update()
+    {
+        if (!IsServer) return;
+        if (GameStageManager.Instance.IsPause()) return;
+
+        TickBuffTimers();
+    }
+
+    private void TickBuffTimers()
+    {
+        foreach (var effect in allPlayerAppliedEffects)
+            if (!effect.isEffectEndless)
+            {
+                effect.effectRemainingTime -= Time.deltaTime;
+                if (effect.effectRemainingTime <= 0) DispelEffect(effect);
+            }
+    }
+
+    #endregion
+
+    #region Apply & Dispell Effects
+
+    public void ApplyEffect(AllPlayerEffects applyingEffectType, float effectTotalDuration,
+        float effectPercentageScale, int effectFlatScale = 0,
+        int maxUsagesLimit = 0, float effectLimit = 0f, float effectApplyingChance = 0f,
+        float applyingEffectDuration = 0f)
+    {
+        if (!IsServer) return;
+
+        lastUsedEffectID++;
+
+        var applyingEffect = new AppliedEffect
+        {
+            appliedEffectID = lastUsedEffectID,
+            appliedEffectType = applyingEffectType,
+            effectPercentageScale = effectPercentageScale,
+            isUsagesLimited = maxUsagesLimit > 0,
+            maxUsagesLimit = maxUsagesLimit,
+            effectLimit = effectLimit,
+            effectApplyingChance = effectApplyingChance,
+            applyingEffectDuration = applyingEffectDuration,
+            effectFlatScale = effectFlatScale,
+            effectRemainingTime = effectTotalDuration,
+            isEffectEndless = effectTotalDuration <= 0,
+            effectCurrentlyAppliedTimes = 1
+        };
+
+        AddOrRemoveEffectToController(applyingEffect);
+        allPlayerAppliedEffects.Add(applyingEffect);
+    }
+
+    public void ApplyEffect(AppliedEffect applyingEffect)
+    {
+        if (!IsServer) return;
+
+        lastUsedEffectID++;
+
+        applyingEffect.appliedEffectID = lastUsedEffectID;
+
+        var applyingTimes = GetEffectAppliedTimesByConditions(applyingEffect);
+        applyingEffect.effectCurrentlyAppliedTimes = applyingTimes;
+
+        while (applyingTimes > 0)
+        {
+            AddOrRemoveEffectToController(applyingEffect);
+            applyingTimes--;
+        }
+
+        allPlayerAppliedEffects.Add(applyingEffect);
+    }
+
     private void DispelEffect(AppliedEffect removingEffect)
     {
         if (!IsServer) return;
@@ -333,6 +359,10 @@ public class PlayerEffectsController : NetworkBehaviour
             break;
         }
     }
+
+    #endregion
+
+    #region Effect Controllers
 
     private void AddOrRemoveEffectToController(AppliedEffect appliedEffect, bool isAdding = true)
     {
@@ -441,6 +471,10 @@ public class PlayerEffectsController : NetworkBehaviour
         }
     }
 
+    #endregion
+
+    #region Effect Limits
+
     private void BuffedController_OnLimitedBuffEffectTriggered(object sender, RelicBuffEffectTriggeredEventArgs e)
     {
         var relicsToDeleteList = new List<AppliedEffect>();
@@ -474,4 +508,6 @@ public class PlayerEffectsController : NetworkBehaviour
 
         return false;
     }
+
+    #endregion
 }

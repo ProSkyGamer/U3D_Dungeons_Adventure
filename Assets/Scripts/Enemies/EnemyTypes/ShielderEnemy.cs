@@ -4,7 +4,13 @@ using UnityEngine;
 [RequireComponent(typeof(EnemyController))]
 public class ShielderEnemy : MonoBehaviour
 {
+    #region Variables
+
     [SerializeField] private int applyingShieldDurability = 32;
+
+    #endregion
+
+    #region Enemy Type Methods
 
     public void ShieldEnemies(List<EnemyController> enemiesToShield)
     {
@@ -13,4 +19,6 @@ public class ShielderEnemy : MonoBehaviour
                 enemy.ApplyShield(applyingShieldDurability -
                                   enemy.GetCurrentShieldDurability());
     }
+
+    #endregion
 }

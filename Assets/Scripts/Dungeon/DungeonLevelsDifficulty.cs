@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class DungeonLevelsDifficulty : MonoBehaviour
 {
-    public static DungeonLevelsDifficulty Instance { get; private set; }
+    #region Created classes
 
     [Serializable]
     public class StatsIncreaseOnDungeonDifficulty
@@ -27,9 +27,19 @@ public class DungeonLevelsDifficulty : MonoBehaviour
         }
     }
 
+    #endregion
+
+    public static DungeonLevelsDifficulty Instance { get; private set; }
+
+    #region Variables & References
+
     [SerializeField] private List<StatsIncreaseOnDungeonDifficulty> allStatsIncreaseOnDungeonDifficulty = new();
     [SerializeField] private float additionalBaseHpPercentagePerConnectedPlayer = 0.5f;
     [SerializeField] private float additionalBaseAtkPercentagePerConnectedPlayer = 0.1f;
+
+    #endregion
+
+    #region Initialization
 
     private void Awake()
     {
@@ -38,6 +48,10 @@ public class DungeonLevelsDifficulty : MonoBehaviour
         else
             Instance = this;
     }
+
+    #endregion
+
+    #region GetIncreasedStats
 
     public float GetEnemyBaseStatIncreaseByCurrentConnectedPlayers(
         StatsIncreaseOnDungeonDifficulty.EnemiesStatIncrease currentStat)
@@ -80,4 +94,6 @@ public class DungeonLevelsDifficulty : MonoBehaviour
 
         return currentStatIncrease;
     }
+
+    #endregion
 }

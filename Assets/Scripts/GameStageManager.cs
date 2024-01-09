@@ -5,9 +5,15 @@ public class GameStageManager : MonoBehaviour
 {
     public static GameStageManager Instance { get; private set; }
 
+    #region Events
+
     public event EventHandler OnGameStart;
     public event EventHandler OnGamePause;
     public event EventHandler OnGameEnd;
+
+    #endregion
+
+    #region Enums
 
     private enum GameStages
     {
@@ -17,10 +23,18 @@ public class GameStageManager : MonoBehaviour
         Ended
     }
 
+    #endregion
+
+    #region Variables
+
     private GameStages currentGameStage = GameStages.WaitingForStart;
     private GameStages gameStageBeforePause;
 
     private bool isPauseOnPressing = true;
+
+    #endregion
+
+    #region Initialization & Subscribed events
 
     private void Awake()
     {
@@ -81,6 +95,10 @@ public class GameStageManager : MonoBehaviour
         OnGameStart?.Invoke(this, EventArgs.Empty);
     }
 
+    #endregion
+
+    #region Get Stages Data
+
     public bool IsWaitingForStart()
     {
         return currentGameStage == GameStages.WaitingForStart;
@@ -100,6 +118,8 @@ public class GameStageManager : MonoBehaviour
     {
         return currentGameStage == GameStages.Ended;
     }
+
+    #endregion
 
     public void OnDestroy()
     {

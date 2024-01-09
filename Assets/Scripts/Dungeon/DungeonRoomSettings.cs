@@ -5,7 +5,13 @@ using UnityEngine;
 
 public class DungeonRoomSettings : NetworkBehaviour
 {
+    #region Events
+
     public event EventHandler OnAllEnemiesDefeated;
+
+    #endregion
+
+    #region Variables & References
 
     [SerializeField] private List<Transform> enemiesToSpawn = new();
 
@@ -13,6 +19,10 @@ public class DungeonRoomSettings : NetworkBehaviour
     [SerializeField] private Transform minimapRoomIconCleared;
 
     private readonly List<EnemyController> remainingEnemies = new();
+
+    #endregion
+
+    #region Initialization & Subscribes events
 
     private void Awake()
     {
@@ -45,14 +55,24 @@ public class DungeonRoomSettings : NetworkBehaviour
             OnAllEnemiesDefeated?.Invoke(this, EventArgs.Empty);
     }
 
+    #endregion
+
+    #region Room Methods
+
     public void SetRoomAsClear()
     {
         minimapRoomIcon.gameObject.SetActive(false);
         minimapRoomIconCleared.gameObject.SetActive(true);
     }
 
+    #endregion
+
+    #region Get Room Data
+
     public bool IsHasAnyEnemiesToKill()
     {
         return enemiesToSpawn.Count > 0;
     }
+
+    #endregion
 }

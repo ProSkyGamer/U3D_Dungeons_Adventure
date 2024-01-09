@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class StaminaController : NetworkBehaviour
 {
+    #region Events & Event Args
+
     public event EventHandler<OnStaminaChangeEventArgs> OnStaminaChange;
 
     public class OnStaminaChangeEventArgs : EventArgs
@@ -14,6 +16,10 @@ public class StaminaController : NetworkBehaviour
 
     public event EventHandler OnAllStaminaSpend;
 
+    #endregion
+
+    #region Variables & References
+
     [SerializeField] private int maxStamina = 100;
     private float staminaSpendMultiplayer = 1f;
     [SerializeField] private float staminaRecoveryPerSecond = 25f;
@@ -23,10 +29,18 @@ public class StaminaController : NetworkBehaviour
 
     private bool isFirstUpdate = true;
 
+    #endregion
+
+    #region Initialization
+
     private void Awake()
     {
         currentStamina = maxStamina;
     }
+
+    #endregion
+
+    #region Update
 
     private void Update()
     {
@@ -57,10 +71,18 @@ public class StaminaController : NetworkBehaviour
         }
     }
 
+    #endregion
+
+    #region Effects
+
     public void ChangeStaminaSpendMultiplayer(float deltaValue)
     {
         staminaSpendMultiplayer += deltaValue;
     }
+
+    #endregion
+
+    #region Stamina Spending & Regenerating
 
     public void SpendStamina(float toSpend)
     {
@@ -88,6 +110,10 @@ public class StaminaController : NetworkBehaviour
         isRegeneratingStamina = false;
     }
 
+    #endregion
+
+    #region Check Data
+
     public bool IsHaveAvailableStamina()
     {
         return currentStamina > 0;
@@ -107,4 +133,6 @@ public class StaminaController : NetworkBehaviour
     {
         return currentStamina >= maxStamina;
     }
+
+    #endregion
 }

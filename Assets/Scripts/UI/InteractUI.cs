@@ -8,6 +8,8 @@ public class InteractUI : MonoBehaviour
 {
     public static InteractUI Instance { get; private set; }
 
+    #region Variables & References
+
     private readonly List<Button> allInteractButtonsList = new();
     private readonly List<AddInteractButtonUI> allInteractableItemButtonsList = new();
 
@@ -17,6 +19,10 @@ public class InteractUI : MonoBehaviour
     private Button activeButton;
     private readonly float timeBetweenScrolls = 0.1f;
     private float timerBetweenScrolls;
+
+    #endregion
+
+    #region Initialization & Subscribed events
 
     private void Awake()
     {
@@ -28,21 +34,39 @@ public class InteractUI : MonoBehaviour
 
     private void Start()
     {
-        Hide();
+        SubscribeToShowingAndHidingInterfaces();
 
-        GiveCoinsUI.OnInterfaceShown += GiveCoinsUI_OnInterfaceShown;
-        GiveCoinsUI.OnInterfaceHidden += GiveCoinsUI_OnInterfaceHidden;
+        Hide();
     }
 
-    private void GiveCoinsUI_OnInterfaceHidden(object sender, EventArgs e)
+    private void SubscribeToShowingAndHidingInterfaces()
+    {
+        GiveCoinsUI.OnInterfaceShown += OnOtherTabOpen;
+        GiveCoinsUI.OnInterfaceHidden += OnOtherTabClose;
+
+        PauseUI.OnInterfaceShown += OnOtherTabOpen;
+        PauseUI.OnInterfaceHidden += OnOtherTabClose;
+
+        ShopUI.Instance.OnShopOpen += OnOtherTabOpen;
+        ShopUI.Instance.OnShopClose += OnOtherTabClose;
+
+        CharacterUI.OnCharacterUIOpen += OnOtherTabOpen;
+        CharacterUI.OnCharacterUIClose += OnOtherTabClose;
+    }
+
+    private void OnOtherTabClose(object sender, EventArgs e)
     {
         Show();
     }
 
-    private void GiveCoinsUI_OnInterfaceShown(object sender, EventArgs e)
+    private void OnOtherTabOpen(object sender, EventArgs e)
     {
         Hide();
     }
+
+    #endregion
+
+    #region Update
 
     public void Update()
     {
@@ -85,6 +109,10 @@ public class InteractUI : MonoBehaviour
             }
         }
     }
+
+    #endregion
+
+    #region Add Remove Interact Buttons
 
     public void AddButtonInteractToScreen(
         AddInteractButtonUI interactButtonUI, TextTranslationsSO textTranslationsSo)
@@ -131,6 +159,10 @@ public class InteractUI : MonoBehaviour
             }
     }
 
+    #endregion
+
+    #region Visual
+
     private void Show()
     {
         gameObject.SetActive(true);
@@ -152,8 +184,5 @@ public class InteractUI : MonoBehaviour
         GameInput.Instance.OnInteractAction -= GameInput_OnInteractAction;
     }
 
-    public bool IsShow()
-    {
-        return gameObject.activeSelf;
-    }
+    #endregion
 }

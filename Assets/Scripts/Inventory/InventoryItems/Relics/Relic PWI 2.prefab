@@ -49,7 +49,7 @@ MonoBehaviour:
     type: 3}
   brokenInventoryObjectSprite: {fileID: 21300000, guid: c34cd61ed96ff9a40a54e159467c5155,
     type: 3}
-  inventoryObjectNameTextTranslationSo: {fileID: 11400000, guid: d08f4378fe2b3aa4bbe895d1f8cead6f,
+  inventoryObjectNameTextTranslationSo: {fileID: 11400000, guid: ef2aeea2c5e3b5b47973e068c1208289,
     type: 2}
   weaponSo: {fileID: 0}
   relicSo: {fileID: 11400000, guid: 601cf4f1dc742f340916c712ff4bbad8, type: 2}

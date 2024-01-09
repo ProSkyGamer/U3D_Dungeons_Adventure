@@ -5,16 +5,30 @@ using UnityEngine;
 
 public class StartingDungeonRoom : InteractableItem
 {
+    #region Events
+
     public static event EventHandler OnDungeonStart;
     public static event EventHandler OnNavMeshBuild;
 
+    #endregion
+
+    #region Vatiables & References
+
     private DungeonRoom dungeonRoom;
     [SerializeField] private NavMeshSurface navMeshSurface;
+
+    #endregion
+
+    #region Initialization
 
     private void Awake()
     {
         dungeonRoom = GetComponentInParent<DungeonRoom>();
     }
+
+    #endregion
+
+    #region Interactable Item
 
     public override void OnInteract(PlayerController player)
     {
@@ -27,6 +41,15 @@ public class StartingDungeonRoom : InteractableItem
 
         UnlockDoorClientRpc();
     }
+
+    public override bool IsCanInteract()
+    {
+        return isCanInteract && GameStageManager.Instance.IsWaitingForStart() && IsServer;
+    }
+
+    #endregion
+
+    #region On Dungeon Start
 
     private void ProcedureDungeonGeneration_OnDungeonGenerationFinished(object sender, EventArgs e)
     {
@@ -42,8 +65,11 @@ public class StartingDungeonRoom : InteractableItem
         OnDungeonStart?.Invoke(this, EventArgs.Empty);
     }
 
-    public override bool IsCanInteract()
+    #endregion
+
+    public static void ResetStaticData()
     {
-        return isCanInteract && GameStageManager.Instance.IsWaitingForStart() && IsServer;
+        OnDungeonStart = null;
+        OnNavMeshBuild = null;
     }
 }

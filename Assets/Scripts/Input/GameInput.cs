@@ -6,9 +6,7 @@ using UnityEngine.InputSystem;
 [SuppressMessage("ReSharper", "CheckNamespace")]
 public class GameInput : MonoBehaviour
 {
-    private const string PLAYER_PREFS_BINDINGS = "InputBindings";
-
-    public static GameInput Instance { get; private set; }
+    #region Enums
 
     public enum Binding
     {
@@ -30,6 +28,14 @@ public class GameInput : MonoBehaviour
         InventorySlotInteract
     }
 
+    #endregion
+
+    private const string PLAYER_PREFS_BINDINGS = "InputBindings";
+
+    public static GameInput Instance { get; private set; }
+
+    #region Events
+
     public event EventHandler OnAnyBindingRebind;
 
     public event EventHandler OnAttackAction;
@@ -45,7 +51,11 @@ public class GameInput : MonoBehaviour
     public event EventHandler OnCursorShowAction;
     public event EventHandler OnInventorySlotInteractAction;
 
+    #endregion
+
     private GameInputActions gameInputActions;
+
+    #region Initialization
 
     private void Awake()
     {
@@ -75,6 +85,10 @@ public class GameInput : MonoBehaviour
         gameInputActions.Player.ShowCursor.performed += ShowCursor_OnPerformed;
         gameInputActions.Player.InventorySlotInteract.performed += InventorySlotInteract_OnPerformed;
     }
+
+    #endregion
+
+    #region Bindings Initialization
 
     private void InventorySlotInteract_OnPerformed(InputAction.CallbackContext obj)
     {
@@ -136,18 +150,9 @@ public class GameInput : MonoBehaviour
         OnChangeCameraModeAction?.Invoke(this, EventArgs.Empty);
     }
 
-    private void OnDestroy()
-    {
-        gameInputActions.Player.CameraModeChange.performed -= CameraModeChange_OnPerformed;
-        gameInputActions.Player.Sprint.performed -= Sprint_OnPerformed;
-        gameInputActions.Player.ChangeMovementMode.performed -= ChangeMovementMode_OnPerformed;
-        gameInputActions.Player.Attack.performed -= Attack_OnPerformed;
-        gameInputActions.Player.Interact.performed -= Interact_OnPerformed;
-        gameInputActions.Player.ChangeCurrentWeapon.performed -= ChangeCurrentWeapon_OnPerformed;
-        gameInputActions.Player.DropCurrentWeapon.performed -= DropCurrentWeapon_OnPerformed;
+    #endregion
 
-        gameInputActions.Dispose();
-    }
+    #region Trigger Button
 
     public void TriggerBindingButton(Binding triggeringBinding)
     {
@@ -186,6 +191,10 @@ public class GameInput : MonoBehaviour
         }
     }
 
+    #endregion
+
+    #region Get Input Data
+
     public Vector2 GetMovementVectorNormalized()
     {
         var inputVector = gameInputActions.Player.Movement.ReadValue<Vector2>();
@@ -214,44 +223,6 @@ public class GameInput : MonoBehaviour
         var mouseScroll = -gameInputActions.Player.MouseScroll.ReadValue<Vector2>().y;
 
         return mouseScroll;
-    }
-
-    public string GetBindingText(Binding binding)
-    {
-        switch (binding)
-        {
-            default:
-            case Binding.MoveUp:
-                return gameInputActions.Player.Movement.bindings[1].ToDisplayString();
-            case Binding.MoveDown:
-                return gameInputActions.Player.Movement.bindings[2].ToDisplayString();
-            case Binding.MoveLeft:
-                return gameInputActions.Player.Movement.bindings[3].ToDisplayString();
-            case Binding.MoveRight:
-                return gameInputActions.Player.Movement.bindings[4].ToDisplayString();
-            case Binding.MouseScroll:
-                return gameInputActions.Player.MouseScroll.bindings[0].ToDisplayString();
-            case Binding.Sprint:
-                return gameInputActions.Player.Sprint.bindings[0].ToDisplayString();
-            case Binding.ChangeMovementMode:
-                return gameInputActions.Player.ChangeMovementMode.bindings[0].ToDisplayString();
-            case Binding.Attack:
-                return gameInputActions.Player.Attack.bindings[0].ToDisplayString();
-            case Binding.Interact:
-                return gameInputActions.Player.Interact.bindings[0].ToDisplayString();
-            case Binding.ChangeCurrentWeapon:
-                return gameInputActions.Player.ChangeCurrentWeapon.bindings[0].ToDisplayString();
-            case Binding.DropWeapon:
-                return gameInputActions.Player.DropCurrentWeapon.bindings[0].ToDisplayString();
-            case Binding.OpenCharacterInfo:
-                return gameInputActions.Player.OpenCharacterInfo.bindings[0].ToDisplayString();
-            case Binding.UpgradesStartDragging:
-                return gameInputActions.Player.UpgradesStartDraging.bindings[0].ToDisplayString();
-            case Binding.Pause:
-                return gameInputActions.Player.GamePause.bindings[0].ToDisplayString();
-            case Binding.ShowCursor:
-                return gameInputActions.Player.ShowCursor.bindings[0].ToDisplayString();
-        }
     }
 
     public float GetBindingValue(Binding binding)
@@ -316,6 +287,52 @@ public class GameInput : MonoBehaviour
 
         return inputValue;
     }
+
+    #endregion
+
+    #region Get UI Data
+
+    public string GetBindingText(Binding binding)
+    {
+        switch (binding)
+        {
+            default:
+            case Binding.MoveUp:
+                return gameInputActions.Player.Movement.bindings[1].ToDisplayString();
+            case Binding.MoveDown:
+                return gameInputActions.Player.Movement.bindings[2].ToDisplayString();
+            case Binding.MoveLeft:
+                return gameInputActions.Player.Movement.bindings[3].ToDisplayString();
+            case Binding.MoveRight:
+                return gameInputActions.Player.Movement.bindings[4].ToDisplayString();
+            case Binding.MouseScroll:
+                return gameInputActions.Player.MouseScroll.bindings[0].ToDisplayString();
+            case Binding.Sprint:
+                return gameInputActions.Player.Sprint.bindings[0].ToDisplayString();
+            case Binding.ChangeMovementMode:
+                return gameInputActions.Player.ChangeMovementMode.bindings[0].ToDisplayString();
+            case Binding.Attack:
+                return gameInputActions.Player.Attack.bindings[0].ToDisplayString();
+            case Binding.Interact:
+                return gameInputActions.Player.Interact.bindings[0].ToDisplayString();
+            case Binding.ChangeCurrentWeapon:
+                return gameInputActions.Player.ChangeCurrentWeapon.bindings[0].ToDisplayString();
+            case Binding.DropWeapon:
+                return gameInputActions.Player.DropCurrentWeapon.bindings[0].ToDisplayString();
+            case Binding.OpenCharacterInfo:
+                return gameInputActions.Player.OpenCharacterInfo.bindings[0].ToDisplayString();
+            case Binding.UpgradesStartDragging:
+                return gameInputActions.Player.UpgradesStartDraging.bindings[0].ToDisplayString();
+            case Binding.Pause:
+                return gameInputActions.Player.GamePause.bindings[0].ToDisplayString();
+            case Binding.ShowCursor:
+                return gameInputActions.Player.ShowCursor.bindings[0].ToDisplayString();
+        }
+    }
+
+    #endregion
+
+    #region Rebind
 
     public void RebindBinding(Binding binding, Action onActionRebound)
     {
@@ -385,5 +402,25 @@ public class GameInput : MonoBehaviour
                 OnAnyBindingRebind?.Invoke(this, EventArgs.Empty);
             })
             .Start();
+    }
+
+    #endregion
+
+    private void OnDestroy()
+    {
+        gameInputActions.Player.CameraModeChange.performed -= CameraModeChange_OnPerformed;
+        gameInputActions.Player.Sprint.performed -= Sprint_OnPerformed;
+        gameInputActions.Player.ChangeMovementMode.performed -= ChangeMovementMode_OnPerformed;
+        gameInputActions.Player.Attack.performed -= Attack_OnPerformed;
+        gameInputActions.Player.Interact.performed -= Interact_OnPerformed;
+        gameInputActions.Player.ChangeCurrentWeapon.performed -= ChangeCurrentWeapon_OnPerformed;
+        gameInputActions.Player.DropCurrentWeapon.performed -= DropCurrentWeapon_OnPerformed;
+        gameInputActions.Player.OpenCharacterInfo.performed -= OpenCharacterInfo_OnPerformed;
+        gameInputActions.Player.UpgradesStartDraging.performed -= UpgradesStartDragging_OnPerformed;
+        gameInputActions.Player.GamePause.performed -= GamePause_OnPerformed;
+        gameInputActions.Player.ShowCursor.performed -= ShowCursor_OnPerformed;
+        gameInputActions.Player.InventorySlotInteract.performed -= InventorySlotInteract_OnPerformed;
+
+        gameInputActions.Dispose();
     }
 }

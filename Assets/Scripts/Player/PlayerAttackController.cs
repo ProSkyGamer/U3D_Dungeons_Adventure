@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
 [SuppressMessage("ReSharper", "CompareOfFloatsByEqualityOperator")]
 public class PlayerAttackController : NetworkBehaviour
 {
+    #region Events & Event Args
+
     public event EventHandler OnChargeAttackStopCharging;
     public event EventHandler OnGunChargedAttackTriggered;
     public event EventHandler<OnEnemyHittedEventArgs> OnEnemyHitted;
@@ -18,6 +19,10 @@ public class PlayerAttackController : NetworkBehaviour
         public EnemyController hittedEnemy;
     }
 
+    #endregion
+
+    #region Created Classes
+
     private class SlowEnemyOnHit
     {
         public float slowDuration;
@@ -26,24 +31,15 @@ public class PlayerAttackController : NetworkBehaviour
         public int effectId;
     }
 
-    private readonly List<SlowEnemyOnHit> slowEnemyOnHits = new();
+    private class CritRateIncreaseOnHit
+    {
+        public float critRateIncreasePerHit;
+        public float currentCritRateIncrease;
+        public float maxCritRateIncrease;
+        public int effectId;
+    }
 
-    private int currentAttackCombo = -1;
-
-    [SerializeField] private float comboAttackResetTime = 3f;
-    private float comboAttackResetTimer;
-
-    private bool isTryingToChargedAttack;
-    private bool isAiming;
-    [SerializeField] private float chargedAttackPressTime = 1f;
-    private float chargedAttackPressTimer;
-
-    [SerializeField] private float meleeWeaponAttackRange = 0.25f;
-    [SerializeField] private float rangedWeaponAttackRange = 10f;
-    [SerializeField] private Transform bulletPrefab;
-    [SerializeField] private float bulletLifetime = 3f;
-    [FormerlySerializedAs("bulletSpawnPosition")] [SerializeField] private Transform bulletSpawnTransform;
-    [SerializeField] private LayerMask enemiesLayer;
+    #endregion
 
     #region GeneralStats
 
@@ -58,23 +54,53 @@ public class PlayerAttackController : NetworkBehaviour
     private float currentCritRate;
     private float currentCritDamage;
 
-    private class CritRateIncreaseOnHit
-    {
-        public float critRateIncreasePerHit;
-        public float currentCritRateIncrease;
-        public float maxCritRateIncrease;
-        public int effectId;
-    }
+    #endregion
 
+    #region Effects
+
+    private readonly List<SlowEnemyOnHit> slowEnemyOnHits = new();
     private readonly List<CritRateIncreaseOnHit> critRateIncreaseOnHitBuffs = new();
 
     #endregion
+
+    #region Combo Attacks
+
+    private int currentAttackCombo = -1;
+
+    [SerializeField] private float comboAttackResetTime = 3f;
+    private float comboAttackResetTimer;
+
+    private bool isTryingToChargedAttack;
+    private bool isAiming;
+    [SerializeField] private float chargedAttackPressTime = 1f;
+    private float chargedAttackPressTimer;
+
+    #endregion
+
+    #region Weapons Ranges
+
+    [SerializeField] private float meleeWeaponAttackRange = 0.25f;
+    [SerializeField] private Transform weaponCastTransform;
+    [SerializeField] private float maxRangeToFindEnemies = 5f;
+    [SerializeField] private float maxMoveDistanceToFoundEnemy = 0.25f;
+    [SerializeField] private float distanceToMoveIfNotFoundEnemies = 0.05f;
+
+    [SerializeField] private float rangedWeaponAttackRange = 10f;
+    [SerializeField] private Transform bulletPrefab;
+    [SerializeField] private float bulletLifetime = 3f;
+    [SerializeField] private Transform bulletSpawnTransform;
+    [SerializeField] private LayerMask enemiesLayer;
+
+    #endregion
+
+    #region References & Other
 
     private bool isAnyInterfaceOpened;
     private bool isCursorShown;
 
     private PlayerWeapons playerWeapons;
     private PlayerController playerController;
+    private PlayerMovement playerMovement;
     private StaminaController staminaController;
     private Animator animator;
 
@@ -84,13 +110,18 @@ public class PlayerAttackController : NetworkBehaviour
 
     private WeaponSO chosenAttackWeapon;
     private bool isCurrentlyAttacking;
-    private readonly List<EnemyController> enemiesWaitingToAttack = new();
+    [SerializeField] private List<EnemyController> enemiesWaitingToAttack = new();
     private bool isCurrentAttackNormal;
+
+    #endregion
+
+    #region Initialization & Subscribed events
 
     private void Awake()
     {
         playerWeapons = GetComponent<PlayerWeapons>();
         playerController = GetComponent<PlayerController>();
+        playerMovement = GetComponent<PlayerMovement>();
         staminaController = GetComponent<StaminaController>();
         animator = GetComponent<Animator>();
 
@@ -102,8 +133,6 @@ public class PlayerAttackController : NetworkBehaviour
         comboAttackResetTimer = comboAttackResetTime;
     }
 
-    #region SubscribedEvents
-
     private void Start()
     {
         if (!IsOwner) return;
@@ -111,6 +140,12 @@ public class PlayerAttackController : NetworkBehaviour
         GameInput.Instance.OnAttackAction += GameInput_OnAttackAction;
 
         GameInput.Instance.OnCursorShowAction += GameInput_OnCursorShowAction;
+
+        GiveCoinsUI.OnInterfaceShown += OnAnyTabOpen;
+        GiveCoinsUI.OnInterfaceHidden += OnAnyTabClose;
+
+        PauseUI.OnInterfaceShown += OnAnyTabOpen;
+        PauseUI.OnInterfaceHidden += OnAnyTabClose;
 
         ShopUI.Instance.OnShopOpen += OnAnyTabOpen;
         ShopUI.Instance.OnShopClose += OnAnyTabClose;
@@ -137,6 +172,7 @@ public class PlayerAttackController : NetworkBehaviour
     private void GameInput_OnAttackAction(object sender, EventArgs e)
     {
         if (isAnyInterfaceOpened) return;
+        if (isCursorShown) return;
         if (isCurrentlyAttacking) return;
 
         NormalAttack();
@@ -144,6 +180,8 @@ public class PlayerAttackController : NetworkBehaviour
     }
 
     #endregion
+
+    #region Update & Connected
 
     private void Update()
     {
@@ -231,75 +269,9 @@ public class PlayerAttackController : NetworkBehaviour
         weaponBullet.OnEnemyHitted += WeaponBullet_OnEnemyHitted;
     }
 
-    private List<EnemyController> FindEnemiesToAttack()
-    {
-        var castPosition = transform.position;
-        var castCubeLength = new Vector3(meleeWeaponAttackRange, meleeWeaponAttackRange, meleeWeaponAttackRange);
+    #endregion
 
-        var raycastHits = Physics.BoxCastAll(castPosition, castCubeLength, Vector3.forward,
-            Quaternion.identity, meleeWeaponAttackRange, enemiesLayer);
-
-        List<EnemyController> enemiesToAttack = new();
-
-        foreach (var hit in raycastHits)
-            if (hit.transform.gameObject.TryGetComponent(out EnemyController enemyController))
-            {
-                enemiesToAttack.Add(enemyController);
-
-                OnEnemyHitted?.Invoke(this, new OnEnemyHittedEventArgs
-                {
-                    hittedEnemy = enemyController
-                });
-            }
-
-        return enemiesToAttack;
-    }
-
-    private Vector3 FindNearestEnemyPositionForRangeAttack()
-    {
-        var castPosition = bulletSpawnTransform.position;
-        var castCubeLength = new Vector3(rangedWeaponAttackRange * 2, rangedWeaponAttackRange * 2,
-            rangedWeaponAttackRange * 2);
-
-        var raycastHits = Physics.BoxCastAll(castPosition, castCubeLength, Vector3.forward,
-            Quaternion.identity, meleeWeaponAttackRange, enemiesLayer);
-
-        var closestEnemyRange = rangedWeaponAttackRange;
-        var closestEnemyTransform = bulletSpawnTransform;
-
-        foreach (var hit in raycastHits)
-            if (hit.transform.gameObject.TryGetComponent(out EnemyController _))
-                if (closestEnemyRange < rangedWeaponAttackRange || closestEnemyTransform == bulletSpawnTransform)
-                {
-                    closestEnemyTransform = hit.transform;
-                    closestEnemyRange = hit.distance;
-                }
-
-        return closestEnemyTransform.position;
-    }
-
-    private void NormalAttack()
-    {
-        NormalAttackServerRpc();
-    }
-
-    [ServerRpc]
-    private void NormalAttackServerRpc()
-    {
-        chosenAttackWeapon = playerWeapons.GetCurrentWeaponSo();
-        if (chosenAttackWeapon == null) return;
-
-        currentAttackCombo++;
-        if (currentAttackCombo >= chosenAttackWeapon.comboAttack)
-            currentAttackCombo = 0;
-
-        animator.SetInteger(CurrentNormalAttackCombo, currentAttackCombo);
-        animator.SetBool(IsChargedAttack, false);
-        animator.SetInteger(WeaponType, (int)chosenAttackWeapon.weaponType);
-
-        isCurrentlyAttacking = true;
-        isCurrentAttackNormal = true;
-    }
+    #region Animator Methods
 
     public void FindEnemiesToAttackAnimator()
     {
@@ -349,6 +321,134 @@ public class PlayerAttackController : NetworkBehaviour
         animator.SetBool(IsChargedAttack, false);
     }
 
+    #endregion
+
+    #region Find Enemies
+
+    private List<EnemyController> FindEnemiesToAttack()
+    {
+        var castPosition = weaponCastTransform.position;
+        var castCubeLength = new Vector3(meleeWeaponAttackRange, meleeWeaponAttackRange, meleeWeaponAttackRange);
+
+        var raycastHits = Physics.BoxCastAll(castPosition, castCubeLength, Vector3.forward,
+            Quaternion.identity, meleeWeaponAttackRange, enemiesLayer);
+
+        List<EnemyController> enemiesToAttack = new();
+
+        foreach (var hit in raycastHits)
+            if (hit.transform.gameObject.TryGetComponent(out EnemyController enemyController))
+            {
+                enemiesToAttack.Add(enemyController);
+
+                OnEnemyHitted?.Invoke(this, new OnEnemyHittedEventArgs
+                {
+                    hittedEnemy = enemyController
+                });
+            }
+
+        return enemiesToAttack;
+    }
+
+    private Vector3 FindNearestEnemyPositionForRangeAttack()
+    {
+        var castPosition = bulletSpawnTransform.position;
+        var castCubeLength = new Vector3(rangedWeaponAttackRange * 2, rangedWeaponAttackRange * 2,
+            rangedWeaponAttackRange * 2);
+
+        var raycastHits = Physics.BoxCastAll(castPosition, castCubeLength, Vector3.forward,
+            Quaternion.identity, meleeWeaponAttackRange, enemiesLayer);
+
+        var closestEnemyRange = rangedWeaponAttackRange;
+        var closestEnemyTransform = bulletSpawnTransform;
+
+        foreach (var hit in raycastHits)
+            if (hit.transform.gameObject.TryGetComponent(out EnemyController _))
+                if (closestEnemyRange < rangedWeaponAttackRange || closestEnemyTransform == bulletSpawnTransform)
+                {
+                    closestEnemyTransform = hit.transform;
+                    closestEnemyRange = hit.distance;
+                }
+
+        return closestEnemyTransform.position;
+    }
+
+    private void TryFindTargetToAttack(out Vector2 additionalMoveToTargetVector,
+        out Vector3 newPlayerForwardToFaceEnemy)
+    {
+        var playerTransform = transform;
+        additionalMoveToTargetVector = Vector2.zero;
+        newPlayerForwardToFaceEnemy = playerTransform.forward;
+
+        var castPosition = playerTransform.position;
+        var castCubeLength = new Vector3(maxRangeToFindEnemies, maxRangeToFindEnemies, maxRangeToFindEnemies);
+
+        var raycastHits = Physics.BoxCastAll(castPosition, castCubeLength, Vector3.forward,
+            Quaternion.identity, maxRangeToFindEnemies, enemiesLayer);
+
+        var minDistanceToEnemy = maxRangeToFindEnemies;
+        var foundEnemyPosition = Vector3.zero;
+
+        foreach (var hit in raycastHits)
+            if (hit.transform.gameObject.TryGetComponent(out EnemyController _))
+            {
+                if (hit.distance > minDistanceToEnemy) continue;
+
+                var hitTransformPosition = hit.transform.position;
+                minDistanceToEnemy = (transform.position - hitTransformPosition).magnitude;
+                foundEnemyPosition = hitTransformPosition;
+            }
+
+        if (foundEnemyPosition == Vector3.zero)
+        {
+            additionalMoveToTargetVector = new Vector2(0f, distanceToMoveIfNotFoundEnemies);
+        }
+        else
+        {
+            if (minDistanceToEnemy < maxMoveDistanceToFoundEnemy) return;
+
+            var enemyDirectionNormalized = -(transform.position - foundEnemyPosition).normalized;
+            newPlayerForwardToFaceEnemy = enemyDirectionNormalized;
+
+            var additionalMoveToTargetVector3 = enemyDirectionNormalized * maxMoveDistanceToFoundEnemy;
+            additionalMoveToTargetVector =
+                new Vector2(additionalMoveToTargetVector3.x, additionalMoveToTargetVector3.z);
+        }
+    }
+
+    #endregion
+
+    #region Normal Attack
+
+    private void NormalAttack()
+    {
+        NormalAttackServerRpc();
+    }
+
+    [ServerRpc]
+    private void NormalAttackServerRpc()
+    {
+        chosenAttackWeapon = playerWeapons.GetCurrentWeaponSo();
+        if (chosenAttackWeapon == null) return;
+
+        var playerTransform = transform;
+        currentAttackCombo++;
+        if (currentAttackCombo >= chosenAttackWeapon.comboAttack)
+            currentAttackCombo = 0;
+
+        TryFindTargetToAttack(out var vectorToMoveToEnemy, out var newPlayerForwardToFaceEnemy);
+        playerMovement.Move(vectorToMoveToEnemy, false);
+
+        playerTransform.forward = newPlayerForwardToFaceEnemy;
+        playerTransform.localEulerAngles = new Vector3(0f, playerTransform.localEulerAngles.y, 0f);
+
+        animator.SetInteger(CurrentNormalAttackCombo, currentAttackCombo);
+        animator.SetBool(IsChargedAttack, false);
+        animator.SetInteger(WeaponType, (int)chosenAttackWeapon.weaponType);
+
+        isCurrentlyAttacking = true;
+        isCurrentAttackNormal = true;
+    }
+
     private void KatanaNormalAttack()
     {
         foreach (var enemy in enemiesWaitingToAttack)
@@ -373,7 +473,11 @@ public class PlayerAttackController : NetworkBehaviour
             }
         }
 
-        enemiesWaitingToAttack.Clear();
+        for (var i = 0; i < enemiesWaitingToAttack.Count; i++)
+        {
+            enemiesWaitingToAttack.RemoveAt(i);
+            i--;
+        }
     }
 
     private void GunNormalAttack()
@@ -415,31 +519,6 @@ public class PlayerAttackController : NetworkBehaviour
         weaponBullet.OnEnemyHitted += WeaponBullet_OnEnemyHitted;
     }
 
-    private void KatanaChargedAttack()
-    {
-        foreach (var enemy in enemiesWaitingToAttack)
-        {
-            var chargeAttackDamage = CalculateDamage(currentAttack,
-                chosenAttackWeapon.chargedAttackDamageScale,
-                chargedAttackDamageBonus, currentCritRate, currentCritDamage);
-
-            enemy.ReceiveDamage(chargeAttackDamage, playerController);
-
-            var enemyEffectsController = enemy.GetComponent<EnemyEffects>();
-            foreach (var slowEnemyOnHit in slowEnemyOnHits)
-            {
-                var isApplyingEffect = Random.Range(0, 100) <= slowEnemyOnHit.effectChance * 100;
-
-                if (!isApplyingEffect) return;
-
-                enemyEffectsController.AddOrRemoveEffect(EnemyEffects.EnemiesEffects.SlowDebuff,
-                    slowEnemyOnHit.speedDecrease, true, false, slowEnemyOnHit.slowDuration);
-            }
-        }
-
-        enemiesWaitingToAttack.Clear();
-    }
-
     private void WeaponBullet_OnEnemyHitted(object sender, WeaponBullet.OnEnemyHittedEventArgs e)
     {
         var bullet = sender as WeaponBullet;
@@ -463,25 +542,44 @@ public class PlayerAttackController : NetworkBehaviour
         bullet.OnEnemyHitted -= WeaponBullet_OnEnemyHitted;
     }
 
-    private void ResetNormalAttackCombo()
-    {
-        if (!IsServer) return;
+    #endregion
 
-        isCurrentlyAttacking = false;
-
-        ResetNormalAttackComboClientRpc();
-    }
-
-    [ClientRpc]
-    private void ResetNormalAttackComboClientRpc()
-    {
-        comboAttackResetTimer = comboAttackResetTime;
-        currentAttackCombo = -1;
-    }
+    #region Charged Attack
 
     private void ChargeAttack()
     {
         ChargeAttackServerRpc();
+    }
+
+    private void KatanaChargedAttack()
+    {
+        foreach (var enemy in enemiesWaitingToAttack)
+        {
+            if (!enemy) continue;
+
+            var chargeAttackDamage = CalculateDamage(currentAttack,
+                chosenAttackWeapon.chargedAttackDamageScale,
+                chargedAttackDamageBonus, currentCritRate, currentCritDamage);
+
+            enemy.ReceiveDamage(chargeAttackDamage, playerController);
+
+            var enemyEffectsController = enemy.GetComponent<EnemyEffects>();
+            foreach (var slowEnemyOnHit in slowEnemyOnHits)
+            {
+                var isApplyingEffect = Random.Range(0, 100) <= slowEnemyOnHit.effectChance * 100;
+
+                if (!isApplyingEffect) return;
+
+                enemyEffectsController.AddOrRemoveEffect(EnemyEffects.EnemiesEffects.SlowDebuff,
+                    slowEnemyOnHit.speedDecrease, true, false, slowEnemyOnHit.slowDuration);
+            }
+        }
+
+        for (var i = 0; i < enemiesWaitingToAttack.Count; i++)
+        {
+            enemiesWaitingToAttack.RemoveAt(i);
+            i--;
+        }
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -503,6 +601,29 @@ public class PlayerAttackController : NetworkBehaviour
 
         //Debug.Log($"I'm attacking with damage:{chargeAttackDamage} by C.A.");
     }
+
+    #endregion
+
+    #region Reset Normal Attack Combo
+
+    private void ResetNormalAttackCombo()
+    {
+        if (!IsServer) return;
+        if (isCurrentlyAttacking) return;
+
+        ResetNormalAttackComboClientRpc();
+    }
+
+    [ClientRpc]
+    private void ResetNormalAttackComboClientRpc()
+    {
+        comboAttackResetTimer = comboAttackResetTime;
+        currentAttackCombo = -1;
+    }
+
+    #endregion
+
+    #region Calculate Values
 
     private int CalculateDamage(int attack, float attackScale, float damageBonus, float critCrate, float critDamage)
     {
@@ -536,6 +657,8 @@ public class PlayerAttackController : NetworkBehaviour
 
         return critValue;
     }
+
+    #endregion
 
     #region Buffs
 

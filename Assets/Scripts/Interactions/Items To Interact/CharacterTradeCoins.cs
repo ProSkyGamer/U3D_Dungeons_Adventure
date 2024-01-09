@@ -2,19 +2,29 @@ using System;
 
 public class CharacterTradeCoins : InteractableItem
 {
-    public static event EventHandler<OnStartCharacterTradeCoinsEventArgs> OnStartCharacterTradeCoins;
+    #region Event & Event Args
 
-    private PlayerController playerToReceiveCoins;
+    public static event EventHandler<OnStartCharacterTradeCoinsEventArgs> OnStartCharacterTradeCoins;
 
     public class OnStartCharacterTradeCoinsEventArgs : EventArgs
     {
         public PlayerController characterToReceiveCoins;
     }
 
+    #endregion
+
+    private PlayerController playerToReceiveCoins;
+
+    #region Initialization
+
     private void Awake()
     {
         playerToReceiveCoins = GetComponent<PlayerController>();
     }
+
+    #endregion
+
+    #region Interact Item
 
     public override void OnInteract(PlayerController player)
     {
@@ -32,10 +42,10 @@ public class CharacterTradeCoins : InteractableItem
                GameInput.Instance.GetBindingValue(GameInput.Binding.ShowCursor) == 1f;
     }
 
-    public override void OnDestroy()
-    {
-        base.OnDestroy();
+    #endregion
 
+    public static void ResetStaticData()
+    {
         OnStartCharacterTradeCoins = null;
     }
 }

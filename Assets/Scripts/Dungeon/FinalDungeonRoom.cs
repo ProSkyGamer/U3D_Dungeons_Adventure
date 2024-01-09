@@ -3,9 +3,15 @@ using UnityEngine.SceneManagement;
 
 public class FinalDungeonRoom : InteractableItem
 {
+    #region Variables & References
+
     private DungeonRoomSettings dungeonRoomSettings;
 
     private bool isBossKilled;
+
+    #endregion
+
+    #region Initialization & Susbscribed events
 
     private void Awake()
     {
@@ -21,6 +27,10 @@ public class FinalDungeonRoom : InteractableItem
     {
         isBossKilled = true;
     }
+
+    #endregion
+
+    #region Intaractable Item
 
     public override void OnInteract(PlayerController player)
     {
@@ -42,4 +52,6 @@ public class FinalDungeonRoom : InteractableItem
     {
         return isCanInteract && isBossKilled && IsServer;
     }
+
+    #endregion
 }

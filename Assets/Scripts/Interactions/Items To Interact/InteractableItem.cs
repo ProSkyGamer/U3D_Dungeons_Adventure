@@ -3,9 +3,15 @@ using UnityEngine;
 
 public class InteractableItem : NetworkBehaviour
 {
+    #region Variables & References
+
     [SerializeField] protected bool isCanInteract = true;
 
     protected PlayerController interactedPlayer;
+
+    #endregion
+
+    #region Interactable Item
 
     public virtual void OnInteract(PlayerController player)
     {
@@ -16,4 +22,6 @@ public class InteractableItem : NetworkBehaviour
     {
         return isCanInteract;
     }
+
+    #endregion
 }

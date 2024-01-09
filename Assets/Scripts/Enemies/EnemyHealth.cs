@@ -4,17 +4,7 @@ using UnityEngine;
 
 public class EnemyHealth : NetworkBehaviour
 {
-    [SerializeField] private int baseHealth = 75;
-    private int maxHealth;
-    private int currentHealth;
-
-    [SerializeField] private int baseDefence = 75;
-    [SerializeField] private int maxDefence = 1000;
-    [SerializeField] [Range(0, 0.99f)] private float maxDefenceAbsorption = 0.5f;
-    private int additionalDefenceNumberFormula;
-    private int currentDefence;
-
-    private int currentShieldDurability;
+    #region Events & Event Args
 
     public event EventHandler<OnEnemyHealthChangeEventArgs> OnEnemyHealthChange;
     public event EventHandler OnEnemyDie;
@@ -27,7 +17,27 @@ public class EnemyHealth : NetworkBehaviour
         public int obtainedHealth;
     }
 
+    #endregion
+
+    #region Enemy Stats
+
+    [SerializeField] private int baseHealth = 75;
+    private int maxHealth;
+    private int currentHealth;
+
+    [SerializeField] private int baseDefence = 75;
+    [SerializeField] private int maxDefence = 1000;
+    [SerializeField] [Range(0, 0.99f)] private float maxDefenceAbsorption = 0.5f;
+    private int additionalDefenceNumberFormula;
+    private int currentDefence;
+
+    private int currentShieldDurability;
+
+    #endregion
+
     private bool isFirstUpdate = true;
+
+    #region Initialization
 
     private void Awake()
     {
@@ -82,6 +92,10 @@ public class EnemyHealth : NetworkBehaviour
         currentDefence = newCurrentDefence;
     }
 
+    #endregion
+
+    #region Update
+
     private void Update()
     {
         if (isFirstUpdate)
@@ -94,6 +108,10 @@ public class EnemyHealth : NetworkBehaviour
         }
     }
 
+    #endregion
+
+    #region Enemy Methods
+
     public void TakeDamage(int damage)
     {
         if (!IsServer) return;
@@ -104,6 +122,8 @@ public class EnemyHealth : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     private void TakeDamageServerRpc(int damage)
     {
+        if (!IsSpawned) return;
+
         var takenDamage =
             (int)(damage * (1 - (float)currentDefence / (additionalDefenceNumberFormula + currentDefence)));
         var newCurrentShieldDurability = currentShieldDurability;
@@ -213,8 +233,14 @@ public class EnemyHealth : NetworkBehaviour
         currentDefence = newCurrentDefence;
     }
 
+    #endregion
+
+    #region Get Enemy Data
+
     public int GetCurrentShieldDurability()
     {
         return currentShieldDurability;
     }
+
+    #endregion
 }

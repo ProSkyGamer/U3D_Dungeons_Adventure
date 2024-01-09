@@ -4,12 +4,15 @@ using Unity.Mathematics;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.AI;
+using Random = UnityEngine.Random;
 
 [RequireComponent(typeof(EnemyHealth))]
 [RequireComponent(typeof(EnemyAttackController))]
 [RequireComponent(typeof(EnemyEffects))]
 public class EnemyController : NetworkBehaviour
 {
+    #region Events & Event Args
+
     public event EventHandler<OnEnemyDeathEventArgs> OnEnemyDeath;
 
     public class OnEnemyDeathEventArgs : EventArgs
@@ -18,7 +21,13 @@ public class EnemyController : NetworkBehaviour
         public int expValue;
     }
 
+    #endregion
+
+    #region General Variables & References
+
+    [Header("General Data")]
     [SerializeField] private int coinsForKill = 1;
+
     [SerializeField] private int experienceForKill = 1;
     private readonly List<PlayerController> playerAttackedEnemy = new();
 
@@ -36,8 +45,17 @@ public class EnemyController : NetworkBehaviour
 
     private EnemyAttackController enemyAttackController;
     private EnemyHealth enemyHealth;
+    private NetworkObject enemyNetworkObject;
 
+    private bool isFirstUpdate = true;
+
+    #endregion
+
+    #region Types Variables & References
+
+    [Header("Enemy Types Variables")]
     private BufferEnemy bufferEnemy;
+
     private HealerEnemy healerEnemy;
     private ShielderEnemy shielderEnemy;
 
@@ -57,11 +75,16 @@ public class EnemyController : NetworkBehaviour
 
     private bool isHasAnyClass;
 
+    #endregion
+
+    #region Initialization & Subscribed events
+
     private void Awake()
     {
         navMeshAgent = GetComponent<NavMeshAgent>();
         enemyAttackController = GetComponent<EnemyAttackController>();
         enemyHealth = GetComponent<EnemyHealth>();
+        enemyNetworkObject = GetComponent<NetworkObject>();
 
         TryGetComponent(out bufferEnemy);
         TryGetComponent(out healerEnemy);
@@ -87,23 +110,35 @@ public class EnemyController : NetworkBehaviour
             return;
         }
 
-        enemyHealth.OnEnemyDie += EnemyHealth_OnEnemyDie;
+        gameObject.name = $"Enemy {Random.Range(0, 1000)}";
     }
 
     private void EnemyHealth_OnEnemyDie(object sender, EventArgs e)
     {
+        if (!IsServer) return;
+
         OnEnemyDeath?.Invoke(this, new OnEnemyDeathEventArgs
         {
             coinsValue = coinsForKill,
             expValue = experienceForKill
         });
 
+        enemyNetworkObject.Despawn();
         Destroy(gameObject);
     }
+
+    #endregion
+
+    #region Update & Connected
 
     private void Update()
     {
         if (!IsServer) return;
+        if (isFirstUpdate)
+        {
+            isFirstUpdate = false;
+            enemyHealth.OnEnemyDie += EnemyHealth_OnEnemyDie;
+        }
 
         if (GameStageManager.Instance.IsPause()) currentFollowingPlayer = transform;
         if (!GameStageManager.Instance.IsPlaying()) return;
@@ -242,6 +277,10 @@ public class EnemyController : NetworkBehaviour
         return foundEnemies;
     }
 
+    #endregion
+
+    #region Dedug
+
     private void OnDrawGizmos()
     {
         var castPosition = transform.position;
@@ -265,6 +304,10 @@ public class EnemyController : NetworkBehaviour
         }
     }
 
+    #endregion
+
+    #region Enemy Methods
+
     public void ReceiveDamage(int damage, PlayerController attackedPlayerController)
     {
         if (!playerAttackedEnemy.Contains(attackedPlayerController))
@@ -283,8 +326,14 @@ public class EnemyController : NetworkBehaviour
         enemyHealth.ApplyShield(shieldDurability);
     }
 
+    #endregion
+
+    #region Get Enemy Data
+
     public int GetCurrentShieldDurability()
     {
         return enemyHealth.GetCurrentShieldDurability();
     }
+
+    #endregion
 }

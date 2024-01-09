@@ -4,20 +4,27 @@ using UnityEngine.UI;
 
 public class SettingsUI : MonoBehaviour
 {
+    #region Events
+
     public static event EventHandler OnSettingsClose;
-
-    [SerializeField] private Button closeSettingsButton;
-
-    [SerializeField] private Button keymapsTabButton;
     public static event EventHandler OnKeymapsButtonClick;
-
-    [SerializeField] private Button languagesTabButton;
     public static event EventHandler OnLanguagesButtonClick;
-
-    [SerializeField] private Button minimapTabButton;
     public static event EventHandler OnMinimapButtonClick;
 
+    #endregion
+
+    #region Variables & References
+
+    [SerializeField] private Button closeSettingsButton;
+    [SerializeField] private Button keymapsTabButton;
+    [SerializeField] private Button languagesTabButton;
+    [SerializeField] private Button minimapTabButton;
+
     private bool isFirstUpdate = true;
+
+    #endregion
+
+    #region Initialization & Subscribed events
 
     private void Awake()
     {
@@ -47,6 +54,10 @@ public class SettingsUI : MonoBehaviour
         }
     }
 
+    #endregion
+
+    #region Visual
+
     private void Show()
     {
         gameObject.SetActive(true);
@@ -56,6 +67,13 @@ public class SettingsUI : MonoBehaviour
         GameInput.Instance.OnPauseAction += GameInput_OnPauseAction;
     }
 
+    private void Hide()
+    {
+        gameObject.SetActive(false);
+
+        OnSettingsClose?.Invoke(this, EventArgs.Empty);
+    }
+
     private void GameInput_OnPauseAction(object sender, EventArgs e)
     {
         Hide();
@@ -63,12 +81,7 @@ public class SettingsUI : MonoBehaviour
         GameInput.Instance.OnPauseAction -= GameInput_OnPauseAction;
     }
 
-    private void Hide()
-    {
-        gameObject.SetActive(false);
-
-        OnSettingsClose?.Invoke(this, EventArgs.Empty);
-    }
+    #endregion
 
     public static void ResetStaticData()
     {

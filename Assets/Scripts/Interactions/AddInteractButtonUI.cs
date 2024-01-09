@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class AddInteractButtonUI : MonoBehaviour
 {
+    #region Variables & References
+
     [SerializeField] private float interactDistance = 2.5f;
     [SerializeField] private TextTranslationsSO buttonTextTranslationsSo;
 
@@ -10,13 +12,25 @@ public class AddInteractButtonUI : MonoBehaviour
 
     private bool isHasInteractButtonOnScreen;
 
+    private bool isPlayerSpawned;
+
+    #endregion
+
+    #region Initialization
+
     private void Awake()
     {
         interactableItemsList.AddRange(GetComponents<InteractableItem>());
     }
 
+    #endregion
+
+    #region Update
+
     private void Update()
     {
+        if (!SpawnPlayers.isAllPlayersSpawned) return;
+
         if (IsAnyItemInteractable())
         {
             var castPosition = transform.position;
@@ -46,6 +60,10 @@ public class AddInteractButtonUI : MonoBehaviour
         }
     }
 
+    #endregion
+
+    #region Interact Button Methods
+
     public void OnInteract()
     {
         foreach (var interactableItem in interactableItemsList)
@@ -69,6 +87,8 @@ public class AddInteractButtonUI : MonoBehaviour
 
         return false;
     }
+
+    #endregion
 
     public void OnDestroy()
     {

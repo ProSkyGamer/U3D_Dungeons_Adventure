@@ -1,9 +1,19 @@
+using System;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Serialization;
 
 public class ShopItem : NetworkBehaviour
 {
+    #region Events
+
+    public static event EventHandler OnStartTryBuyingItem;
+    public static event EventHandler OnFinishBuyingItem;
+
+    #endregion
+
+    #region Enums
+
     public enum ShopItemType
     {
         Experience,
@@ -11,6 +21,10 @@ public class ShopItem : NetworkBehaviour
         Relic,
         RelicReset
     }
+
+    #endregion
+
+    #region Variables & References
 
     [FormerlySerializedAs("soldItemType")] public ShopItemType soldShopItemType;
     public float boughtItemValue;
@@ -22,6 +36,10 @@ public class ShopItem : NetworkBehaviour
 
     public TextTranslationsSO itemNameTextTranslationsSo;
     public Sprite boughtItemImage;
+
+    #endregion
+
+    #region Adding SHop Item To Merchant
 
     public void AddShopItemToMerchant(NetworkObjectReference merchantNetworkObjectReference,
         NetworkObjectReference addingPlayerNetworkObjectReference)
@@ -46,8 +64,14 @@ public class ShopItem : NetworkBehaviour
         merchant.AddSellingObject(this);
     }
 
+    #endregion
+
+    #region Buying Item
+
     public void TryBuyItem(PlayerController playerToBuy)
     {
+        OnStartTryBuyingItem?.Invoke(this, EventArgs.Empty);
+
         var playerToBuyNetworkObjectReference = new NetworkObjectReference(playerToBuy.GetPlayerNetworkObject());
 
         TryBuyItemServerRpc(playerToBuyNetworkObjectReference);
@@ -64,8 +88,6 @@ public class ShopItem : NetworkBehaviour
         if (!IsHasOnInventory(playerToBuy, out var inventoryParent, out var inventorySlotNumber)) return;
 
         playerToBuy.SpendCoins(coinsCost);
-
-        ChangeItemsBoughtCountClientRpc(isBoughtsUnlimited ? 0 : maxBoughtCount - 1);
 
         switch (soldShopItemType)
         {
@@ -90,7 +112,7 @@ public class ShopItem : NetworkBehaviour
                 newInventoryObjectNetworkObject.Spawn();
                 var newInventoryObject = newInventoryObjectTransform.GetComponent<InventoryObject>();
                 newInventoryObject.SetInventoryParent(playerToBuyNetworkObjectReference,
-                    CharacterInventoryUI.InventoryType.PlayerRelicsInventory);
+                    CharacterInventoryUI.InventoryType.PlayerRelicsInventory, true);
 
                 break;
             case ShopItemType.RelicReset:
@@ -100,7 +122,21 @@ public class ShopItem : NetworkBehaviour
 
                 break;
         }
+
+        FinishBoughtItemClientRpc(isBoughtsUnlimited ? 0 : maxBoughtCount - 1);
     }
+
+    [ClientRpc]
+    private void FinishBoughtItemClientRpc(int newBoughtCountValue)
+    {
+        maxBoughtCount = newBoughtCountValue;
+
+        OnFinishBuyingItem?.Invoke(this, EventArgs.Empty);
+    }
+
+    #endregion
+
+    #region Get Additional Info
 
     private bool IsHasOnInventory(PlayerController playerToCheck, out IInventoryParent inventoryParent,
         out int inventorySlot)
@@ -165,9 +201,11 @@ public class ShopItem : NetworkBehaviour
         return false;
     }
 
-    [ClientRpc]
-    private void ChangeItemsBoughtCountClientRpc(int newBoughtCountValue)
+    #endregion
+
+    public static void ResetStaticData()
     {
-        maxBoughtCount = newBoughtCountValue;
+        OnStartTryBuyingItem = null;
+        OnFinishBuyingItem = null;
     }
 }

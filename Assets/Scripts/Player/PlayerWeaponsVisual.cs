@@ -2,10 +2,16 @@ using UnityEngine;
 
 public class PlayerWeaponsVisual : MonoBehaviour
 {
+    #region Variables & References
+
     private PlayerWeapons playerWeapons;
 
     [SerializeField] private Transform playerWeaponTransform;
     private Transform currentShownWeapon;
+
+    #endregion
+
+    #region Initialization & Subscribed events
 
     private void Awake()
     {
@@ -22,4 +28,6 @@ public class PlayerWeaponsVisual : MonoBehaviour
         var newShownWeapon = Instantiate(weaponSo.weaponVisual, playerWeaponTransform);
         currentShownWeapon = newShownWeapon;
     }
+
+    #endregion
 }

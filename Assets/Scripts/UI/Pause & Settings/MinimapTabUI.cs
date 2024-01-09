@@ -6,11 +6,17 @@ using UnityEngine.UI;
 
 public class MinimapTabUI : MonoBehaviour
 {
+    #region Variables & References
+
     [SerializeField] private Toggle fixedMinimapToggle;
     private const string FIXED_MINIMAP_TOGGLE_PLAYER_PREFS = "FixedMinimapTogglePlayerPrefs";
 
     [SerializeField] private TMP_Dropdown minimapRenderingSizeDropdown;
     private const string MINIMAP_RENDERING_SIZE_PLAYER_PREFS = "FixedMinimapTogglePlayerPrefs";
+
+    #endregion
+
+    #region Initialization & Subscribed events
 
     private void Start()
     {
@@ -52,6 +58,10 @@ public class MinimapTabUI : MonoBehaviour
         Show();
     }
 
+    #endregion
+
+    #region Visual
+
     private void Show()
     {
         fixedMinimapToggle.isOn = MinimapCameraController.Instance.IsMinimapFixed();
@@ -63,6 +73,10 @@ public class MinimapTabUI : MonoBehaviour
     {
         gameObject.SetActive(false);
     }
+
+    #endregion
+
+    #region Minimap Change Data Methods
 
     private void ChangeMinimapFixedMode(bool isFixed)
     {
@@ -76,4 +90,6 @@ public class MinimapTabUI : MonoBehaviour
             (MinimapCameraController.MinimapRenderingSize)sizeMode);
         PlayerPrefs.SetInt(MINIMAP_RENDERING_SIZE_PLAYER_PREFS, sizeMode);
     }
+
+    #endregion
 }

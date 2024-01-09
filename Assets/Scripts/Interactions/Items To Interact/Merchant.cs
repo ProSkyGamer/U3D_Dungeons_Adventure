@@ -6,6 +6,8 @@ using Random = UnityEngine.Random;
 
 public class Merchant : InteractableItem
 {
+    #region Created Classes
+
     [Serializable]
     public class ShopTab
     {
@@ -17,11 +19,19 @@ public class Merchant : InteractableItem
         public int maxRandomItems = 3;
     }
 
+    #endregion
+
+    #region Variables & References
+
     [SerializeField] private List<ShopTab> allShopTabs = new();
 
     [SerializeField] private List<ShopTab> currentShopTabs = new();
 
     private bool isFirstUpdate;
+
+    #endregion
+
+    #region Initialization
 
     public override void OnNetworkSpawn()
     {
@@ -113,6 +123,10 @@ public class Merchant : InteractableItem
         }
     }
 
+    #endregion
+
+    #region Shop Items Initialization
+
     private Transform CreateShopItem(ShopItem shopItemPrefab)
     {
         if (!IsServer) return null;
@@ -124,6 +138,10 @@ public class Merchant : InteractableItem
         return newShopItemTransform;
     }
 
+    #endregion
+
+    #region Interactable Item
+
     public override void OnInteract(PlayerController player)
     {
         base.OnInteract(player);
@@ -133,6 +151,20 @@ public class Merchant : InteractableItem
         ShopUI.Instance.ShowShop(currentShopTabs);
         ShopUI.Instance.OnShopClose += ShopUI_OnShopClose;
     }
+
+    private void ShopUI_OnShopClose(object sender, EventArgs e)
+    {
+        isCanInteract = true;
+    }
+
+    public override bool IsCanInteract()
+    {
+        return isCanInteract;
+    }
+
+    #endregion
+
+    #region Shop Initialization
 
     public void AddSellingObject(ShopItem addingShopItem)
     {
@@ -147,13 +179,5 @@ public class Merchant : InteractableItem
         }
     }
 
-    private void ShopUI_OnShopClose(object sender, EventArgs e)
-    {
-        isCanInteract = true;
-    }
-
-    public override bool IsCanInteract()
-    {
-        return isCanInteract;
-    }
+    #endregion
 }

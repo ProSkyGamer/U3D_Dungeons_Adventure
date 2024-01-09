@@ -6,8 +6,14 @@ using UnityEngine.UI;
 
 public class CharacterInventoryUI : NetworkBehaviour
 {
+    #region Events
+
     public static event EventHandler OnAnySlotInteractButtonPressed;
     public static event EventHandler OnStopItemDragging;
+
+    #endregion
+
+    #region Enums
 
     public enum InventoryType
     {
@@ -16,17 +22,43 @@ public class CharacterInventoryUI : NetworkBehaviour
         PlayerRelicsInventory
     }
 
+    public enum InventoryItemDescriptionSize
+    {
+        Small,
+        Medium,
+        Large
+    }
+
+    public enum InventoryItemInteractButtonsSize
+    {
+        Small,
+        Medium,
+        Large
+    }
+
+    #endregion
+
+    #region Variables & References
+
     [SerializeField] private InventoryType inventoryType = InventoryType.PlayerInventory;
 
     [SerializeField] private Transform playerInventorySlotPrefab;
     [SerializeField] private Transform playerInventorySlotsGrid;
     [SerializeField] private bool isInventoryInteractable = true;
+    [SerializeField] private bool isShowingItemsDescription = true;
+
+    [SerializeField] private InventoryItemDescriptionSize inventoryItemDescriptionSize =
+        InventoryItemDescriptionSize.Large;
+
+    [SerializeField] private bool isShowingInteractButtons = true;
+
+    [SerializeField] private InventoryItemInteractButtonsSize inventoryItemInteractButtonsSize =
+        InventoryItemInteractButtonsSize.Large;
+
     [SerializeField] private bool isShowingObjectName = true;
 
     [SerializeField] private Image currentDraggingImage;
-    [SerializeField] private Transform slotDescriptionPrefab;
     private Transform currentSlotDescription;
-    [SerializeField] private Transform slotInteractButtonsPrefab;
     private Transform currentSlotInteractButtons;
     private static InventoryObject currentDraggingObject;
 
@@ -34,11 +66,15 @@ public class CharacterInventoryUI : NetworkBehaviour
 
     private bool isFirstUpdate;
 
+    #endregion
+
+    #region Inititalization & Subscribed events
+
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
 
-        isFirstUpdate = true;
+        PlayerController.OnPlayerSpawned += PlayerController_OnPlayerSpawned;
 
         OnAnySlotInteractButtonPressed += CharacterInventoryUI_OnAnySlotInteractButtonPressed;
         InventorySlotSingleUI.OnStartItemDragging += InventorySlotSingleUI_OnStartItemDragging;
@@ -49,6 +85,26 @@ public class CharacterInventoryUI : NetworkBehaviour
         CharacterUI.OnCharacterUIClose += InventorySlotSingleUI_OnStopDisplaySlotDescription;
 
         InventorySlotSingleUI.OnDisplaySlotInteractButtons += InventorySlotSingleUI_OnDisplaySlotInteractButtons;
+
+        InventoryObject.OnInventoryParentChanged += InventoryObject_OnInventoryParentChanged;
+    }
+
+    private void InventoryObject_OnInventoryParentChanged(object sender, EventArgs e)
+    {
+        if (currentSlotInteractButtons != null)
+        {
+            Destroy(currentSlotInteractButtons.gameObject);
+            currentSlotInteractButtons = null;
+        }
+
+        UpdateInventory();
+    }
+
+    private void PlayerController_OnPlayerSpawned(object sender, EventArgs e)
+    {
+        isFirstUpdate = true;
+
+        PlayerController.OnPlayerSpawned -= PlayerController_OnPlayerSpawned;
     }
 
     private void CharacterInventoryUI_OnAnySlotInteractButtonPressed(object sender, EventArgs e)
@@ -65,6 +121,9 @@ public class CharacterInventoryUI : NetworkBehaviour
     private void InventorySlotSingleUI_OnDisplaySlotInteractButtons(object sender,
         InventorySlotSingleUI.OnDisplaySlotInteractButtonsEventArgs e)
     {
+        if (!isInventoryInteractable) return;
+        if (!isShowingInteractButtons) return;
+
         if (currentSlotInteractButtons != null)
         {
             Destroy(currentSlotInteractButtons.gameObject);
@@ -72,6 +131,10 @@ public class CharacterInventoryUI : NetworkBehaviour
         }
 
         if (e.displayedInventory != this) return;
+
+        var slotInteractButtonsPrefab =
+            GetPlayerInventoryAdditionalInfoPrefabs.Instance.GetInventoryItemInteractButtonPrefabBySize(
+                inventoryItemInteractButtonsSize);
 
         var newSlotInteractButton = Instantiate(slotInteractButtonsPrefab,
             GameInput.Instance.GetCurrentMousePosition(),
@@ -95,6 +158,8 @@ public class CharacterInventoryUI : NetworkBehaviour
     private void InventorySlotSingleUI_OnDisplaySlotDescription(object sender,
         InventorySlotSingleUI.OnDisplaySlotDescriptionEventArgs e)
     {
+        if (!isShowingItemsDescription) return;
+
         if (currentSlotInteractButtons != null)
         {
             Destroy(currentSlotInteractButtons.gameObject);
@@ -102,6 +167,10 @@ public class CharacterInventoryUI : NetworkBehaviour
         }
 
         if (e.displayedInventory != this) return;
+
+        var slotDescriptionPrefab =
+            GetPlayerInventoryAdditionalInfoPrefabs.Instance.GetInventoryItemDescriptionPrefabBySize(
+                inventoryItemDescriptionSize);
 
         var newSlotDescription = Instantiate(slotDescriptionPrefab,
             GameInput.Instance.GetCurrentMousePosition(), Quaternion.identity,
@@ -122,6 +191,10 @@ public class CharacterInventoryUI : NetworkBehaviour
         currentDraggingImage.gameObject.SetActive(true);
         currentDraggingImage.sprite = currentDraggingObject.GetInventoryObjectSprite();
     }
+
+    #endregion
+
+    #region Update
 
     private void Update()
     {
@@ -158,6 +231,10 @@ public class CharacterInventoryUI : NetworkBehaviour
             OnStopItemDragging?.Invoke(this, EventArgs.Empty);
         }
     }
+
+    #endregion
+
+    #region Updating Inventory
 
     private void UpdateInventorySlotCount()
     {
@@ -226,6 +303,10 @@ public class CharacterInventoryUI : NetworkBehaviour
         }
     }
 
+    #endregion
+
+    #region Get Inventory Data
+
     private IInventoryParent GetCurrentPlayerInventoryByType()
     {
         switch (inventoryType)
@@ -254,6 +335,8 @@ public class CharacterInventoryUI : NetworkBehaviour
     {
         return currentDraggingObject;
     }
+
+    #endregion
 
     public static void ResetStaticData()
     {

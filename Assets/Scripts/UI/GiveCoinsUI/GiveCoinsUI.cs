@@ -5,12 +5,17 @@ using UnityEngine.UI;
 
 public class GiveCoinsUI : MonoBehaviour
 {
+    #region Events
+
     public static event EventHandler OnInterfaceShown;
     public static event EventHandler OnInterfaceHidden;
 
+    #endregion
+
+    #region Variables & References
+
     [SerializeField] private TMP_InputField insertedCoinsAmount;
-    [SerializeField] private TextMeshProUGUI currentInsertedCoinsAmountText;
-    [SerializeField] private TextTranslationsSO incorrectValueTextTranslationsSo;
+    [SerializeField] private TextMeshProUGUI currentOwnedCoinsAmountText;
 
     [SerializeField] private Button confirmButton;
     [SerializeField] private Button cancelButton;
@@ -20,10 +25,16 @@ public class GiveCoinsUI : MonoBehaviour
     private int currentTransportingCoins;
     private PlayerController playerToTransferCoins;
 
-    private bool isFirstUpdate = true;
+    private bool isFirstUpdate;
+
+    #endregion
+
+    #region Initialization & Subscribed events
 
     private void Awake()
     {
+        PlayerController.OnPlayerSpawned += PlayerController_OnPlayerSpawned;
+
         confirmButton.onClick.AddListener(() =>
         {
             notificationUI.Show(currentTransportingCoins.ToString(), "Soon there be a name...");
@@ -37,14 +48,10 @@ public class GiveCoinsUI : MonoBehaviour
             if (int.TryParse(value, out var parsedInt))
             {
                 currentTransportingCoins = parsedInt;
-                currentInsertedCoinsAmountText.text = currentTransportingCoins.ToString();
                 confirmButton.interactable = PlayerController.Instance.IsEnoughCoins(currentTransportingCoins);
             }
             else
             {
-                currentInsertedCoinsAmountText.text =
-                    TextTranslationController.GetTextFromTextTranslationSOByLanguage(
-                        TextTranslationController.GetCurrentLanguage(), incorrectValueTextTranslationsSo);
                 confirmButton.interactable = false;
             }
         });
@@ -64,6 +71,18 @@ public class GiveCoinsUI : MonoBehaviour
 
         notificationUI.OnNotificationShown += NotificationUI_OnNotificationShown;
         notificationUI.OnNotificationHidden += NotificationUI_OnNotificationHidden;
+    }
+
+    private void PlayerController_OnPlayerSpawned(object sender, EventArgs e)
+    {
+        PlayerController.Instance.OnCoinsValueChange += PlayerController_OnCoinsValueChange;
+
+        isFirstUpdate = true;
+    }
+
+    private void PlayerController_OnCoinsValueChange(object sender, EventArgs e)
+    {
+        currentOwnedCoinsAmountText.text = PlayerController.Instance.GetCurrentCoinsValue().ToString();
     }
 
     private void NotificationUI_OnNotificationHidden(object sender, EventArgs e)
@@ -94,18 +113,19 @@ public class GiveCoinsUI : MonoBehaviour
         }
     }
 
+    #endregion
+
+    #region Visual
+
     private void Show(PlayerController playerToTransfer)
     {
         gameObject.SetActive(true);
         playerToTransferCoins = playerToTransfer;
         OnInterfaceShown?.Invoke(this, EventArgs.Empty);
 
-        GameInput.Instance.OnPauseAction += GameInput_OnPauseAction;
-    }
+        currentOwnedCoinsAmountText.text = PlayerController.Instance.GetCurrentCoinsValue().ToString();
 
-    private void GameInput_OnPauseAction(object sender, EventArgs e)
-    {
-        Hide();
+        GameInput.Instance.OnPauseAction += GameInput_OnPauseAction;
     }
 
     private void Hide()
@@ -117,7 +137,14 @@ public class GiveCoinsUI : MonoBehaviour
         GameInput.Instance.OnPauseAction -= GameInput_OnPauseAction;
     }
 
-    private void OnDestroy()
+    private void GameInput_OnPauseAction(object sender, EventArgs e)
+    {
+        Hide();
+    }
+
+    #endregion
+
+    public static void ResetStaticData()
     {
         OnInterfaceShown = null;
         OnInterfaceShown = null;

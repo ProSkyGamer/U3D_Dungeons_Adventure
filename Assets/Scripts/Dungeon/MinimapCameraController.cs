@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class MinimapCameraController : MonoBehaviour
 {
-    public static MinimapCameraController Instance;
+    #region Enums
 
     public enum MinimapRenderingSize
     {
@@ -10,6 +10,12 @@ public class MinimapCameraController : MonoBehaviour
         Middle,
         Big
     }
+
+    #endregion
+
+    public static MinimapCameraController Instance { get; private set; }
+
+    #region Variables & References
 
     [SerializeField] private bool isFollowing = true;
     [SerializeField] private Transform followingObject;
@@ -21,6 +27,10 @@ public class MinimapCameraController : MonoBehaviour
 
     private Transform cameraTransform;
 
+    #endregion
+
+    #region Initialization
+
     private void Awake()
     {
         if (Instance != null)
@@ -30,6 +40,10 @@ public class MinimapCameraController : MonoBehaviour
 
         cameraTransform = transform;
     }
+
+    #endregion
+
+    #region Update
 
     private void Update()
     {
@@ -50,6 +64,10 @@ public class MinimapCameraController : MonoBehaviour
         var cameraRotation = new Vector3(localEulerAngles.x, playerRotation, localEulerAngles.z);
         cameraTransform.localEulerAngles = cameraRotation;
     }
+
+    #endregion
+
+    #region Camera Methods
 
     public void ChangeCameraFixedMode(bool isFixed)
     {
@@ -88,8 +106,14 @@ public class MinimapCameraController : MonoBehaviour
         followingObject = newFollowingObject;
     }
 
+    #endregion
+
+    #region Get Camera Data
+
     public bool IsMinimapFixed()
     {
         return isMinimapFixed;
     }
+
+    #endregion
 }

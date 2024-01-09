@@ -7,6 +7,8 @@ using UnityEngine.UI;
 
 public class MainGameUI : NetworkBehaviour
 {
+    #region Variables & References
+
     [SerializeField] private Transform healthBarPrefab;
     [SerializeField] private Transform healthBarsLayoutGroup;
     private readonly Dictionary<PlayerHealthController, HealthBarUI> allPlayersHealthBars = new();
@@ -19,6 +21,10 @@ public class MainGameUI : NetworkBehaviour
     [SerializeField] private CharacterInventoryUI relicsInventory;
 
     private bool isFirstUpdate;
+
+    #endregion
+
+    #region Initialization & Subscribed events
 
     private void Start()
     {
@@ -33,7 +39,29 @@ public class MainGameUI : NetworkBehaviour
             SubscribeToNewPlayerHealthController(newPlayerHealthController);
         }
 
-        GameStageManager.Instance.OnGamePause += GameStageManager_OnGamePause;
+        SubscribeToShowingAndHidingInterfaces();
+    }
+
+    private void Update()
+    {
+        if (isFirstUpdate)
+        {
+            isFirstUpdate = false;
+
+            PlayerController.Instance.GetPlayerStaminaController().OnStaminaChange += StaminaController_OnStaminaChange;
+
+            PlayerController.Instance.OnExperienceChange += PlayerController_OnExperienceChange;
+            PlayerController.Instance.OnSkillPointsValueChange += PlayerController_OnSkillPointsValueChange;
+        }
+    }
+
+    private void SubscribeToShowingAndHidingInterfaces()
+    {
+        GiveCoinsUI.OnInterfaceShown += OnOtherTabOpen;
+        GiveCoinsUI.OnInterfaceHidden += OnOtherTabClose;
+
+        PauseUI.OnInterfaceShown += OnOtherTabOpen;
+        PauseUI.OnInterfaceHidden += OnOtherTabClose;
 
         ShopUI.Instance.OnShopOpen += OnOtherTabOpen;
         ShopUI.Instance.OnShopClose += OnOtherTabClose;
@@ -63,7 +91,14 @@ public class MainGameUI : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
+        PlayerController.OnPlayerSpawned += PlayerController_OnPlayerSpawned;
+    }
+
+    private void PlayerController_OnPlayerSpawned(object sender, EventArgs e)
+    {
         isFirstUpdate = true;
+
+        PlayerController.OnPlayerSpawned -= PlayerController_OnPlayerSpawned;
     }
 
     private void OnOtherTabClose(object sender, EventArgs e)
@@ -74,12 +109,6 @@ public class MainGameUI : NetworkBehaviour
     private void OnOtherTabOpen(object sender, EventArgs e)
     {
         Hide();
-    }
-
-    private void GameStageManager_OnGamePause(object sender, EventArgs e)
-    {
-        if (GameStageManager.Instance.IsPause()) Hide();
-        else Show();
     }
 
     private void PlayerController_OnSkillPointsValueChange(object sender, EventArgs e)
@@ -125,18 +154,9 @@ public class MainGameUI : NetworkBehaviour
         healthBar.ChangeHealthBarValue(e.currentHealth, e.maxHealth);
     }
 
-    private void Update()
-    {
-        if (isFirstUpdate)
-        {
-            isFirstUpdate = false;
+    #endregion
 
-            PlayerController.Instance.GetPlayerStaminaController().OnStaminaChange += StaminaController_OnStaminaChange;
-
-            PlayerController.Instance.OnExperienceChange += PlayerController_OnExperienceChange;
-            PlayerController.Instance.OnSkillPointsValueChange += PlayerController_OnSkillPointsValueChange;
-        }
-    }
+    #region Visual
 
     private void Show()
     {
@@ -149,4 +169,6 @@ public class MainGameUI : NetworkBehaviour
     {
         gameObject.SetActive(false);
     }
+
+    #endregion
 }

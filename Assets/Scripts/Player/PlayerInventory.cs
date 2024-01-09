@@ -3,36 +3,55 @@ using UnityEngine;
 
 public class PlayerInventory : NetworkBehaviour, IInventoryParent
 {
+    #region Variables & References
+
     [SerializeField] private int playerMaxSlots = 10;
     private InventoryObject[] storedInventoryObjects;
+
+    #endregion
+
+    #region Inititalization
 
     private void Awake()
     {
         storedInventoryObjects = new InventoryObject[playerMaxSlots];
     }
 
-    public void AddInventoryObject(InventoryObject inventoryObject)
+    #endregion
+
+    #region Add & Remove Inventory Objects
+
+    public void AddInventoryObject(InventoryObject inventoryObject, bool isNeedToSendNotification)
     {
         var storedSlot = GetFirstAvailableSlot();
         if (storedSlot == -1) return;
 
         storedInventoryObjects[storedSlot] = inventoryObject;
 
-        ReceivingItemsUI.Instance.AddReceivedItem(inventoryObject.GetInventoryObjectSprite(),
-            inventoryObject.GetInventoryObjectNameTextTranslationSo(), 1, 1);
+        if (IsOwner && isNeedToSendNotification)
+            ReceivingItemsUI.Instance.AddReceivedItem(inventoryObject.GetInventoryObjectSprite(),
+                inventoryObject.GetInventoryObjectNameTextTranslationSo(), 1, 1);
     }
 
-    public void AddInventoryObjectToSlot(InventoryObject inventoryObject, int slotNumber)
+    public void AddInventoryObjectToSlot(InventoryObject inventoryObject, int slotNumber, bool isNeedToSendNotification)
     {
         if (!IsSlotNumberAvailable(slotNumber)) return;
 
         storedInventoryObjects[slotNumber] = inventoryObject;
+
+        if (IsOwner && isNeedToSendNotification)
+            ReceivingItemsUI.Instance.AddReceivedItem(inventoryObject.GetInventoryObjectSprite(),
+                inventoryObject.GetInventoryObjectNameTextTranslationSo(), 1, 1);
     }
 
     public void RemoveInventoryObjectBySlot(int slotNumber)
     {
         storedInventoryObjects[slotNumber] = null;
     }
+
+    #endregion
+
+    #region Inventory Size
 
     public void ChangeInventorySize(int newSize)
     {
@@ -71,6 +90,10 @@ public class PlayerInventory : NetworkBehaviour, IInventoryParent
 
         storedInventoryObjects = newStoredRelicsInventory;
     }
+
+    #endregion
+
+    #region Get Inventory Data
 
     public InventoryObject GetInventoryObjectBySlot(int slotNumber)
     {
@@ -134,4 +157,6 @@ public class PlayerInventory : NetworkBehaviour, IInventoryParent
 
         return storedInventoryObjectsCount;
     }
+
+    #endregion
 }

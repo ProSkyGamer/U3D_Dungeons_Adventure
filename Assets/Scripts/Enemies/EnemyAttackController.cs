@@ -3,12 +3,22 @@ using UnityEngine;
 
 public class EnemyAttackController : NetworkBehaviour
 {
+    #region Variables & References
+
     [SerializeField] private LayerMask playerLayer;
+
+    #endregion
+
+    #region Attack Data
 
     [SerializeField] private float attackRange = 2.5f;
 
     [SerializeField] private int baseAttack = 15;
     private int currentAttack;
+
+    #endregion
+
+    #region Initialization
 
     private void Awake()
     {
@@ -37,6 +47,10 @@ public class EnemyAttackController : NetworkBehaviour
         baseAttack = newBaseAtk;
     }
 
+    #endregion
+
+    #region Attack
+
     public void Attack()
     {
         var raycastHits =
@@ -47,6 +61,10 @@ public class EnemyAttackController : NetworkBehaviour
             if (hit.transform.gameObject.TryGetComponent(out PlayerController playerController))
                 playerController.ChangeHealth(-currentAttack);
     }
+
+    #endregion
+
+    #region Buffs
 
     public void ChangeAttackBuff(float percentageBuff)
     {
@@ -68,4 +86,6 @@ public class EnemyAttackController : NetworkBehaviour
     {
         currentAttack = newCurrentAttack;
     }
+
+    #endregion
 }

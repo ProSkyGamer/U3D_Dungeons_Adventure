@@ -2,6 +2,8 @@ using System.Collections.Generic;
 
 public static class PlayerBoughtUpgrades
 {
+    #region Created Classes
+
     private class BoughtUpgrades
     {
         public PlayerEffectsController.AllPlayerEffects buffType;
@@ -9,7 +11,11 @@ public static class PlayerBoughtUpgrades
         public int boughtItemID;
     }
 
+    #endregion
+
     private static readonly List<BoughtUpgrades> boughtUpgrades = new();
+
+    #region Bought Upgrades
 
     public static void AddBoughtUpgrade(PlayerEffectsController.AllPlayerEffects buffType, float buffValue, int itemID)
     {
@@ -19,6 +25,10 @@ public static class PlayerBoughtUpgrades
         };
         boughtUpgrades.Add(newBoughtUpgrade);
     }
+
+    #endregion
+
+    #region Get Bought Upgrades
 
     public static bool IsUpgradeAlreadyBought(PlayerEffectsController.AllPlayerEffects buffType, float buffValue,
         int itemID)
@@ -34,4 +44,6 @@ public static class PlayerBoughtUpgrades
 
         return false;
     }
+
+    #endregion
 }

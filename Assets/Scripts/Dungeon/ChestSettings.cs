@@ -4,11 +4,17 @@ using UnityEngine;
 
 public class ChestSettings : NetworkBehaviour
 {
+    #region Variables & References
+
     [SerializeField] private Transform roomLootChest;
     private LootChest lootChest;
     [SerializeField] private bool isChestSpawnedAfterDefeatingAllEnemies;
 
     private DungeonRoomSettings dungeonRoomSettings;
+
+    #endregion
+
+    #region Initialization & Subscribed events
 
     private void Awake()
     {
@@ -61,4 +67,6 @@ public class ChestSettings : NetworkBehaviour
             lootChest.OnChestOpen += LootChest_OnChestOpen;
         }
     }
+
+    #endregion
 }

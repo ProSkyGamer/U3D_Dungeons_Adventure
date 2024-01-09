@@ -4,8 +4,14 @@ using UnityEngine.UI;
 
 public class VeryTempUI : MonoBehaviour
 {
+    #region Variables & References
+
     [SerializeField] private Button startHostButton;
     [SerializeField] private Button startClientButton;
+
+    #endregion
+
+    #region Initialization
 
     private void Awake()
     {
@@ -20,4 +26,6 @@ public class VeryTempUI : MonoBehaviour
             gameObject.SetActive(false);
         });
     }
+
+    #endregion
 }

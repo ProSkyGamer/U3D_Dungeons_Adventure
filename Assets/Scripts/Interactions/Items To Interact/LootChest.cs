@@ -4,16 +4,15 @@ using Unity.Netcode;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-// ReSharper disable once CheckNamespace
 public class LootChest : InteractableItem
 {
+    #region Events
+
     public event EventHandler OnChestOpen;
 
-    [SerializeField] private int coinsInChest = 10;
-    [SerializeField] private int experienceForChest = 10;
+    #endregion
 
-    [SerializeField] [Range(0f, 1f)] private List<float> multipleItemsDropChances = new();
-    [SerializeField] private int maxChestDropItems = 3;
+    #region Created Classes
 
     [Serializable]
     public class ChestDropItem
@@ -22,9 +21,23 @@ public class LootChest : InteractableItem
         public int inventoryObjectDropChance = 1;
     }
 
+    #endregion
+
+    #region Variables & References
+
+    [SerializeField] private int coinsInChest = 10;
+    [SerializeField] private int experienceForChest = 10;
+
+    [SerializeField] [Range(0f, 1f)] private List<float> multipleItemsDropChances = new();
+    [SerializeField] private int maxChestDropItems = 3;
+
     [SerializeField] private List<ChestDropItem> allChestDropItems = new();
 
     private bool isLootChestLocked;
+
+    #endregion
+
+    #region Chest Methods
 
     public void LockChest()
     {
@@ -35,6 +48,10 @@ public class LootChest : InteractableItem
     {
         isLootChestLocked = false;
     }
+
+    #endregion
+
+    #region Interactable Item
 
     public override void OnInteract(PlayerController player)
     {
@@ -77,6 +94,15 @@ public class LootChest : InteractableItem
 
         Destroy(gameObject);
     }
+
+    public override bool IsCanInteract()
+    {
+        return isCanInteract && !isLootChestLocked;
+    }
+
+    #endregion
+
+    #region Get Chest Loot
 
     private int GetDroppingItemsCount()
     {
@@ -127,8 +153,5 @@ public class LootChest : InteractableItem
         return droppingItems;
     }
 
-    public override bool IsCanInteract()
-    {
-        return isCanInteract && !isLootChestLocked;
-    }
+    #endregion
 }

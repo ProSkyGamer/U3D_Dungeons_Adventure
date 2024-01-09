@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class GetAdditionalInventoryTextTranslationSo : MonoBehaviour
 {
+    #region Variables & References
+
     [Header("Object Type's")]
     [SerializeField] private TextTranslationsSO noTypeTextTranslationSo;
 
@@ -61,7 +63,9 @@ public class GetAdditionalInventoryTextTranslationSo : MonoBehaviour
     [SerializeField] private TextTranslationsSO effectConditionTypeDefLessThen;
     [SerializeField] private TextTranslationsSO effectConditionIfEndless;
 
-    public static GetAdditionalInventoryTextTranslationSo Instance;
+    #endregion
+
+    #region Initialization
 
     private void Awake()
     {
@@ -70,6 +74,12 @@ public class GetAdditionalInventoryTextTranslationSo : MonoBehaviour
         else
             Instance = this;
     }
+
+    #endregion
+
+    public static GetAdditionalInventoryTextTranslationSo Instance { get; private set; }
+
+    #region Get TransaltionSO Data
 
     public TextTranslationsSO GetObjectTypeTextTranslationSoByInventoryObject(InventoryObject inventoryObject)
     {
@@ -151,6 +161,36 @@ public class GetAdditionalInventoryTextTranslationSo : MonoBehaviour
         }
     }
 
+    public TextTranslationsSO GetWeaponAdditionalStatTypeTextTranslationSoByInventoryObject(
+        InventoryObject inventoryObject)
+    {
+        if (!inventoryObject.TryGetWeaponSo(out var weaponSo)) return noStatTypeTextTranslationSo;
+
+        switch (weaponSo.additionalWeaponStatType)
+        {
+            default:
+                return noStatTypeTextTranslationSo;
+            case PlayerEffectsController.AllPlayerEffects.AtkIncrease:
+                return atkTypeTextTranslationSo;
+            case PlayerEffectsController.AllPlayerEffects.HpIncrease:
+                return hpTypeTextTranslationSo;
+            case PlayerEffectsController.AllPlayerEffects.DefIncrease:
+                return defTypeTextTranslationSo;
+            case PlayerEffectsController.AllPlayerEffects.CritRateIncrease:
+                return critRateTypeTextTranslationSo;
+            case PlayerEffectsController.AllPlayerEffects.CritDamageIncrease:
+                return critDmgTextTypeTranslationSo;
+            case PlayerEffectsController.AllPlayerEffects.NADmgIncrease:
+                return naDmgBonusTextTypeTranslationSo;
+            case PlayerEffectsController.AllPlayerEffects.CADmgIncrease:
+                return caDmgBonusTypeTextTranslationSo;
+        }
+    }
+
+    #endregion
+
+    #region Get Effect Condition Description
+
     public string GetEffectConditionTextTranslationByEffect(PlayerEffectsController.AppliedEffect effect)
     {
         var fullConditionString = "";
@@ -193,29 +233,5 @@ public class GetAdditionalInventoryTextTranslationSo : MonoBehaviour
         return fullConditionString;
     }
 
-    public TextTranslationsSO GetWeaponAdditionalStatTypeTextTranslationSoByInventoryObject(
-        InventoryObject inventoryObject)
-    {
-        if (!inventoryObject.TryGetWeaponSo(out var weaponSo)) return noStatTypeTextTranslationSo;
-
-        switch (weaponSo.additionalWeaponStatType)
-        {
-            default:
-                return noStatTypeTextTranslationSo;
-            case PlayerEffectsController.AllPlayerEffects.AtkIncrease:
-                return atkTypeTextTranslationSo;
-            case PlayerEffectsController.AllPlayerEffects.HpIncrease:
-                return hpTypeTextTranslationSo;
-            case PlayerEffectsController.AllPlayerEffects.DefIncrease:
-                return defTypeTextTranslationSo;
-            case PlayerEffectsController.AllPlayerEffects.CritRateIncrease:
-                return critRateTypeTextTranslationSo;
-            case PlayerEffectsController.AllPlayerEffects.CritDamageIncrease:
-                return critDmgTextTypeTranslationSo;
-            case PlayerEffectsController.AllPlayerEffects.NADmgIncrease:
-                return naDmgBonusTextTypeTranslationSo;
-            case PlayerEffectsController.AllPlayerEffects.CADmgIncrease:
-                return caDmgBonusTypeTextTranslationSo;
-        }
-    }
+    #endregion
 }

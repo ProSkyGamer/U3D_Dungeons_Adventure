@@ -4,7 +4,11 @@ using UnityEngine;
 
 public class StatsTabUI : MonoBehaviour
 {
+    #region Variables & References
+
     [SerializeField] private CharacterInventoryUI characterInventoryUI;
+
+    [SerializeField] private TextMeshProUGUI currentOwnedTextValue;
 
     [SerializeField] private TextMeshProUGUI baseHpText;
     [SerializeField] private TextMeshProUGUI additionalHpText;
@@ -17,15 +21,29 @@ public class StatsTabUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI naDmgBonusText;
     [SerializeField] private TextMeshProUGUI caDmgBonusText;
 
+    #endregion
+
+    #region Initialization & Subscribed events
+
     private void Start()
     {
         CharacterUI.OnStatsTabButtonClick += CharacterUI_OnStatsTabButtonClick;
         CharacterUI.OnUpgradesTabButtonClick += CharacterUI_OnOtherTabButtonClick;
         CharacterUI.OnWeaponsTabButtonClick += CharacterUI_OnOtherTabButtonClick;
         CharacterUI.OnRelicsTabButtonClick += CharacterUI_OnOtherTabButtonClick;
+
+        PlayerController.OnPlayerSpawned += PlayerController_OnPlayerSpawned;
     }
 
-    #region SubscribedEvents
+    private void PlayerController_OnPlayerSpawned(object sender, EventArgs e)
+    {
+        PlayerController.Instance.OnCoinsValueChange += PlayerController_OnCoinsValueChange;
+    }
+
+    private void PlayerController_OnCoinsValueChange(object sender, EventArgs e)
+    {
+        UpdateStats();
+    }
 
     private void CharacterUI_OnOtherTabButtonClick(object sender, EventArgs e)
     {
@@ -39,11 +57,18 @@ public class StatsTabUI : MonoBehaviour
 
     #endregion
 
+    #region Tab Visual
+
     private void Show()
     {
         gameObject.SetActive(true);
 
         UpdatePageVisual();
+    }
+
+    private void Hide()
+    {
+        gameObject.SetActive(false);
     }
 
     private void UpdatePageVisual()
@@ -54,6 +79,8 @@ public class StatsTabUI : MonoBehaviour
 
     private void UpdateStats()
     {
+        currentOwnedTextValue.text = PlayerController.Instance.GetCurrentCoinsValue().ToString();
+
         baseHpText.text = PlayerController.Instance.GetBaseHp().ToString();
         additionalHpText.text = PlayerController.Instance.GetCurrentAdditionalHp().ToString();
         baseAtkText.text = PlayerController.Instance.GetBaseAttack().ToString();
@@ -66,8 +93,5 @@ public class StatsTabUI : MonoBehaviour
         caDmgBonusText.text = $"+ {PlayerController.Instance.GetCurrentCaDmgBonus().ToString()} %";
     }
 
-    private void Hide()
-    {
-        gameObject.SetActive(false);
-    }
+    #endregion
 }

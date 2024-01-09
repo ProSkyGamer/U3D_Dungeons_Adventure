@@ -6,6 +6,19 @@ using UnityEngine;
 
 public class UpgradesTabUI : NetworkBehaviour
 {
+    #region Created Classes
+
+    [Serializable]
+    public class UpgradeButtons
+    {
+        public PlayerEffectsController.AllPlayerEffects buffType = PlayerEffectsController.AllPlayerEffects.AtkIncrease;
+        public float buffValue = 0.1f;
+    }
+
+    #endregion
+
+    #region Variables & References
+
     [SerializeField] private Transform allUpgradesField;
     [SerializeField] private float draggingSensitivity = 2f;
     [SerializeField] private Vector2 movingPartSize = new(3000, 2000);
@@ -34,16 +47,12 @@ public class UpgradesTabUI : NetworkBehaviour
     [SerializeField] private TextTranslationsSO critRateTextTranslationsSo;
     [SerializeField] private TextTranslationsSO critDmgTranslationsSo;
 
-    [Serializable]
-    public class UpgradeButtons
-    {
-        public PlayerEffectsController.AllPlayerEffects buffType = PlayerEffectsController.AllPlayerEffects.AtkIncrease;
-        public float buffValue = 0.1f;
-    }
-
     private bool isDragging;
-
     private bool isFirstUpdate;
+
+    #endregion
+
+    #region Line Initialization
 
     private void InitializeUpgradeLine(UpgradeSingleUI firstUpgrade, List<UpgradeButtons> allUpgrades,
         TextTranslationsSO lineTypeTextTranslationsSo)
@@ -74,9 +83,19 @@ public class UpgradesTabUI : NetworkBehaviour
         firstUpgrade.SetUpgradeType(allUpgrades[0].buffType, allUpgrades[0].buffValue, lineTypeTextTranslationsSo, 0);
     }
 
+    #endregion
+
+    #region Inititalization & Subscribed events
+
     public override void OnNetworkSpawn()
     {
+        PlayerController.OnPlayerSpawned += PlayerController_OnPlayerSpawned;
+    }
+
+    private void PlayerController_OnPlayerSpawned(object sender, EventArgs e)
+    {
         isFirstUpdate = true;
+        PlayerController.OnPlayerSpawned -= PlayerController_OnPlayerSpawned;
     }
 
     private void Start()
@@ -112,6 +131,10 @@ public class UpgradesTabUI : NetworkBehaviour
     }
 
     #endregion
+
+    #endregion
+
+    #region Update
 
     private void Update()
     {
@@ -169,6 +192,10 @@ public class UpgradesTabUI : NetworkBehaviour
         allUpgradesField.localScale = newUpgradesFieldSize;
     }
 
+    #endregion
+
+    #region Tab Visual
+
     private void Show()
     {
         gameObject.SetActive(true);
@@ -179,4 +206,6 @@ public class UpgradesTabUI : NetworkBehaviour
     {
         gameObject.SetActive(false);
     }
+
+    #endregion
 }

@@ -8,10 +8,13 @@ using Random = UnityEngine.Random;
 
 public class ProcedureDungeonGeneration : NetworkBehaviour
 {
+    #region Events
+
     public static event EventHandler OnDungeonGenerationFinished;
 
-    [SerializeField] private Vector2Int maxDungeonSize = new(5, 8);
-    [SerializeField] private int maxDungeonsRoomsCount = 10;
+    #endregion
+
+    #region Created Classes
 
     [Serializable]
     private class DungeonRoomType
@@ -39,6 +42,13 @@ public class ProcedureDungeonGeneration : NetworkBehaviour
         }
     }
 
+    #endregion
+
+    #region Variables & References
+
+    [SerializeField] private Vector2Int maxDungeonSize = new(5, 8);
+    [SerializeField] private int maxDungeonsRoomsCount = 10;
+
     [SerializeField] private List<DungeonRoomType> dungeonRoomVariationsPrefabsList = new();
     [SerializeField] private List<DungeonRoomType> finalDungeonRoomVariationsPrefabsList = new();
     [SerializeField] private DungeonRoomType startingRoom;
@@ -52,6 +62,10 @@ public class ProcedureDungeonGeneration : NetworkBehaviour
     };
 
     private bool isFirstUpdate;
+
+    #endregion
+
+    #region Initialization & Subscribed events
 
     public override void OnNetworkSpawn()
     {
@@ -128,6 +142,10 @@ public class ProcedureDungeonGeneration : NetworkBehaviour
             StartingDungeonRoom.OnDungeonStart += StartingDungeonRoom_OnDungeonStart;
         }
     }
+
+    #endregion
+
+    #region Dungeon Generation
 
     private void GenerateDungeon()
     {
@@ -228,6 +246,10 @@ public class ProcedureDungeonGeneration : NetworkBehaviour
 
         for (var i = 1; i < allRoomsList.Count; i++) allRoomsList[i].UnlockAllExits();
     }
+
+    #endregion
+
+    #region Dungeon Room Generation
 
     private DungeonRoom GenerateDungeonRoom(Transform roomToCreatePrefab, Vector3 roomTransformPosition,
         Vector2Int roomGridPosition, Vector2Int roomPosition, int previousDistanceFromStart)
@@ -527,7 +549,9 @@ public class ProcedureDungeonGeneration : NetworkBehaviour
         return requiredRoomsCount;
     }
 
-    public override void OnDestroy()
+    #endregion
+
+    public static void ResetStaticData()
     {
         OnDungeonGenerationFinished = null;
     }

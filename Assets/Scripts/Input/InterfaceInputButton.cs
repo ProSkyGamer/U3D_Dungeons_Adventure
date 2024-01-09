@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 public class InterfaceInputButton : NetworkBehaviour
 {
+    #region Variables & References
+
     [SerializeField] private GameInput.Binding inputBinding = GameInput.Binding.Attack;
 
     [SerializeField] private Transform pressedInputBindingButton;
@@ -15,6 +17,10 @@ public class InterfaceInputButton : NetworkBehaviour
     private float hideAfterTime;
 
     private bool isFirstUpdate;
+
+    #endregion
+
+    #region Initialization
 
     private void Awake()
     {
@@ -34,6 +40,10 @@ public class InterfaceInputButton : NetworkBehaviour
 
         interfaceBindingButton.onClick.AddListener(() => { GameInput.Instance.TriggerBindingButton(inputBinding); });
     }
+
+    #endregion
+
+    #region Update & Connected
 
     private void Update()
     {
@@ -80,4 +90,6 @@ public class InterfaceInputButton : NetworkBehaviour
     {
         pressedInputBindingButton.gameObject.SetActive(true);
     }
+
+    #endregion
 }
