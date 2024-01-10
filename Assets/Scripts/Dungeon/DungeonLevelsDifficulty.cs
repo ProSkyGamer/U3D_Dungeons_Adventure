@@ -27,6 +27,13 @@ public class DungeonLevelsDifficulty : MonoBehaviour
         }
     }
 
+    [Serializable]
+    public class IncreasingExperiencePerLevel
+    {
+        public int enemyLevelToActivateStatMultiplayer;
+        public float multiplayerForEachEnemyLevel;
+    }
+
     #endregion
 
     public static DungeonLevelsDifficulty Instance { get; private set; }
@@ -34,6 +41,8 @@ public class DungeonLevelsDifficulty : MonoBehaviour
     #region Variables & References
 
     [SerializeField] private List<StatsIncreaseOnDungeonDifficulty> allStatsIncreaseOnDungeonDifficulty = new();
+    [SerializeField] private List<IncreasingExperiencePerLevel> increasingExperiencePerLevels = new();
+    [SerializeField] private float maxIncreasingExpMultiplayer = 2f;
     [SerializeField] private float additionalBaseHpPercentagePerConnectedPlayer = 0.5f;
     [SerializeField] private float additionalBaseAtkPercentagePerConnectedPlayer = 0.1f;
 
@@ -92,7 +101,33 @@ public class DungeonLevelsDifficulty : MonoBehaviour
             break;
         }
 
+        if (currentStatIncrease > maxIncreasingExpMultiplayer)
+            currentStatIncrease = maxIncreasingExpMultiplayer;
+
         return currentStatIncrease;
+    }
+
+    public float GetCurrentEnemyIncreasedExperienceMultiplayer()
+    {
+        var currentStatIncrease = 0f;
+        var currentDungeonLevel = DungeonSettings.GetCurrentDungeonLevel();
+
+        foreach (var increasingExperiencePerLevel in increasingExperiencePerLevels)
+        {
+            if (increasingExperiencePerLevel.enemyLevelToActivateStatMultiplayer > currentDungeonLevel) break;
+
+            currentStatIncrease = increasingExperiencePerLevel.multiplayerForEachEnemyLevel * currentDungeonLevel;
+
+            break;
+        }
+
+        return currentStatIncrease;
+    }
+
+    public int GetCurrentDungeonLevelDifficulty()
+    {
+        var currentDungeonLevel = DungeonSettings.GetCurrentDungeonLevel();
+        return currentDungeonLevel;
     }
 
     #endregion

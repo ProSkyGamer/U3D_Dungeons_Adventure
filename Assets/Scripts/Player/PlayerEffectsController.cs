@@ -26,6 +26,9 @@ public class PlayerEffectsController : NetworkBehaviour
 
     public enum AllPlayerEffects
     {
+        BaseAtkIncrease,
+        BaseHpIncrease,
+        BaseDefIncrease,
         AtkIncrease,
         HpIncrease,
         DefIncrease,
@@ -102,7 +105,7 @@ public class PlayerEffectsController : NetworkBehaviour
 
     #region Effects & References
 
-    private readonly List<AppliedEffect> allPlayerAppliedEffects = new();
+    [SerializeField] private List<AppliedEffect> allPlayerAppliedEffects = new();
 
     private int lastUsedEffectID;
 
@@ -139,6 +142,15 @@ public class PlayerEffectsController : NetworkBehaviour
 
         playerHealthController.OnCurrentPlayerHealthChange += OnAnyFollowingStatChangeChange;
         playerHealthController.OnCurrentDefenceChange += OnAnyFollowingStatChangeChange;
+
+        playerController.OnNewLevelReached += PlayerController_OnNewLevelReached;
+    }
+
+    private void PlayerController_OnNewLevelReached(object sender, PlayerController.OnNewLevelReachedEventArgs e)
+    {
+        ApplyEffect(AllPlayerEffects.BaseAtkIncrease, 0f, e.baseAtkPercentageIncrease);
+        ApplyEffect(AllPlayerEffects.BaseHpIncrease, 0f, e.baseHealthPercentageIncrease);
+        ApplyEffect(AllPlayerEffects.BaseDefIncrease, 0f, e.baseDefencePercentageIncrease);
     }
 
     private void OnAnyFollowingStatChangeChange(object sender, EventArgs e)
@@ -378,6 +390,15 @@ public class PlayerEffectsController : NetworkBehaviour
 
         switch (applyingEffectType)
         {
+            case AllPlayerEffects.BaseAtkIncrease:
+                playerAttackController.ChangeBaseAttackBuff(effectPercentageValue);
+                break;
+            case AllPlayerEffects.BaseHpIncrease:
+                playerHealthController.ChangeBaseHealthBuff(effectPercentageValue);
+                break;
+            case AllPlayerEffects.BaseDefIncrease:
+                playerHealthController.ChangeBaseDefenceBuff(effectPercentageValue);
+                break;
             case AllPlayerEffects.HpIncrease:
                 playerHealthController.ChangeHealthBuff(effectPercentageValue, effectFlatValue);
                 break;

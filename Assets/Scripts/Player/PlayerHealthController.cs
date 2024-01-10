@@ -40,14 +40,18 @@ public class PlayerHealthController : NetworkBehaviour
     #region GeneralStats
 
     [SerializeField] private int baseHealth = 100;
+    private float baseHealthIncreaseMultiplayer = 1f;
     private int maxHealth;
+    private float healthIncreaseMultiplayer = 1f;
     private int currentHealth;
 
     [SerializeField] private int baseDefence = 100;
+    private float baseDefenceIncreaseMultiplayer = 1f;
     [SerializeField] private int maxDefence = 1000;
     [SerializeField] [Range(0, 0.99f)] private float maxDefenceAbsorption = 0.5f;
     private int additionalDefenceNumberFormula;
     private int currentDefence;
+    private float defenceIncreaseMultiplayer = 1f;
 
     #endregion
 
@@ -228,27 +232,33 @@ public class PlayerHealthController : NetworkBehaviour
 
     #region Buffs
 
-    public void ChangeHealthBuff(float percentageBuff = default, int flatBuff = default)
+    public void ChangeBaseHealthBuff(float percentageBuff)
     {
-        ChangeHealthBuffServerRpc(percentageBuff, flatBuff);
+        if (!IsServer) return;
+
+        ChangeBaseHealthBuffServerRpc(percentageBuff);
     }
 
     [ServerRpc(RequireOwnership = false)]
-    private void ChangeHealthBuffServerRpc(float percentageBuff, int flatBuff)
+    private void ChangeBaseHealthBuffServerRpc(float percentageBuff)
     {
+        baseHealthIncreaseMultiplayer += percentageBuff;
         var currentHpPercentage = currentHealth / (float)maxHealth;
 
-        var newMaxHealth = (int)(maxHealth + baseHealth * percentageBuff + flatBuff);
+        var newBaseHealth = (int)(baseHealth * baseHealthIncreaseMultiplayer);
+        var newMaxHealth = (int)(newBaseHealth * healthIncreaseMultiplayer);
         var newCurrentHealth = (int)(newMaxHealth * currentHpPercentage);
 
-        ChangeHealthBuffClientRpc(newMaxHealth, newCurrentHealth);
+        ChangeBaseHealthBuffClientRpc(newMaxHealth, newCurrentHealth, baseHealthIncreaseMultiplayer);
     }
 
     [ClientRpc]
-    private void ChangeHealthBuffClientRpc(int newMaxHealth, int newCurrentHealth)
+    private void ChangeBaseHealthBuffClientRpc(int newMaxHealth, int newCurrentHealth,
+        float newBaseHealthIncreaseMultiplayer)
     {
         maxHealth = newMaxHealth;
         currentHealth = newCurrentHealth;
+        baseHealthIncreaseMultiplayer = newBaseHealthIncreaseMultiplayer;
 
         OnCurrentPlayerHealthChange?.Invoke(this, new OnCurrentPlayerHealthChangeEventArgs
         {
@@ -256,23 +266,87 @@ public class PlayerHealthController : NetworkBehaviour
         });
     }
 
+    public void ChangeHealthBuff(float percentageBuff = default, int flatBuff = default)
+    {
+        if (!IsServer) return;
+
+        ChangeHealthBuffServerRpc(percentageBuff, flatBuff);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void ChangeHealthBuffServerRpc(float percentageBuff, int flatBuff)
+    {
+        healthIncreaseMultiplayer += percentageBuff;
+        var currentHpPercentage = currentHealth / (float)maxHealth;
+
+        var newMaxHealth = (int)(baseHealth * baseHealthIncreaseMultiplayer * healthIncreaseMultiplayer + flatBuff);
+        var newCurrentHealth = (int)(newMaxHealth * currentHpPercentage);
+
+        ChangeHealthBuffClientRpc(newMaxHealth, newCurrentHealth, healthIncreaseMultiplayer);
+    }
+
+    [ClientRpc]
+    private void ChangeHealthBuffClientRpc(int newMaxHealth, int newCurrentHealth, float newHealthIncreaseMultiplayer)
+    {
+        maxHealth = newMaxHealth;
+        currentHealth = newCurrentHealth;
+        healthIncreaseMultiplayer = newHealthIncreaseMultiplayer;
+
+        OnCurrentPlayerHealthChange?.Invoke(this, new OnCurrentPlayerHealthChangeEventArgs
+        {
+            currentHealth = currentHealth, maxHealth = maxHealth
+        });
+    }
+
+    public void ChangeBaseDefenceBuff(float percentageBuff)
+    {
+        if (!IsServer) return;
+
+        ChangeBaseDefenceBuffServerRpc(percentageBuff);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void ChangeBaseDefenceBuffServerRpc(float percentageBuff)
+    {
+        baseDefenceIncreaseMultiplayer += percentageBuff;
+
+        var newBaseDefence = (int)(baseDefence * baseDefenceIncreaseMultiplayer);
+        var newCurrentDefence = (int)(newBaseDefence * defenceIncreaseMultiplayer);
+
+        ChangeBaseDefenceBuffClientRpc(newCurrentDefence, baseDefenceIncreaseMultiplayer);
+    }
+
+    [ClientRpc]
+    private void ChangeBaseDefenceBuffClientRpc(int newCurrentDefence, float newBaseDefenceIncreaseMultiplayer)
+    {
+        currentDefence = newCurrentDefence;
+        baseDefenceIncreaseMultiplayer = newBaseDefenceIncreaseMultiplayer;
+
+        OnCurrentDefenceChange?.Invoke(this, EventArgs.Empty);
+    }
+
     public void ChangeDefenceBuff(float percentageBuff = default, int flatBuff = default)
     {
+        if (!IsServer) return;
+
         ChangeDefenceBuffServerRpc(percentageBuff, flatBuff);
     }
 
     [ServerRpc(RequireOwnership = false)]
     private void ChangeDefenceBuffServerRpc(float percentageBuff, int flatBuff)
     {
-        var newCurrentDefence = (int)(currentDefence + baseDefence * percentageBuff + flatBuff);
+        defenceIncreaseMultiplayer += percentageBuff;
+        var newCurrentDefence =
+            (int)(baseDefence * baseDefenceIncreaseMultiplayer * defenceIncreaseMultiplayer + flatBuff);
 
-        ChangeDefenceBuffClientRpc(newCurrentDefence);
+        ChangeDefenceBuffClientRpc(newCurrentDefence, defenceIncreaseMultiplayer);
     }
 
     [ClientRpc]
-    private void ChangeDefenceBuffClientRpc(int newCurrentDefence)
+    private void ChangeDefenceBuffClientRpc(int newCurrentDefence, float newDefenceIncreaseMultiplayer)
     {
         currentDefence = newCurrentDefence;
+        defenceIncreaseMultiplayer = newDefenceIncreaseMultiplayer;
 
         OnCurrentDefenceChange?.Invoke(this, EventArgs.Empty);
     }
@@ -391,12 +465,12 @@ public class PlayerHealthController : NetworkBehaviour
 
     public int GetBaseHp()
     {
-        return baseHealth;
+        return (int)(baseHealth * baseHealthIncreaseMultiplayer);
     }
 
     public int GetBaseDefence()
     {
-        return baseDefence;
+        return (int)(baseDefence * baseDefenceIncreaseMultiplayer);
     }
 
     public int GetCurrentMaxHp()

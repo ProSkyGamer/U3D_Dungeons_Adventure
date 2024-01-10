@@ -13,8 +13,10 @@ public class EnemyAttackController : NetworkBehaviour
 
     [SerializeField] private float attackRange = 2.5f;
 
-    [SerializeField] private int baseAttack = 15;
+    [SerializeField] private int baseAttack = 100;
     private int currentAttack;
+
+    [SerializeField] private float basicAttackScale = 0.15f;
 
     #endregion
 
@@ -57,9 +59,11 @@ public class EnemyAttackController : NetworkBehaviour
             Physics.SphereCastAll(transform.position, attackRange,
                 Vector3.forward, attackRange, playerLayer);
 
+        var attackDamage = (int)(-currentAttack * basicAttackScale);
+
         foreach (var hit in raycastHits)
             if (hit.transform.gameObject.TryGetComponent(out PlayerController playerController))
-                playerController.ChangeHealth(-currentAttack);
+                playerController.ChangeHealth(attackDamage);
     }
 
     #endregion

@@ -7,6 +7,7 @@ public static class StoredPlayerData
     public class StoredPlayerDataSingle
     {
         public int currentLevelExperienceNeeded;
+        public int currentSkillPointExperienceNeeded;
         public int currentExperience;
         public int currentAvailableSkillPoint;
 
@@ -24,7 +25,7 @@ public static class StoredPlayerData
         var newStoredPlayerData = new StoredPlayerDataSingle
         {
             currentLevelExperienceNeeded = playerDataToSave.GetExperienceForCurrentLevel(),
-            currentExperience = playerDataToSave.GetCurrentExperience(),
+            currentExperience = playerDataToSave.GetCurrentLevelExperience(),
             currentAvailableSkillPoint = playerDataToSave.GetCurrentSkillPointsValue(),
             currentCoins = playerDataToSave.GetCurrentCoinsValue()
         };

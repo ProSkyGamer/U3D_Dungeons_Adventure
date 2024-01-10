@@ -15,6 +15,9 @@ MonoBehaviour:
   weaponType: 1
   weaponVisual: {fileID: 8156390610259069869, guid: 0a3098c5fdd6d814d9dd1350a1bfcf1c,
     type: 3}
+  additionalWeaponStatType: 6
+  additionalWeaponStatTypeScale: 0.1
+  weaponPassiveTalent: []
   comboAttack: 3
   comboAttackScales:
   - 0.4
@@ -22,5 +25,3 @@ MonoBehaviour:
   - 0.6
   chargedAttackDamageScale: 1
   chargedAttackStaminaCost: 25
-  additionalWeaponStatType: 3
-  additionalWeaponStatTypeScale: 0.1

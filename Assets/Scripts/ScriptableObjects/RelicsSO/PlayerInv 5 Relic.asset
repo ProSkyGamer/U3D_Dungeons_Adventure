@@ -16,7 +16,7 @@ MonoBehaviour:
   - appliedEffectID: 0
     effectCurrentlyAppliedTimes: 0
     currentUsages: 0
-    appliedEffectType: 17
+    appliedEffectType: 20
     effectPercentageScale: 0.05
     effectFlatScale: 0
     effectCondition:

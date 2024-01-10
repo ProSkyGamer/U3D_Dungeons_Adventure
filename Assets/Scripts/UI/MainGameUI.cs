@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class MainGameUI : NetworkBehaviour
@@ -15,7 +16,7 @@ public class MainGameUI : NetworkBehaviour
     [SerializeField] private Transform staminaBar;
     [SerializeField] private Image staminaBarValue;
     [SerializeField] private TextMeshProUGUI experienceText;
-    [SerializeField] private Image experienceBarValue;
+    [FormerlySerializedAs("experienceBarValue")] [SerializeField] private Image skillPointExperienceBarValue;
     [SerializeField] private Transform skillPointsNotification;
     [SerializeField] private TextMeshProUGUI skillPointsText;
     [SerializeField] private CharacterInventoryUI relicsInventory;
@@ -127,9 +128,9 @@ public class MainGameUI : NetworkBehaviour
 
     private void PlayerController_OnExperienceChange(object sender, PlayerController.OnExperienceChangeEventArgs e)
     {
-        experienceText.text = $"{e.currentXp} / {e.maxXp}";
-        var fillAmount = e.currentXp / (float)e.maxXp;
-        experienceBarValue.fillAmount = fillAmount;
+        experienceText.text = $"{e.neededSkillPointExp - e.currentSkillPointExp}";
+        var fillAmount = e.currentSkillPointExp / (float)e.neededSkillPointExp;
+        skillPointExperienceBarValue.fillAmount = fillAmount;
     }
 
     private void StaminaController_OnStaminaChange(object sender, StaminaController.OnStaminaChangeEventArgs e)

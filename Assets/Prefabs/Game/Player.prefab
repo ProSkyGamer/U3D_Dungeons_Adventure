@@ -262,7 +262,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1bb84e17aa579fe4f873ca6b21236e76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  experienceForFirstLevel: 100
+  experienceForFirstLevel: 1000
+  experienceForSkillPoint: 250
   experienceIncreaseForNextLevel: 0.1
   experienceIconSprite: {fileID: 21300000, guid: bd76726ffb1eb94429fb8143429bd978,
     type: 3}
@@ -271,6 +272,9 @@ MonoBehaviour:
   coinsIconSprite: {fileID: 21300000, guid: 2b06c35710693f640babb3dcf747d06a, type: 3}
   coinsTextTranslationsSo: {fileID: 11400000, guid: 8b00c407c2d85c14f849c4550fa77c4a,
     type: 2}
+  hpIncreasePercentagePerLevel: 0.15
+  atkIncreasePercentagePerLevel: 0.1
+  defIncreasePercentagePerLevel: 0.125
   walkSpeed: 1
   runSpeed: 3
   sprintSpeed: 5
@@ -301,6 +305,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4354c4b84f46ccc4984727453762cbd6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  baseAttack: 100
+  baseCritRate: 0.05
+  baseCritDamage: 0.5
   comboAttackResetTime: 3
   chargedAttackPressTime: 0.6
   meleeWeaponAttackRange: 0.3
@@ -316,9 +323,7 @@ MonoBehaviour:
   enemiesLayer:
     serializedVersion: 2
     m_Bits: 128
-  baseAttack: 100
-  baseCritRate: 0.05
-  baseCritDamage: 0.5
+  enemiesWaitingToAttack: []
 --- !u!114 &9127793870788687417
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -100,6 +100,11 @@ public class EnemyController : NetworkBehaviour
 
         if (bufferEnemy != null || healerEnemy != null || shielderEnemy != null)
             isHasAnyClass = true;
+
+        if (!IsServer) return;
+
+        var additionalExpIncrease = DungeonLevelsDifficulty.Instance.GetCurrentEnemyIncreasedExperienceMultiplayer();
+        experienceForKill += (int)(experienceForKill * additionalExpIncrease);
     }
 
     private void Start()
@@ -281,7 +286,7 @@ public class EnemyController : NetworkBehaviour
 
     #region Dedug
 
-    private void OnDrawGizmos()
+    private void OnDrawGizmosSelected()
     {
         var castPosition = transform.position;
 

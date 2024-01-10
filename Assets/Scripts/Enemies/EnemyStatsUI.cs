@@ -9,6 +9,8 @@ public class EnemyStatsUI : MonoBehaviour
 
     [SerializeField] private TextMeshProUGUI healthText;
     [SerializeField] private TextMeshProUGUI healedText;
+    [SerializeField] private TextMeshProUGUI levelText;
+    [SerializeField] private TextTranslationsSO levelTextTranslationsSo;
     [SerializeField] private TextMeshProUGUI damagedText;
     [SerializeField] private TextMeshProUGUI shieldText;
 
@@ -26,6 +28,15 @@ public class EnemyStatsUI : MonoBehaviour
     private void Start()
     {
         enemyHealth.OnEnemyHealthChange += EnemyHealth_OnEnemyHealthChange;
+
+        var currentLanguageLevelText =
+            TextTranslationController.GetTextFromTextTranslationSOByLanguage(
+                TextTranslationController.GetCurrentLanguage(),
+                levelTextTranslationsSo);
+        var currentLevelText = string.Format(currentLanguageLevelText,
+            DungeonLevelsDifficulty.Instance.GetCurrentDungeonLevelDifficulty());
+
+        levelText.text = currentLevelText;
     }
 
     private void EnemyHealth_OnEnemyHealthChange(object sender, EnemyHealth.OnEnemyHealthChangeEventArgs e)

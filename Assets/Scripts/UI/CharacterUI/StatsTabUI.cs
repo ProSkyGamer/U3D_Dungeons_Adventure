@@ -1,6 +1,7 @@
 using System;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class StatsTabUI : MonoBehaviour
 {
@@ -8,7 +9,7 @@ public class StatsTabUI : MonoBehaviour
 
     [SerializeField] private CharacterInventoryUI characterInventoryUI;
 
-    [SerializeField] private TextMeshProUGUI currentOwnedTextValue;
+    [SerializeField] private TextMeshProUGUI currentOwnedCoinsTextValue;
 
     [SerializeField] private TextMeshProUGUI baseHpText;
     [SerializeField] private TextMeshProUGUI additionalHpText;
@@ -20,6 +21,10 @@ public class StatsTabUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI critDmgText;
     [SerializeField] private TextMeshProUGUI naDmgBonusText;
     [SerializeField] private TextMeshProUGUI caDmgBonusText;
+    [SerializeField] private Image skillPointExperienceBar;
+    [SerializeField] private TextMeshProUGUI skillPointExperienceText;
+    [SerializeField] private Image levelExperienceBar;
+    [SerializeField] private TextMeshProUGUI levelExperienceText;
 
     #endregion
 
@@ -38,6 +43,18 @@ public class StatsTabUI : MonoBehaviour
     private void PlayerController_OnPlayerSpawned(object sender, EventArgs e)
     {
         PlayerController.Instance.OnCoinsValueChange += PlayerController_OnCoinsValueChange;
+        PlayerController.Instance.OnExperienceChange += PlayerController_OnExperienceChange;
+    }
+
+    private void PlayerController_OnExperienceChange(object sender, PlayerController.OnExperienceChangeEventArgs e)
+    {
+        skillPointExperienceText.text = $"{e.neededSkillPointExp - e.currentSkillPointExp}";
+        var skillPointExpFillAmount = e.currentSkillPointExp / (float)e.neededSkillPointExp;
+        skillPointExperienceBar.fillAmount = skillPointExpFillAmount;
+
+        levelExperienceText.text = $"{e.neededLevelExp - e.currentLevelExp}";
+        var levelExpFillAmount = e.currentLevelExp / (float)e.neededLevelExp;
+        levelExperienceBar.fillAmount = levelExpFillAmount;
     }
 
     private void PlayerController_OnCoinsValueChange(object sender, EventArgs e)
@@ -73,13 +90,31 @@ public class StatsTabUI : MonoBehaviour
 
     private void UpdatePageVisual()
     {
+        UpdateOtherData();
         UpdateStats();
         characterInventoryUI.UpdateInventory();
     }
 
+    private void UpdateOtherData()
+    {
+        currentOwnedCoinsTextValue.text = PlayerController.Instance.GetCurrentCoinsValue().ToString();
+
+        var currentSkillPointExp = PlayerController.Instance.GetCurrentSkillPointExperience();
+        var neededSkillPointExp = PlayerController.Instance.GetExperienceForSkillPoint();
+        skillPointExperienceText.text = $"{neededSkillPointExp - currentSkillPointExp}";
+        var skillPointExpFillAmount = currentSkillPointExp / (float)neededSkillPointExp;
+        skillPointExperienceBar.fillAmount = skillPointExpFillAmount;
+
+        var currentLevelExp = PlayerController.Instance.GetCurrentLevelExperience();
+        var neededLevelExp = PlayerController.Instance.GetExperienceForCurrentLevel();
+        levelExperienceText.text = $"{neededLevelExp - currentLevelExp}";
+        var levelExpFillAmount = currentLevelExp / (float)neededLevelExp;
+        levelExperienceBar.fillAmount = levelExpFillAmount;
+    }
+
     private void UpdateStats()
     {
-        currentOwnedTextValue.text = PlayerController.Instance.GetCurrentCoinsValue().ToString();
+        currentOwnedCoinsTextValue.text = PlayerController.Instance.GetCurrentCoinsValue().ToString();
 
         baseHpText.text = PlayerController.Instance.GetBaseHp().ToString();
         additionalHpText.text = PlayerController.Instance.GetCurrentAdditionalHp().ToString();

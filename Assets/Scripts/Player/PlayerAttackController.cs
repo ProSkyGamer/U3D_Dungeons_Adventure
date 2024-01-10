@@ -44,7 +44,9 @@ public class PlayerAttackController : NetworkBehaviour
     #region GeneralStats
 
     [SerializeField] private int baseAttack = 100;
+    private float baseAttackIncreaseMultiplayer = 1f;
     private int currentAttack;
+    private float attackIncreaseMultiplayer = 1f;
 
     private float normalAttackDamageBonus;
     private float chargedAttackDamageBonus;
@@ -664,6 +666,8 @@ public class PlayerAttackController : NetworkBehaviour
 
     public void ChangeEnemySlowOnHit(float slowValue, float slowDuration, float effectChance, int effectId)
     {
+        if (!IsServer) return;
+
         ChangeEnemySlowOnHitServerRpc(slowValue, slowDuration, effectChance, effectId);
     }
 
@@ -693,27 +697,58 @@ public class PlayerAttackController : NetworkBehaviour
         }
     }
 
+    public void ChangeBaseAttackBuff(float percentageBuff)
+    {
+        if (!IsServer) return;
+
+        ChangeBaseAttackBuffServerRpc(percentageBuff);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void ChangeBaseAttackBuffServerRpc(float percentageBuff)
+    {
+        baseAttackIncreaseMultiplayer += percentageBuff;
+
+        var newBaseAttack = (int)(baseAttack * baseAttackIncreaseMultiplayer);
+        var newCurrentAttack = (int)(newBaseAttack * attackIncreaseMultiplayer);
+
+        ChangeBaseAttackBuffClientRpc(newCurrentAttack, baseAttackIncreaseMultiplayer);
+    }
+
+    [ClientRpc]
+    private void ChangeBaseAttackBuffClientRpc(int newCurrentAttack, float newBaseAttackIncreaseMultiplayer)
+    {
+        currentAttack = newCurrentAttack;
+        baseAttackIncreaseMultiplayer = newBaseAttackIncreaseMultiplayer;
+    }
+
     public void ChangeAttackBuff(float percentageBuff = default, int flatBuff = default)
     {
+        if (!IsServer) return;
+
         ChangeAttackBuffServerRpc(percentageBuff, flatBuff);
     }
 
     [ServerRpc(RequireOwnership = false)]
     private void ChangeAttackBuffServerRpc(float percentageBuff, int flatBuff)
     {
-        var newCurrentAttack = (int)(currentAttack + baseAttack * percentageBuff + flatBuff);
+        attackIncreaseMultiplayer += percentageBuff;
+        var newCurrentAttack = (int)(baseAttack * baseAttackIncreaseMultiplayer * attackIncreaseMultiplayer + flatBuff);
 
-        ChangeAttackBuffClientRpc(newCurrentAttack);
+        ChangeAttackBuffClientRpc(newCurrentAttack, attackIncreaseMultiplayer);
     }
 
     [ClientRpc]
-    private void ChangeAttackBuffClientRpc(int newCurrentAttack)
+    private void ChangeAttackBuffClientRpc(int newCurrentAttack, float newAttackIncreaseMultiplayer)
     {
         currentAttack = newCurrentAttack;
+        attackIncreaseMultiplayer = newAttackIncreaseMultiplayer;
     }
 
     public void ChangeNormalAttackBuff(float percentageBuff)
     {
+        if (!IsServer) return;
+
         ChangeNormalAttackBuffServerRpc(percentageBuff);
     }
 
@@ -733,6 +768,8 @@ public class PlayerAttackController : NetworkBehaviour
 
     public void ChangeChargedAttackBuff(float percentageBuff)
     {
+        if (!IsServer) return;
+
         ChangeChargedAttackBuffServerRpc(percentageBuff);
     }
 
@@ -752,6 +789,8 @@ public class PlayerAttackController : NetworkBehaviour
 
     public void ChangeCritRateBuff(float percentageBuff)
     {
+        if (!IsServer) return;
+
         ChangeCritRateBuffServerRpc(percentageBuff);
     }
 
@@ -771,6 +810,8 @@ public class PlayerAttackController : NetworkBehaviour
 
     public void ChangeCritDamageBuff(float percentageBuff)
     {
+        if (!IsServer) return;
+
         ChangeCritDamageBuffServerRpc(percentageBuff);
     }
 
@@ -791,6 +832,8 @@ public class PlayerAttackController : NetworkBehaviour
     public void ChangeCritRateOnHitIncreaseBuff(float critRateOnHitIncreaseValue, float maxCritRateIncrease,
         int effectId)
     {
+        if (!IsServer) return;
+
         ChangeCritRateOnHitIncreaseBuffServerRpc(critRateOnHitIncreaseValue, maxCritRateIncrease, effectId);
     }
 
@@ -826,7 +869,7 @@ public class PlayerAttackController : NetworkBehaviour
 
     public int GetBaseAttack()
     {
-        return baseAttack;
+        return (int)(baseAttack * baseAttackIncreaseMultiplayer);
     }
 
     public int GetCurrentAttack()

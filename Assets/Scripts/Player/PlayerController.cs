@@ -21,13 +21,23 @@ public class PlayerController : NetworkBehaviour
 
     public class OnExperienceChangeEventArgs : EventArgs
     {
-        public int currentXp;
-        public int maxXp;
+        public int currentLevelExp;
+        public int currentSkillPointExp;
+        public int neededLevelExp;
+        public int neededSkillPointExp;
     }
 
     public event EventHandler OnStopSprinting;
     public event EventHandler OnCoinsValueChange;
     public event EventHandler OnSkillPointsValueChange;
+    public event EventHandler<OnNewLevelReachedEventArgs> OnNewLevelReached;
+
+    public class OnNewLevelReachedEventArgs : EventArgs
+    {
+        public float baseHealthPercentageIncrease;
+        public float baseAtkPercentageIncrease;
+        public float baseDefencePercentageIncrease;
+    }
 
     public event EventHandler<PlayerEffectsController.RelicBuffEffectTriggeredEventArgs>
         OnPlayerRegenerateHpAfterEnemyDeath;
@@ -50,10 +60,13 @@ public class PlayerController : NetworkBehaviour
 
     #region Experience & Skill Points
 
-    [SerializeField] private int experienceForFirstLevel = 100;
-    [SerializeField] private float experienceIncreaseForNextLevel = 0.2f;
+    [SerializeField] private int experienceForFirstLevel = 1000;
+    [SerializeField] private int experienceForSkillPoint = 250;
+    [SerializeField] private float experienceIncreaseForNextLevel = 0.15f;
+    private int currentSkillPointExperienceNeeded;
+    private int currentSkillPointExperience;
     private int currentLevelExperienceNeeded;
-    private int currentExperience;
+    private int currentLevelExperience;
     private float additionalExperienceMultiplayer;
     [SerializeField] private Sprite experienceIconSprite;
     [SerializeField] private TextTranslationsSO experienceTextTranslationsSo;
@@ -63,6 +76,14 @@ public class PlayerController : NetworkBehaviour
     [SerializeField] private Sprite coinsIconSprite;
     [SerializeField] private TextTranslationsSO coinsTextTranslationsSo;
     private float coinsOnEnemyDeathMultiplayer = 1f;
+
+    #endregion
+
+    #region Level stats increase values
+
+    [SerializeField] private float hpIncreasePercentagePerLevel = 0.15f;
+    [SerializeField] private float atkIncreasePercentagePerLevel = 0.1f;
+    [SerializeField] private float defIncreasePercentagePerLevel = 0.125f;
 
     #endregion
 
@@ -126,8 +147,8 @@ public class PlayerController : NetworkBehaviour
         cameraController = CameraController.Instance;
         networkObject = GetComponent<NetworkObject>();
 
-        if (currentLevelExperienceNeeded == 0)
-            currentLevelExperienceNeeded = experienceForFirstLevel;
+        currentLevelExperienceNeeded = experienceForFirstLevel;
+        currentSkillPointExperienceNeeded = experienceForSkillPoint;
 
         timerForConstantSprint = timeForConstantSprint;
         waitingForStaminaRegenerationTimer = waitingForStaminaRegenerationTime;
@@ -199,6 +220,7 @@ public class PlayerController : NetworkBehaviour
                 }
 
                 SetStoredDataClientRpc(currentStoredData.currentLevelExperienceNeeded,
+                    currentStoredData.currentSkillPointExperienceNeeded,
                     currentStoredData.currentExperience, currentStoredData.currentAvailableSkillPoint,
                     currentStoredData.currentCoins, currentStoredData.currentHealth);
             }
@@ -224,11 +246,14 @@ public class PlayerController : NetworkBehaviour
     }
 
     [ClientRpc]
-    private void SetStoredDataClientRpc(int storedCurrentLevelExperienceNeeded, int storedCurrentExperience,
-        int storedCurrentAvailableSkillPoint, int storedCurrentCoins, int storedCurrentHealth)
+    private void SetStoredDataClientRpc(int storedCurrentLevelExperienceNeeded,
+        int storedCurrentSkillPointExperienceNeeded,
+        int storedCurrentExperience, int storedCurrentAvailableSkillPoint, int storedCurrentCoins,
+        int storedCurrentHealth)
     {
+        currentSkillPointExperienceNeeded = storedCurrentSkillPointExperienceNeeded;
         currentLevelExperienceNeeded = storedCurrentLevelExperienceNeeded;
-        currentExperience = storedCurrentExperience;
+        currentLevelExperience = storedCurrentExperience;
         currentAvailableSkillPoint = storedCurrentAvailableSkillPoint;
         currentCoins = storedCurrentCoins;
 
@@ -302,7 +327,8 @@ public class PlayerController : NetworkBehaviour
 
             OnExperienceChange?.Invoke(this, new OnExperienceChangeEventArgs
             {
-                currentXp = currentExperience, maxXp = currentLevelExperienceNeeded
+                currentLevelExp = currentLevelExperience, neededLevelExp = currentLevelExperienceNeeded,
+                currentSkillPointExp = currentSkillPointExperience, neededSkillPointExp = experienceForSkillPoint
             });
             OnSkillPointsValueChange?.Invoke(this, EventArgs.Empty);
         }
@@ -451,27 +477,45 @@ public class PlayerController : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     private void ReceiveExperienceServerRpc(int experience)
     {
-        var newCurrentExperience = (int)(currentExperience + experience * (1 + additionalExperienceMultiplayer));
+        var addingExperience = (int)(experience * (1 + additionalExperienceMultiplayer));
+        var newCurrentLevelExperience = currentLevelExperience + addingExperience;
+        var newCurrentSkillPointExperience = currentSkillPointExperience + addingExperience;
         var newCurrentLevelExperienceNeeded = currentLevelExperienceNeeded;
+        var newCurrentSkillPointExperienceNeeded = currentSkillPointExperienceNeeded;
         var newCurrentAvailableSkillPoints = currentAvailableSkillPoint;
 
-        while (newCurrentExperience >= newCurrentLevelExperienceNeeded)
+        while (newCurrentLevelExperience >= newCurrentLevelExperienceNeeded)
         {
-            newCurrentExperience -= newCurrentLevelExperienceNeeded;
+            newCurrentLevelExperience -= newCurrentLevelExperienceNeeded;
             newCurrentLevelExperienceNeeded += (int)(newCurrentLevelExperienceNeeded * experienceIncreaseForNextLevel);
+            OnNewLevelReached?.Invoke(this, new OnNewLevelReachedEventArgs
+            {
+                baseAtkPercentageIncrease = atkIncreasePercentagePerLevel,
+                baseDefencePercentageIncrease = defIncreasePercentagePerLevel,
+                baseHealthPercentageIncrease = hpIncreasePercentagePerLevel
+            });
+        }
+
+        while (newCurrentSkillPointExperience >= newCurrentSkillPointExperienceNeeded)
+        {
+            newCurrentSkillPointExperience -= newCurrentSkillPointExperienceNeeded;
             newCurrentAvailableSkillPoints += 1;
         }
 
-        ReceiveExperienceClientRpc(newCurrentExperience, newCurrentLevelExperienceNeeded,
+        ReceiveExperienceClientRpc(newCurrentLevelExperience, newCurrentSkillPointExperience,
+            newCurrentLevelExperienceNeeded, newCurrentSkillPointExperienceNeeded,
             newCurrentAvailableSkillPoints, experience);
     }
 
     [ClientRpc]
-    private void ReceiveExperienceClientRpc(int newCurrentExperience, int newCurrentLevelExperienceNeeded,
+    private void ReceiveExperienceClientRpc(int newCurrentLevelExperience, int newCurrentSkillPointExperience,
+        int newCurrentLevelExperienceNeeded, int newCurrentSkillPointExperienceNeeded,
         int newCurrentAvailableSkillPoints, int deltaExperience)
     {
-        currentExperience = newCurrentExperience;
+        currentLevelExperience = newCurrentLevelExperience;
+        currentSkillPointExperience = newCurrentSkillPointExperience;
         currentLevelExperienceNeeded = newCurrentLevelExperienceNeeded;
+        currentSkillPointExperienceNeeded = newCurrentSkillPointExperienceNeeded;
         currentAvailableSkillPoint = newCurrentAvailableSkillPoints;
 
         if (!IsOwner) return;
@@ -479,7 +523,8 @@ public class PlayerController : NetworkBehaviour
         OnSkillPointsValueChange?.Invoke(this, EventArgs.Empty);
         OnExperienceChange?.Invoke(this, new OnExperienceChangeEventArgs
         {
-            currentXp = currentExperience, maxXp = currentLevelExperienceNeeded
+            currentLevelExp = currentLevelExperience, neededLevelExp = currentLevelExperienceNeeded,
+            currentSkillPointExp = currentSkillPointExperience, neededSkillPointExp = currentSkillPointExperienceNeeded
         });
 
         ReceivingItemsUI.Instance.AddReceivedItem(experienceIconSprite, experienceTextTranslationsSo,
@@ -696,9 +741,19 @@ public class PlayerController : NetworkBehaviour
         return currentLevelExperienceNeeded;
     }
 
-    public int GetCurrentExperience()
+    public int GetCurrentLevelExperience()
     {
-        return currentExperience;
+        return currentLevelExperience;
+    }
+
+    public int GetExperienceForSkillPoint()
+    {
+        return currentSkillPointExperienceNeeded;
+    }
+
+    public int GetCurrentSkillPointExperience()
+    {
+        return currentSkillPointExperience;
     }
 
     public int GetCurrentSkillPointsValue()

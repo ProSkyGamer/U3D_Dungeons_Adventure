@@ -90,6 +90,7 @@ public class CameraController : MonoBehaviour
     {
         isShowingCursor = true;
         Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.Confined;
     }
 
     private void OnAnyTabClose(object sender, EventArgs e)

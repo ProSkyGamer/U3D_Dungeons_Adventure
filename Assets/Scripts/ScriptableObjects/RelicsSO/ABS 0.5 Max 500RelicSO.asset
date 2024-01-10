@@ -14,12 +14,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   relicApplyingEffects:
   - appliedEffectID: 3
-    appliedEffectType: 9
+    effectCurrentlyAppliedTimes: 0
+    currentUsages: 72
+    appliedEffectType: 12
     effectPercentageScale: 0.5
     effectFlatScale: 0
+    effectCondition:
+      conditionType: 0
+      conditionValue: 0
+      isConditionValueFlat: 0
+      isCountEndless: 0
+      stepSize: 0
+      isStepSizeFlat: 0
     isUsagesLimited: 1
     maxUsagesLimit: 500
-    currentUsages: 72
     effectLimit: 0
     effectApplyingChance: 0
     applyingEffectDuration: 0
