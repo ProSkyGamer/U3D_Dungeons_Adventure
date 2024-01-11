@@ -144,6 +144,13 @@ public class PlayerEffectsController : NetworkBehaviour
         playerHealthController.OnCurrentDefenceChange += OnAnyFollowingStatChangeChange;
 
         playerController.OnNewLevelReached += PlayerController_OnNewLevelReached;
+
+        playerController.OnNewUpgradeBought += PlayerController_OnNewUpgradeBought;
+    }
+
+    private void PlayerController_OnNewUpgradeBought(object sender, PlayerController.OnNewUpgradeBoughtEventArgs e)
+    {
+        foreach (var upgradeEffect in e.upgradeEffects) ApplyEffect(upgradeEffect);
     }
 
     private void PlayerController_OnNewLevelReached(object sender, PlayerController.OnNewLevelReachedEventArgs e)

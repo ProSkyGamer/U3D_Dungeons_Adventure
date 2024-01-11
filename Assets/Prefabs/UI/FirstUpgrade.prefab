@@ -86,7 +86,6 @@ GameObject:
   - component: {fileID: 614579208419256537}
   - component: {fileID: 1771202721340903463}
   - component: {fileID: 1543058279426823232}
-  - component: {fileID: 6360609726518961183}
   m_Layer: 5
   m_Name: UpgradeTypeText
   m_TagString: Untagged
@@ -211,19 +210,6 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!114 &6360609726518961183
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3180391277096341656}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa11c4d1160b0874cbb2c3e0f668715d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  textTranslationsSO: {fileID: 11400000, guid: d0425e7983a33c54d9868b058d382c44, type: 2}
 --- !u!1 &5499207705094774581
 GameObject:
   m_ObjectHideFlags: 0
@@ -360,9 +346,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8672a74472418d94eb48ac2f0c642cf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  upgradeTypeTextTranslationSingle: {fileID: 6360609726518961183}
+  upgradeTypeTextTranslationSingle: {fileID: 0}
   upgradeValueText: {fileID: 6063329645414877775}
+  upgradeApplyingEffects: []
   lockedObjectTransform: {fileID: 1201382034863391792}
+  upgradesThatLock: []
 --- !u!1 &7924975118256400138
 GameObject:
   m_ObjectHideFlags: 0

@@ -39,6 +39,15 @@ public class PlayerController : NetworkBehaviour
         public float baseDefencePercentageIncrease;
     }
 
+    public event EventHandler<OnNewUpgradeBoughtEventArgs> OnNewUpgradeBought;
+
+    public class OnNewUpgradeBoughtEventArgs : EventArgs
+    {
+        public int boughtUpgradeID;
+        public List<PlayerEffectsController.AppliedEffect> upgradeEffects;
+    }
+
+
     public event EventHandler<PlayerEffectsController.RelicBuffEffectTriggeredEventArgs>
         OnPlayerRegenerateHpAfterEnemyDeath;
 
@@ -70,9 +79,11 @@ public class PlayerController : NetworkBehaviour
     private float additionalExperienceMultiplayer;
     [SerializeField] private Sprite experienceIconSprite;
     [SerializeField] private TextTranslationsSO experienceTextTranslationsSo;
-
     private int currentAvailableSkillPoint;
+    private readonly List<int> currentBoughtUpgradesIDs = new();
+
     private int currentCoins;
+
     [SerializeField] private Sprite coinsIconSprite;
     [SerializeField] private TextTranslationsSO coinsTextTranslationsSo;
     private float coinsOnEnemyDeathMultiplayer = 1f;
@@ -155,6 +166,132 @@ public class PlayerController : NetworkBehaviour
 
         isFirstUpdate = true;
 
+
+        if (!IsOwner) return;
+
+        if (Instance != null && Instance != this)
+            Destroy(gameObject);
+        else
+            Instance = this;
+
+        OnPlayerSpawned?.Invoke(this, EventArgs.Empty);
+
+        CameraController.Instance.ChangeFollowingObject(playerVisual);
+        MinimapCameraController.Instance.ChangeFollowingObject(transform);
+
+        GameInput.Instance.OnChangeCameraModeAction += GameInput_OnChangeCameraModeAction;
+        GameInput.Instance.OnSprintAction += GameInput_OnSprintAction;
+        GameInput.Instance.OnChangeMovementModeAction += GameInput_OnChangeMovementMode;
+
+        staminaController.OnAllStaminaSpend += StaminaController_OnAllStaminaSpend;
+    }
+
+    private void UpgradesTabUI_OnNewUpgradeBought(object sender, UpgradesTabUI.OnNewUpgradeBoughtEventArgs e)
+    {
+        OnNewUpgradeBoughtServerRpc(e.boughtUpgradeID);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void OnNewUpgradeBoughtServerRpc(int boughtUpgradeID)
+    {
+        SpendSkillPoints(1);
+        var upgradeApplyingEffects = UpgradesTabUI.Instance.GetUpgradeApplyingEffectsByUpgradeID(boughtUpgradeID);
+
+        OnNewUpgradeBought?.Invoke(this, new OnNewUpgradeBoughtEventArgs
+        {
+            boughtUpgradeID = boughtUpgradeID,
+            upgradeEffects = upgradeApplyingEffects
+        });
+
+        currentBoughtUpgradesIDs.Add(boughtUpgradeID);
+
+        OnNewUpgradeBoughtClientRpc(boughtUpgradeID);
+    }
+
+    [ClientRpc]
+    private void OnNewUpgradeBoughtClientRpc(int boughtUpgradeID)
+    {
+        if (IsServer) return;
+        if (!IsOwner) return;
+
+        OnNewUpgradeBought?.Invoke(this, new OnNewUpgradeBoughtEventArgs
+        {
+            boughtUpgradeID = boughtUpgradeID
+        });
+    }
+
+    [ClientRpc]
+    private void SetStoredDataClientRpc(int storedCurrentLevelExperienceNeeded,
+        int storedCurrentSkillPointExperience,
+        int storedCurrentExperience, int storedCurrentAvailableSkillPoint, int storedCurrentCoins,
+        int storedCurrentHealth, int[] boughtUpgradesID)
+    {
+        currentSkillPointExperience = storedCurrentSkillPointExperience;
+        currentLevelExperienceNeeded = storedCurrentLevelExperienceNeeded;
+        currentLevelExperience = storedCurrentExperience;
+        currentAvailableSkillPoint = storedCurrentAvailableSkillPoint;
+        currentCoins = storedCurrentCoins;
+
+        if (playerHealthController.GetCurrentHealth() != storedCurrentHealth)
+        {
+            var deltaHealth = playerHealthController.GetCurrentHealth() - storedCurrentHealth;
+            playerHealthController.TakePureDamage(deltaHealth);
+        }
+
+        foreach (var boughtUpgradeID in boughtUpgradesID)
+        {
+            var upgradeApplyingEffects =
+                UpgradesTabUI.Instance.GetUpgradeApplyingEffectsByUpgradeID(boughtUpgradeID);
+
+            OnNewUpgradeBought?.Invoke(this, new OnNewUpgradeBoughtEventArgs
+            {
+                upgradeEffects = upgradeApplyingEffects,
+                boughtUpgradeID = boughtUpgradeID
+            });
+        }
+    }
+
+    private void PlayerAttackController_OnEnemyHitted(object sender, PlayerAttackController.OnEnemyHittedEventArgs e)
+    {
+        if (!attackedNotDeadEnemies.Contains(e.hittedEnemy))
+        {
+            attackedNotDeadEnemies.Add(e.hittedEnemy);
+            e.hittedEnemy.OnEnemyDeath += EnemyController_OnEnemyDeath;
+        }
+    }
+
+    private void StaminaController_OnAllStaminaSpend(object sender, EventArgs e)
+    {
+        isSprinting = false;
+        OnStopSprinting?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void GameInput_OnChangeMovementMode(object sender, EventArgs e)
+    {
+        isRunning = !isRunning;
+    }
+
+    private void GameInput_OnSprintAction(object sender, EventArgs e)
+    {
+        if (staminaController.IsHaveAvailableStamina())
+            isSprinting = true;
+    }
+
+    private void GameInput_OnChangeCameraModeAction(object sender, EventArgs e)
+    {
+        switch (cameraController.GetCurrentCameraMode())
+        {
+            case CameraController.CameraModes.ThirdPerson:
+                cameraController.ChangeCameraMode(CameraController.CameraModes.Weapon);
+                break;
+            case CameraController.CameraModes.Weapon:
+                cameraController.ChangeCameraMode(CameraController.CameraModes.ThirdPerson);
+                break;
+        }
+    }
+
+    private void TryGetDataFromPreviousLevel()
+    {
         if (IsServer)
         {
             var currentStoredData = StoredPlayerData.GetPersonStoredData(GetPlayerOwnerID());
@@ -219,87 +356,16 @@ public class PlayerController : NetworkBehaviour
                     currentStoredData.weaponsInventory[i] = null;
                 }
 
+                var boughtUpgradesID = new int[currentStoredData.boughtUpgradesID.Count];
+                for (var i = 0; i < currentStoredData.boughtUpgradesID.Count; i++)
+                    boughtUpgradesID[i] = currentStoredData.boughtUpgradesID[i];
+
                 SetStoredDataClientRpc(currentStoredData.currentLevelExperienceNeeded,
-                    currentStoredData.currentSkillPointExperienceNeeded,
+                    currentStoredData.currentSkillPointExperience,
                     currentStoredData.currentExperience, currentStoredData.currentAvailableSkillPoint,
-                    currentStoredData.currentCoins, currentStoredData.currentHealth);
+                    currentStoredData.currentCoins, currentStoredData.currentHealth,
+                    boughtUpgradesID);
             }
-        }
-
-        if (!IsOwner) return;
-
-        if (Instance != null && Instance != this)
-            Destroy(gameObject);
-        else
-            Instance = this;
-
-        OnPlayerSpawned?.Invoke(this, EventArgs.Empty);
-
-        CameraController.Instance.ChangeFollowingObject(playerVisual);
-        MinimapCameraController.Instance.ChangeFollowingObject(transform);
-
-        GameInput.Instance.OnChangeCameraModeAction += GameInput_OnChangeCameraModeAction;
-        GameInput.Instance.OnSprintAction += GameInput_OnSprintAction;
-        GameInput.Instance.OnChangeMovementModeAction += GameInput_OnChangeMovementMode;
-
-        staminaController.OnAllStaminaSpend += StaminaController_OnAllStaminaSpend;
-    }
-
-    [ClientRpc]
-    private void SetStoredDataClientRpc(int storedCurrentLevelExperienceNeeded,
-        int storedCurrentSkillPointExperienceNeeded,
-        int storedCurrentExperience, int storedCurrentAvailableSkillPoint, int storedCurrentCoins,
-        int storedCurrentHealth)
-    {
-        currentSkillPointExperienceNeeded = storedCurrentSkillPointExperienceNeeded;
-        currentLevelExperienceNeeded = storedCurrentLevelExperienceNeeded;
-        currentLevelExperience = storedCurrentExperience;
-        currentAvailableSkillPoint = storedCurrentAvailableSkillPoint;
-        currentCoins = storedCurrentCoins;
-
-        if (playerHealthController.GetCurrentHealth() != storedCurrentHealth)
-        {
-            var deltaHealth = playerHealthController.GetCurrentHealth() - storedCurrentHealth;
-            playerHealthController.TakePureDamage(deltaHealth);
-        }
-    }
-
-    private void PlayerAttackController_OnEnemyHitted(object sender, PlayerAttackController.OnEnemyHittedEventArgs e)
-    {
-        if (!attackedNotDeadEnemies.Contains(e.hittedEnemy))
-        {
-            attackedNotDeadEnemies.Add(e.hittedEnemy);
-            e.hittedEnemy.OnEnemyDeath += EnemyController_OnEnemyDeath;
-        }
-    }
-
-    private void StaminaController_OnAllStaminaSpend(object sender, EventArgs e)
-    {
-        isSprinting = false;
-        OnStopSprinting?.Invoke(this, EventArgs.Empty);
-    }
-
-    private void GameInput_OnChangeMovementMode(object sender, EventArgs e)
-    {
-        isRunning = !isRunning;
-    }
-
-    private void GameInput_OnSprintAction(object sender, EventArgs e)
-    {
-        if (staminaController.IsHaveAvailableStamina())
-            isSprinting = true;
-    }
-
-    private void GameInput_OnChangeCameraModeAction(object sender, EventArgs e)
-    {
-        switch (cameraController.GetCurrentCameraMode())
-        {
-            case CameraController.CameraModes.ThirdPerson:
-                cameraController.ChangeCameraMode(CameraController.CameraModes.Weapon);
-                break;
-            case CameraController.CameraModes.Weapon:
-                cameraController.ChangeCameraMode(CameraController.CameraModes.ThirdPerson);
-                break;
         }
     }
 
@@ -319,11 +385,15 @@ public class PlayerController : NetworkBehaviour
 
             if (IsServer)
             {
+                TryGetDataFromPreviousLevel();
+
                 playerAttackController.OnEnemyHitted += PlayerAttackController_OnEnemyHitted;
                 AllConnectedPlayers.Instance.AddConnectedPlayerController(this);
             }
 
             if (!IsOwner) return;
+
+            UpgradesTabUI.Instance.OnNewUpgradeBought += UpgradesTabUI_OnNewUpgradeBought;
 
             OnExperienceChange?.Invoke(this, new OnExperienceChangeEventArgs
             {
@@ -759,6 +829,11 @@ public class PlayerController : NetworkBehaviour
     public int GetCurrentSkillPointsValue()
     {
         return currentAvailableSkillPoint;
+    }
+
+    public List<int> GetCurrentBoughtUpgradeIDs()
+    {
+        return currentBoughtUpgradesIDs;
     }
 
     public int GetBaseHp()

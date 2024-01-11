@@ -6,6 +6,19 @@ using UnityEngine;
 
 public class UpgradesTabUI : NetworkBehaviour
 {
+    public static UpgradesTabUI Instance { get; private set; }
+
+    #region Events
+
+    public event EventHandler<OnNewUpgradeBoughtEventArgs> OnNewUpgradeBought;
+
+    public class OnNewUpgradeBoughtEventArgs : EventArgs
+    {
+        public int boughtUpgradeID;
+    }
+
+    #endregion
+
     #region Created Classes
 
     [Serializable]
@@ -26,62 +39,14 @@ public class UpgradesTabUI : NetworkBehaviour
 
     [SerializeField] private TextMeshProUGUI availableSkillPointsText;
 
-    [SerializeField] private Transform lineBetweenUpgradeTransform;
+    [SerializeField] private List<UpgradeSingleUI> allAvailableUpgrades = new();
     [SerializeField] private float minUpgradesFieldSize = 0.5f;
     [SerializeField] private float maxUpgradesFieldSize = 2.5f;
-
-    [SerializeField] private UpgradeSingleUI firstAtkUpgradeSingleUI;
-    [SerializeField] private List<UpgradeButtons> allAtkUpgrades = new();
-    [SerializeField] private UpgradeSingleUI firstHpUpgradeSingleUI;
-    [SerializeField] private List<UpgradeButtons> allHpUpgrades = new();
-    [SerializeField] private UpgradeSingleUI firstDefUpgradeSingleUI;
-    [SerializeField] private List<UpgradeButtons> allDefUpgrades = new();
-    [SerializeField] private UpgradeSingleUI firstCritRateUpgradeSingleUI;
-    [SerializeField] private List<UpgradeButtons> allCritRateUpgrades = new();
-    [SerializeField] private UpgradeSingleUI firstCritDmgUpgradeSingleUI;
-    [SerializeField] private List<UpgradeButtons> allCritDmgUpgrades = new();
-
-    [SerializeField] private TextTranslationsSO atkTextTranslationsSo;
-    [SerializeField] private TextTranslationsSO hpTextTranslationsSo;
-    [SerializeField] private TextTranslationsSO defTextTranslationsSo;
-    [SerializeField] private TextTranslationsSO critRateTextTranslationsSo;
-    [SerializeField] private TextTranslationsSO critDmgTranslationsSo;
 
     private bool isDragging;
     private bool isFirstUpdate;
 
-    #endregion
-
-    #region Line Initialization
-
-    private void InitializeUpgradeLine(UpgradeSingleUI firstUpgrade, List<UpgradeButtons> allUpgrades,
-        TextTranslationsSO lineTypeTextTranslationsSo)
-    {
-        var upgradeButtonTemplate = firstUpgrade.transform;
-        var previousUpgrade = firstUpgrade;
-
-        for (var i = 1; i < allUpgrades.Count; i++)
-        {
-            var upgradeTransform = Instantiate(upgradeButtonTemplate,
-                upgradeButtonTemplate.position + new Vector3(distanceBetweenUpgrades * i, 0, 0),
-                Quaternion.identity, allUpgradesField);
-
-            var upgradeSingleUI = upgradeTransform.gameObject.GetComponent<UpgradeSingleUI>();
-
-            upgradeSingleUI.SetUpgradeType(allUpgrades[i].buffType, allUpgrades[i].buffValue,
-                lineTypeTextTranslationsSo, i);
-            upgradeSingleUI.AddLockUpgrade(previousUpgrade);
-
-            Instantiate(lineBetweenUpgradeTransform,
-                upgradeButtonTemplate.position +
-                new Vector3(distanceBetweenUpgrades * i - distanceBetweenUpgrades / 2, 0, 0), Quaternion.identity,
-                allUpgradesField);
-
-            previousUpgrade = upgradeSingleUI;
-        }
-
-        firstUpgrade.SetUpgradeType(allUpgrades[0].buffType, allUpgrades[0].buffValue, lineTypeTextTranslationsSo, 0);
-    }
+    private Transform currentUpgradeDescription;
 
     #endregion
 
@@ -89,13 +54,60 @@ public class UpgradesTabUI : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
+        if (Instance != null)
+            Destroy(gameObject);
+        else
+            Instance = this;
+
         PlayerController.OnPlayerSpawned += PlayerController_OnPlayerSpawned;
+
+        UpgradeSingleUI.OnShowUpgradeDescription += UpgradeSingleUI_OnShowUpgradeDescription;
+        UpgradeSingleUI.OnStopShowingUpgradeDescription += UpgradeSingleUI_OnStopShowingUpgradeDescription;
+    }
+
+    private void UpgradeSingleUI_OnStopShowingUpgradeDescription(object sender, EventArgs e)
+    {
+        if (currentUpgradeDescription != null)
+        {
+            Destroy(currentUpgradeDescription.gameObject);
+            currentUpgradeDescription = null;
+        }
+    }
+
+    private void UpgradeSingleUI_OnShowUpgradeDescription(object sender,
+        UpgradeSingleUI.OnShowUpgradeDescriptionEventArgs e)
+    {
+        if (currentUpgradeDescription != null)
+        {
+            Destroy(currentUpgradeDescription.gameObject);
+            currentUpgradeDescription = null;
+        }
+
+        var upgradesDescriptionPrefab = GetAdditionalUIPrefabs.Instance.GetUpgradeDescriptionPrefab();
+        var currentMousePosition = GameInput.Instance.GetCurrentMousePosition();
+        var newUpgradesDescription =
+            Instantiate(upgradesDescriptionPrefab, currentMousePosition, Quaternion.identity, transform);
+        var newUpgradesDescriptionSingleUI = newUpgradesDescription.GetComponent<UpgradeDescriptionSingleUI>();
+        newUpgradesDescriptionSingleUI.SetUpgradeEffect(e.upgradeAppliedEffects);
+        currentUpgradeDescription = newUpgradesDescription;
     }
 
     private void PlayerController_OnPlayerSpawned(object sender, EventArgs e)
     {
         isFirstUpdate = true;
+        PlayerController.Instance.OnNewUpgradeBought += PlayerController_OnNewUpgradeBought;
+
         PlayerController.OnPlayerSpawned -= PlayerController_OnPlayerSpawned;
+    }
+
+    private void PlayerController_OnNewUpgradeBought(object sender, PlayerController.OnNewUpgradeBoughtEventArgs e)
+    {
+        foreach (var availableUpgrade in allAvailableUpgrades)
+        {
+            if (availableUpgrade.GetUpgradeID() != e.boughtUpgradeID) continue;
+
+            availableUpgrade.SetUpgradeAsBought();
+        }
     }
 
     private void Start()
@@ -106,6 +118,26 @@ public class UpgradesTabUI : NetworkBehaviour
         CharacterUI.OnStatsTabButtonClick += CharacterUI_OnOtherTabButtonClick;
         CharacterUI.OnWeaponsTabButtonClick += CharacterUI_OnOtherTabButtonClick;
         CharacterUI.OnRelicsTabButtonClick += CharacterUI_OnOtherTabButtonClick;
+
+        for (var i = 0; i < allAvailableUpgrades.Count; i++)
+        {
+            var availableUpgrade = allAvailableUpgrades[i];
+            availableUpgrade.SetUpgradeID(i);
+            availableUpgrade.OnUpgradeBuy += AvailableUpgrade_OnUpgradeBuy;
+        }
+    }
+
+    private void AvailableUpgrade_OnUpgradeBuy(object sender, EventArgs e)
+    {
+        var availableUpgrade = sender as UpgradeSingleUI;
+        if (availableUpgrade == null) return;
+
+        OnNewUpgradeBought?.Invoke(this, new OnNewUpgradeBoughtEventArgs
+        {
+            boughtUpgradeID = availableUpgrade.GetUpgradeID()
+        });
+
+        availableUpgrade.OnUpgradeBuy -= AvailableUpgrade_OnUpgradeBuy;
     }
 
     private void PlayerController_OnSkillPointsValueChange(object sender, EventArgs e)
@@ -141,14 +173,6 @@ public class UpgradesTabUI : NetworkBehaviour
         if (isFirstUpdate)
         {
             isFirstUpdate = false;
-
-            InitializeUpgradeLine(firstAtkUpgradeSingleUI, allAtkUpgrades, atkTextTranslationsSo);
-            InitializeUpgradeLine(firstHpUpgradeSingleUI, allHpUpgrades, hpTextTranslationsSo);
-            InitializeUpgradeLine(firstDefUpgradeSingleUI, allDefUpgrades, defTextTranslationsSo);
-            InitializeUpgradeLine(firstCritRateUpgradeSingleUI, allCritRateUpgrades, critRateTextTranslationsSo);
-            InitializeUpgradeLine(firstCritDmgUpgradeSingleUI, allCritDmgUpgrades, critDmgTranslationsSo);
-
-            lineBetweenUpgradeTransform.gameObject.SetActive(false);
 
             PlayerController.Instance.OnSkillPointsValueChange += PlayerController_OnSkillPointsValueChange;
         }
@@ -205,6 +229,24 @@ public class UpgradesTabUI : NetworkBehaviour
     private void Hide()
     {
         gameObject.SetActive(false);
+    }
+
+    #endregion
+
+    #region Get Upgrades Data
+
+    public List<PlayerEffectsController.AppliedEffect> GetUpgradeApplyingEffectsByUpgradeID(int upgradeID)
+    {
+        List<PlayerEffectsController.AppliedEffect> upgradeApplyingEffects = new();
+
+        foreach (var upgradeSingle in allAvailableUpgrades)
+        {
+            if (upgradeSingle.GetUpgradeID() != upgradeID) continue;
+
+            upgradeApplyingEffects = upgradeSingle.GetAllUpgradesApplyingEffect();
+        }
+
+        return upgradeApplyingEffects;
     }
 
     #endregion

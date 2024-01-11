@@ -96,6 +96,7 @@
      <Compile Include="Assets\Scripts\UI\Translations\SceneLanguageController.cs" />
      <Compile Include="Assets\Scripts\UI\MainMenu\MainMenuSettings\MainMenuLanguagesTabUI.cs" />
      <Compile Include="Assets\Mini First Person Controller\Scripts\FirstPersonMovement.cs" />
+     <Compile Include="Assets\Scripts\UI\CharacterUI\UpgradeDescriptionSingleUI.cs" />
      <Compile Include="Assets\Scripts\Enemies\EnemyTypes\ShielderEnemy.cs" />
      <Compile Include="Assets\Scripts\UI\Pause &amp; Settings\PauseUI.cs" />
      <Compile Include="Assets\Scripts\Enemies\EnemyTypes\BufferEnemy.cs" />
@@ -116,7 +117,6 @@
      <Compile Include="Assets\Scripts\Input\GameInput.cs" />
      <Compile Include="Assets\Scripts\UI\Pause &amp; Settings\RebindKeymapSingleUI.cs" />
      <Compile Include="Assets\Scripts\Enemies\EnemyEffects.cs" />
-     <Compile Include="Assets\Scripts\Inventory\GetPlayerInventoryAdditionalInfoPrefabs.cs" />
      <Compile Include="Assets\Scripts\UI\MainMenu\MainMenuUI.cs" />
      <Compile Include="Assets\Scripts\UI\MainMenu\MainMenuSettings\MainMenuSettingsUI.cs" />
      <Compile Include="Assets\Mini First Person Controller\Scripts\Components\Crouch.cs" />
@@ -135,6 +135,7 @@
      <Compile Include="Assets\Scripts\Multiplayer\LoaderCallback.cs" />
      <Compile Include="Assets\Scripts\Dungeon\FinalDungeonRoom.cs" />
      <Compile Include="Assets\Scripts\Multiplayer\PlayerData.cs" />
+     <Compile Include="Assets\Scripts\Inventory\GetAdditionalUIPrefabs.cs" />
      <Compile Include="Assets\Scripts\Multiplayer\ResetMultiplayerData.cs" />
      <Compile Include="Assets\Scripts\UI\MainMenu\LobbySingleUI.cs" />
      <Compile Include="Assets\Scripts\UI\CharacterUI\UpgradesTabUI.cs" />

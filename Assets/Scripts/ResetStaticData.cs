@@ -21,5 +21,6 @@ public static class ResetStaticData
         ShopItem.ResetStaticData();
         TextTranslationController.ResetStaticData();
         SpawnPlayers.ResetStaticData();
+        UpgradeSingleUI.ResetStaticData();
     }
 }

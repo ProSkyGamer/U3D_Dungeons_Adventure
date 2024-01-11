@@ -1,31 +1,38 @@
 using System;
 using System.Collections.Generic;
-using TMPro;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class UpgradeSingleUI : NetworkBehaviour
+public class UpgradeSingleUI : NetworkBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     #region Events
 
     public event EventHandler OnUpgradeBuy;
 
+    public static event EventHandler<OnShowUpgradeDescriptionEventArgs> OnShowUpgradeDescription;
+
+    public class OnShowUpgradeDescriptionEventArgs : EventArgs
+    {
+        public List<PlayerEffectsController.AppliedEffect> upgradeAppliedEffects;
+    }
+
+    public static event EventHandler OnStopShowingUpgradeDescription;
+
     #endregion
 
     #region Variables & References
 
-    [SerializeField] private TextTranslationSingleUI upgradeTypeTextTranslationSingle;
-    [SerializeField] private TextMeshProUGUI upgradeValueText;
+    [SerializeField] private List<PlayerEffectsController.AppliedEffect> upgradeApplyingEffects;
 
-    private PlayerEffectsController.AllPlayerEffects buffType;
     private float buffValue;
     private int itemUpgradeID;
     [SerializeField] private Transform lockedObjectTransform;
 
     private bool isBought;
 
-    private readonly List<UpgradeSingleUI> upgradesThatLock = new();
+    [SerializeField] private List<UpgradeSingleUI> upgradesThatLock = new();
 
     private Button upgradeButton;
 
@@ -40,6 +47,8 @@ public class UpgradeSingleUI : NetworkBehaviour
         upgradeButton = GetComponent<Button>();
 
         upgradeButton.onClick.AddListener(BuyUpgrade);
+
+        foreach (var upgradeThatLock in upgradesThatLock) upgradeThatLock.OnUpgradeBuy += UpgradeLock_OnUpgradeBuy;
     }
 
     public override void OnNetworkSpawn()
@@ -82,58 +91,46 @@ public class UpgradeSingleUI : NetworkBehaviour
 
     private void BuyUpgrade()
     {
-        PlayerController.Instance.SpendSkillPoints(1);
-        PlayerController.Instance.GetPlayerEffects().ApplyEffect(
-            buffType, 0, buffValue);
-        isBought = true;
-
-        PlayerBoughtUpgrades.AddBoughtUpgrade(buffType, buffValue, itemUpgradeID);
-
         OnUpgradeBuy?.Invoke(this, EventArgs.Empty);
-        UpdateVisual();
     }
 
     private void UpgradeLock_OnUpgradeBuy(object sender, EventArgs e)
     {
         var upgradeSingle = sender as UpgradeSingleUI;
+        if (upgradeSingle == null) return;
 
         upgradesThatLock.Remove(upgradeSingle);
 
+        upgradeSingle.OnUpgradeBuy -= UpgradeLock_OnUpgradeBuy;
+    }
+
+    public void SetUpgradeAsBought()
+    {
+        isBought = true;
+
         UpdateVisual();
+    }
+
+    public void SetUpgradeID(int newUpgradeID)
+    {
+        itemUpgradeID = newUpgradeID;
     }
 
     #endregion
 
-    #region Upgrade Initialization
+    #region Upgrade Description
 
-    public void SetUpgradeType(PlayerEffectsController.AllPlayerEffects upgradeBuffType, float upgradeBuffValue,
-        TextTranslationsSO upgradeTypeTextTranslationSo, int id)
+    public void OnPointerEnter(PointerEventData eventData)
     {
-        if (buffValue != 0f) return;
-
-        buffType = upgradeBuffType;
-        buffValue = upgradeBuffValue;
-        itemUpgradeID = id;
-
-        upgradeTypeTextTranslationSingle.ChangeTextTranslationSO(upgradeTypeTextTranslationSo);
-        upgradeValueText.text = $"{upgradeBuffValue * 100} %";
-
-        if (!PlayerBoughtUpgrades.IsUpgradeAlreadyBought(buffType, buffValue, itemUpgradeID)) return;
-
-        PlayerController.Instance.GetPlayerEffects().ApplyEffect(
-            buffType, 0, buffValue);
-        isBought = true;
-
-        OnUpgradeBuy?.Invoke(this, EventArgs.Empty);
-        UpdateVisual();
+        OnShowUpgradeDescription?.Invoke(this, new OnShowUpgradeDescriptionEventArgs
+        {
+            upgradeAppliedEffects = upgradeApplyingEffects
+        });
     }
 
-    public void AddLockUpgrade(UpgradeSingleUI upgradeLock)
+    public void OnPointerExit(PointerEventData eventData)
     {
-        upgradesThatLock.Add(upgradeLock);
-
-        upgradeLock.OnUpgradeBuy += UpgradeLock_OnUpgradeBuy;
-        UpdateVisual();
+        OnStopShowingUpgradeDescription?.Invoke(this, EventArgs.Empty);
     }
 
     #endregion
@@ -160,5 +157,21 @@ public class UpgradeSingleUI : NetworkBehaviour
         return upgradesThatLock.Count > 0;
     }
 
+    public List<PlayerEffectsController.AppliedEffect> GetAllUpgradesApplyingEffect()
+    {
+        return upgradeApplyingEffects;
+    }
+
+    public int GetUpgradeID()
+    {
+        return itemUpgradeID;
+    }
+
     #endregion
+
+    public static void ResetStaticData()
+    {
+        OnShowUpgradeDescription = null;
+        OnStopShowingUpgradeDescription = null;
+    }
 }

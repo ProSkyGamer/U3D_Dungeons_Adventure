@@ -133,7 +133,7 @@ public class CharacterInventoryUI : NetworkBehaviour
         if (e.displayedInventory != this) return;
 
         var slotInteractButtonsPrefab =
-            GetPlayerInventoryAdditionalInfoPrefabs.Instance.GetInventoryItemInteractButtonPrefabBySize(
+            GetAdditionalUIPrefabs.Instance.GetInventoryItemInteractButtonPrefabBySize(
                 inventoryItemInteractButtonsSize);
 
         var newSlotInteractButton = Instantiate(slotInteractButtonsPrefab,
@@ -169,7 +169,7 @@ public class CharacterInventoryUI : NetworkBehaviour
         if (e.displayedInventory != this) return;
 
         var slotDescriptionPrefab =
-            GetPlayerInventoryAdditionalInfoPrefabs.Instance.GetInventoryItemDescriptionPrefabBySize(
+            GetAdditionalUIPrefabs.Instance.GetInventoryItemDescriptionPrefabBySize(
                 inventoryItemDescriptionSize);
 
         var newSlotDescription = Instantiate(slotDescriptionPrefab,

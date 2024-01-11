@@ -7,7 +7,7 @@ public static class StoredPlayerData
     public class StoredPlayerDataSingle
     {
         public int currentLevelExperienceNeeded;
-        public int currentSkillPointExperienceNeeded;
+        public int currentSkillPointExperience;
         public int currentExperience;
         public int currentAvailableSkillPoint;
 
@@ -18,6 +18,8 @@ public static class StoredPlayerData
         public InventoryObject[] relicsInventory;
 
         public int currentHealth;
+
+        public List<int> boughtUpgradesID;
     }
 
     public static void AddStoredPlayerData(PlayerController playerDataToSave)
@@ -26,8 +28,10 @@ public static class StoredPlayerData
         {
             currentLevelExperienceNeeded = playerDataToSave.GetExperienceForCurrentLevel(),
             currentExperience = playerDataToSave.GetCurrentLevelExperience(),
+            currentSkillPointExperience = playerDataToSave.GetCurrentSkillPointExperience(),
             currentAvailableSkillPoint = playerDataToSave.GetCurrentSkillPointsValue(),
-            currentCoins = playerDataToSave.GetCurrentCoinsValue()
+            currentCoins = playerDataToSave.GetCurrentCoinsValue(),
+            boughtUpgradesID = playerDataToSave.GetCurrentBoughtUpgradeIDs()
         };
 
         var playerDataToSaveInventory = playerDataToSave.GetPlayerInventory();
